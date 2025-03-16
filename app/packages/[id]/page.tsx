@@ -55,7 +55,7 @@ export default function PackageDetailsPage() {
             description:
               "Experience the beauty of Bali with this all-inclusive package. Enjoy pristine beaches, lush rice terraces, and ancient temples. Our package includes luxury accommodations, daily breakfast, airport transfers, and guided tours to Bali's most iconic attractions.",
             destination: "Bali, Indonesia",
-            price: 1299,
+            price: 22999,
             duration: 7,
             category: "Beach Getaways",
             images: ["/balicover.webp", "/bali4.webp", "/bali3.jpg"],
@@ -67,7 +67,7 @@ export default function PackageDetailsPage() {
             description:
               "Discover the breathtaking landscapes of Manali with this adventure-packed package. Trek through snow-capped mountains, experience river rafting, and relax in cozy hilltop resorts. Includes accommodation, meals, and guided activities.",
             destination: "Manali, India",
-            price: 899,
+            price: 5899,
             duration: 5,
             category: "Mountain Adventures",
             images: ["/manali1.jpg", "/manali2.jpg", "/manali3.jpg"],
@@ -79,7 +79,7 @@ export default function PackageDetailsPage() {
             description:
               "Explore the royal charm of Udaipur with a luxurious stay at heritage hotels. Visit grand palaces, cruise on Lake Pichola, and experience authentic Rajasthani culture. Includes guided tours, cultural performances, and exquisite dining experiences.",
             destination: "Udaipur, India",
-            price: 1099,
+            price: 9599,
             duration: 6,
             category: "Cultural Experiences",
             images: ["/udaipur1.jpg", "/udaipur2.jpg", "/udaipur3.jpg"],
@@ -451,7 +451,7 @@ export default function PackageDetailsPage() {
             <CardContent className="p-6">
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold">${pkg.price}</span>
+                  <span className="text-2xl font-bold">₹{pkg.price}</span>
                   <span className="text-muted-foreground">per person</span>
                 </div>
 

@@ -10,7 +10,7 @@ export default function Home() {
       title: "Bali Paradise",
       image: "/balicover.webp",
       location: "Bali, Indonesia",
-      price: 1299,
+      price: 22999,
       rating: 4.8,
     },
     {
@@ -18,7 +18,7 @@ export default function Home() {
       title: "Manali Adventure",
       image: "https://kplexpeditions.com/wp-content/uploads/2023/09/Spiti-Winter-Trip-Himachal-Prade.jpg.webp",
       location: "Kullu Manali",
-      price: 1899,
+      price: 5899,
       rating: 4.9,
     },
     {
@@ -26,7 +26,7 @@ export default function Home() {
       title: "Royal Udaipur",
       image: "/udaipurcover.jpeg",
       location: "Udaipur",
-      price: 1599,
+      price: 9599,
       rating: 4.7,
     },
   ]
@@ -123,7 +123,7 @@ export default function Home() {
                   <p className="text-sm text-muted-foreground mt-1">{destination.location}</p>
                   <div className="mt-4 flex items-center justify-between">
                     <p className="font-semibold">
-                      ${destination.price}
+                    ₹{destination.price}
                       <span className="text-sm font-normal text-muted-foreground"> /person</span>
                     </p>
                     <Button

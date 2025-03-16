@@ -32,7 +32,7 @@ export default function ExplorePage() {
   const [packages, setPackages] = useState<Package[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [priceRange, setPriceRange] = useState([0, 5000])
+  const [priceRange, setPriceRange] = useState([0, 25000])
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategory ? [initialCategory] : [])
   const [filteredPackages, setFilteredPackages] = useState<Package[]>([])
 
@@ -205,15 +205,15 @@ export default function ExplorePage() {
                       <Label className="text-sm font-medium">Price Range</Label>
                       <div className="pt-4 px-2">
                         <Slider
-                          defaultValue={[0, 5000]}
-                          max={5000}
+                          defaultValue={[0, 25000]}
+                          max={25000}
                           step={100}
                           value={priceRange}
                           onValueChange={setPriceRange}
                         />
                         <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-                          <span>${priceRange[0]}</span>
-                          <span>${priceRange[1]}</span>
+                          <span>₹{priceRange[0]}</span>
+                          <span>₹{priceRange[1]}</span>
                         </div>
                       </div>
                     </div>
