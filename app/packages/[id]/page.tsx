@@ -48,24 +48,66 @@ export default function PackageDetailsPage() {
       } catch (error) {
         console.error("Error fetching package:", error)
         // For demo purposes, let's add mock data
-        const mockPackage = {
-          id: params.id as string,
-          title: "Bali Paradise Retreat",
-          description:
-            "Experience the beauty of Bali with this all-inclusive package. Enjoy pristine beaches, lush rice terraces, and ancient temples. Our package includes luxury accommodations, daily breakfast, airport transfers, and guided tours to Bali's most iconic attractions.",
-          destination: "Bali, Indonesia",
-          price: 1299,
-          duration: 7,
-          category: "Beach Getaways",
-          images: [
-            "/placeholder.svg?height=600&width=800",
-            "/placeholder.svg?height=600&width=800",
-            "/placeholder.svg?height=600&width=800",
-            "/placeholder.svg?height=600&width=800",
-          ],
-          seller_id: "seller1",
-          is_approved: true,
-        }
+
+        const packagesData = {
+          1: {
+            title: "Bali Paradise Retreat",
+            description:
+              "Experience the beauty of Bali with this all-inclusive package. Enjoy pristine beaches, lush rice terraces, and ancient temples. Our package includes luxury accommodations, daily breakfast, airport transfers, and guided tours to Bali's most iconic attractions.",
+            destination: "Bali, Indonesia",
+            price: 1299,
+            duration: 7,
+            category: "Beach Getaways",
+            images: ["/balicover.webp", "/bali4.webp", "/bali3.jpg"],
+            seller_id: "seller1",
+            is_approved: true,
+          },
+          2: {
+            title: "Manali Adventure Escape",
+            description:
+              "Discover the breathtaking landscapes of Manali with this adventure-packed package. Trek through snow-capped mountains, experience river rafting, and relax in cozy hilltop resorts. Includes accommodation, meals, and guided activities.",
+            destination: "Manali, India",
+            price: 899,
+            duration: 5,
+            category: "Mountain Adventures",
+            images: ["/manali1.jpg", "/manali2.jpg", "/manali3.jpg"],
+            seller_id: "seller2",
+            is_approved: true,
+          },
+          3: {
+            title: "Udaipur Royal Heritage Tour",
+            description:
+              "Explore the royal charm of Udaipur with a luxurious stay at heritage hotels. Visit grand palaces, cruise on Lake Pichola, and experience authentic Rajasthani culture. Includes guided tours, cultural performances, and exquisite dining experiences.",
+            destination: "Udaipur, India",
+            price: 1099,
+            duration: 6,
+            category: "Cultural Experiences",
+            images: ["/udaipur1.jpg", "/udaipur2.jpg", "/udaipur3.jpg"],
+            seller_id: "seller3",
+            is_approved: true,
+          },
+        };
+
+        const packageId = params.id;
+        const mockPackage = packagesData[packageId] || null;
+
+        // const mockPackage = {
+        //   id: params.id as string,
+        //   title: "Bali Paradise Retreat",
+        //   description:
+        //     "Experience the beauty of Bali with this all-inclusive package. Enjoy pristine beaches, lush rice terraces, and ancient temples. Our package includes luxury accommodations, daily breakfast, airport transfers, and guided tours to Bali's most iconic attractions.",
+        //   destination: "Bali, Indonesia",
+        //   price: 1299,
+        //   duration: 7,
+        //   category: "Beach Getaways",
+        //   images: [
+        //     "/balicover.webp",
+        //     "/bali4.webp",
+        //     "/bali3.jpg",
+        //   ],
+        //   seller_id: "seller1",
+        //   is_approved: true,
+        // }
 
         setPkg(mockPackage)
       } finally {

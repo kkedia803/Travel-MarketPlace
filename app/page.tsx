@@ -8,24 +8,24 @@ export default function Home() {
     {
       id: 1,
       title: "Bali Paradise",
-      image: "/placeholder.svg?height=400&width=600",
+      image: "/balicover.webp",
       location: "Bali, Indonesia",
       price: 1299,
       rating: 4.8,
     },
     {
       id: 2,
-      title: "Swiss Alps Adventure",
-      image: "/placeholder.svg?height=400&width=600",
-      location: "Switzerland",
+      title: "Manali Adventure",
+      image: "https://kplexpeditions.com/wp-content/uploads/2023/09/Spiti-Winter-Trip-Himachal-Prade.jpg.webp",
+      location: "Kullu Manali",
       price: 1899,
       rating: 4.9,
     },
     {
       id: 3,
-      title: "Santorini Getaway",
-      image: "/placeholder.svg?height=400&width=600",
-      location: "Greece",
+      title: "Royal Udaipur",
+      image: "/udaipurcover.jpeg",
+      location: "Udaipur",
       price: 1599,
       rating: 4.7,
     },
@@ -42,13 +42,13 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="relative py-20 md:py-32 px-4">
-        <div className="absolute inset-0 bg-[url('/placeholder.svg?height=1080&width=1920')] bg-cover bg-center opacity-20" />
+        <div className="absolute inset-0 bg-[url('/mald.gif')] bg-cover bg-center opacity-80" />
         <div className="container relative z-10 mx-auto max-w-5xl">
           <div className="flex flex-col items-center text-center space-y-6">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tighter">
               Discover Your Next <span className="text-primary">Adventure</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl text-black">
               Explore curated travel packages from verified sellers around the world. Book with confidence and create
               memories that last a lifetime.
             </p>
@@ -144,7 +144,7 @@ export default function Home() {
       {/* Trust Badges */}
       <section className="py-16 bg-accent">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Choose Wanderlust</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Why Choose TracoIt</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center text-center p-6">
               <div className="p-4 bg-primary/10 rounded-full mb-4">
@@ -182,7 +182,7 @@ export default function Home() {
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Start Your Journey?</h2>
           <p className="text-lg mb-8 max-w-2xl mx-auto opacity-90">
-            Join thousands of travelers who have found their perfect getaway through Wanderlust.
+            Join thousands of travelers who have found their perfect getaway through TracoIt.
           </p>
           <Link href="/explore">
             <Button size="lg" variant="secondary" className="gap-2">

@@ -6,8 +6,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 
 export const metadata: Metadata = {
-  title: 'About Us | TravelMarketplace',
-  description: 'Learn about our mission, values, and the team behind TravelMarketplace',
+  title: 'About Us | TracoIt',
+  description: 'Learn about our mission, values, and the team behind TracoIt',
 }
 
 export default function AboutPage() {
@@ -15,7 +15,7 @@ export default function AboutPage() {
     <div className="container mx-auto py-10 space-y-16">
       {/* Hero Section */}
       <section className="text-center space-y-6">
-        <h1 className="text-4xl md:text-5xl font-bold">About TravelMarketplace</h1>
+        <h1 className="text-4xl md:text-5xl font-bold">About TracoIt</h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
           Connecting travelers with unique experiences and local travel providers around the world.
         </p>
@@ -26,7 +26,7 @@ export default function AboutPage() {
         <div className="space-y-6">
           <h2 className="text-3xl font-bold">Our Story</h2>
           <p className="text-lg text-muted-foreground">
-            TravelMarketplace was founded in 2023 with a simple mission: to make unique travel experiences accessible to everyone while supporting local travel providers.
+            TracoIt was founded in 2023 with a simple mission: to make unique travel experiences accessible to everyone while supporting local travel providers.
           </p>
           <p className="text-lg text-muted-foreground">
             What started as a small platform connecting travelers with local guides has grown into a global marketplace where travelers can discover and book authentic experiences directly from local experts.
@@ -37,7 +37,7 @@ export default function AboutPage() {
         </div>
         <div className="relative h-[400px] rounded-lg overflow-hidden">
           <Image
-            src="/placeholder.svg?height=400&width=600"
+            src="/aboutus.jpg"
             alt="Our team exploring the world"
             fill
             className="object-cover"
@@ -133,7 +133,7 @@ export default function AboutPage() {
         <div className="text-center space-y-4">
           <h2 className="text-3xl font-bold">Why Choose Us</h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            What sets TravelMarketplace apart from other travel platforms.
+            What sets TracoIt apart from other travel platforms.
           </p>
         </div>
         
@@ -177,7 +177,7 @@ export default function AboutPage() {
       <section className="bg-primary text-primary-foreground rounded-xl p-10 text-center space-y-6">
         <h2 className="text-3xl font-bold">Ready to Start Your Journey?</h2>
         <p className="text-xl max-w-3xl mx-auto">
-          Join thousands of travelers who have discovered unique experiences through TravelMarketplace.
+          Join thousands of travelers who have discovered unique experiences through TracoIt.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
           <Button asChild size="lg" variant="secondary">

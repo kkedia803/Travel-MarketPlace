@@ -91,7 +91,7 @@ export function Header() {
           </Sheet>
           <Link href="/" className="flex items-center space-x-2">
             <Compass className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">Wanderlust</span>
+            <span className="font-bold text-xl">TracoIt</span>
           </Link>
           <nav className="hidden md:flex gap-6 ml-6">
             {navItems.map((item, index) => (
