@@ -10,9 +10,9 @@ import { Header } from "./components/header"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Wanderlust - Travel Marketplace",
+  title: "TracoIt - Travel Marketplace",
   description: "Find and book amazing travel experiences",
-    generator: 'v0.dev'
+    // generator: 'v0.dev'
 }
 
 export default function RootLayout({

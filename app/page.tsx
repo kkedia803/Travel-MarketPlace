@@ -48,7 +48,7 @@ export default function Home() {
             <h1 className="text-4xl md:text-6xl font-bold tracking-tighter">
               Discover Your Next <span className="text-primary">Adventure</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl text-black">
+            <p className="text-lg md:text-xl  max-w-2xl text-black">
               Explore curated travel packages from verified sellers around the world. Book with confidence and create
               memories that last a lifetime.
             </p>
