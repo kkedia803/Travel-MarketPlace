@@ -305,7 +305,7 @@ export default function ExplorePage() {
                     <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{pkg.description}</p>
                     <div className="mt-4 flex items-center justify-between">
                       <p className="font-semibold">
-                        ${pkg.price}
+                        ₹{pkg.price}
                         <span className="text-sm font-normal text-muted-foreground"> /person</span>
                       </p>
                       <p className="text-sm text-muted-foreground">{pkg.duration} days</p>

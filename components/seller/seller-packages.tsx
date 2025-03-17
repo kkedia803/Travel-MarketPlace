@@ -14,6 +14,7 @@ import Image from 'next/image'
 interface Package {
   id: string
   title: string
+  description: string
   destination: string
   price: number
   duration: number
@@ -138,7 +139,7 @@ export function SellerPackages({ sellerId }: SellerPackagesProps) {
                 <h3 className="text-lg font-semibold mb-1">{pkg.title}</h3>
                 <p className="text-muted-foreground mb-2">{pkg.destination}</p>
                 <div className="flex justify-between items-center mb-4">
-                  <span className="font-bold text-lg">${pkg.price}</span>
+                  <span className="font-bold text-lg">₹{pkg.price}</span>
                   <span className="text-sm text-muted-foreground">{pkg.duration} days</span>
                 </div>
                 <div className="flex space-x-2">

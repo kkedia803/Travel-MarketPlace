@@ -212,7 +212,7 @@ export default function UserDashboard() {
                       </div>
 
                       <div className="flex justify-between items-center">
-                        <div className="font-semibold">Total: ${booking.package.price * booking.travelers}</div>
+                        <div className="font-semibold">Total: ₹{booking.package.price * booking.travelers}</div>
                         <div className="flex gap-2">
                           <Button
                             variant="outline"

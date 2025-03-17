@@ -300,7 +300,7 @@ export default function AdminDashboard() {
           <CardContent className="p-6 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
-              <p className="text-3xl font-bold">${statistics.revenue.toLocaleString()}</p>
+              <p className="text-3xl font-bold">{statistics.revenue.toLocaleString()}</p>
             </div>
             <div className="p-3 bg-primary/10 rounded-full">
               <DollarSign className="h-6 w-6 text-primary" />
@@ -357,7 +357,7 @@ export default function AdminDashboard() {
                       </div>
                       <div>
                         <p className="text-sm font-medium">Price</p>
-                        <p className="text-sm">${pkg.price}/person</p>
+                        <p className="text-sm">₹{pkg.price}/person</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium">Duration</p>
@@ -592,7 +592,7 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <p className="text-sm font-medium">Price</p>
-                  <p className="text-sm">${selectedPackage.price}/person</p>
+                  <p className="text-sm">₹{selectedPackage.price}/person</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Duration</p>
