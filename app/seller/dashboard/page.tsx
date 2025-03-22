@@ -423,7 +423,7 @@ export default function SellerDashboard() {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div className="flex items-center">
                           <DollarSign className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span>Price: ${pkg.price}/person</span>
+                          <span>Price: {pkg.price}/person</span>
                         </div>
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-2 text-muted-foreground" />

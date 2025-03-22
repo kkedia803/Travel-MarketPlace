@@ -1,56 +1,66 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { useToast } from "@/components/ui/use-toast"
-import { useAuth } from "@/app/contexts/auth-context"
-import { supabase } from "@/app/lib/supabase"
-import { Clock, MapPin, Star, Check, X, Info } from "lucide-react"
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/app/contexts/auth-context";
+import { supabase } from "@/app/lib/supabase";
+import { Clock, MapPin, Star, Check, X, Info } from "lucide-react";
 
 interface Package {
-  id: string
-  title: string
-  description: string
-  destination: string
-  price: number
-  duration: number
-  category: string
-  images: string[]
-  seller_id: string
-  is_approved: boolean
+  id: string;
+  title: string;
+  description: string;
+  destination: string;
+  price: number;
+  duration: number;
+  category: string;
+  images: string[];
+  seller_id: string;
+  is_approved: boolean;
+}
+
+interface PackageDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  packageData: Package | null;
+  onSave: () => void;
 }
 
 export default function PackageDetailsPage() {
-  const params = useParams()
-  const router = useRouter()
-  const { toast } = useToast()
-  const { user } = useAuth()
-  const [pkg, setPkg] = useState<Package | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [travelers, setTravelers] = useState(1)
-  const [activeImage, setActiveImage] = useState(0)
+  const params = useParams();
+  const router = useRouter();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const [pkg, setPkg] = useState<Package | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [travelers, setTravelers] = useState(1);
+  const [activeImage, setActiveImage] = useState(0);
 
   useEffect(() => {
     const fetchPackage = async () => {
-      setLoading(true)
+      setLoading(true);
 
       try {
-        const { data, error } = await supabase.from("packages").select("*").eq("id", params.id).single()
+        const { data, error } = await supabase
+          .from("packages")
+          .select("*")
+          .eq("id", params.id)
+          .single();
 
-        if (error) throw error
+        if (error) throw error;
 
-        setPkg(data)
+        setPkg(data);
       } catch (error) {
-        console.error("Error fetching package:", error)
-        // For demo purposes, let's add mock data
-
-        const packagesData = {
-          1: {
+        console.error("Error fetching package:", error);
+        // For demo purposes, let's add mock data that includes the package id.
+        const packagesData: { [key: string]: Omit<Package, "id"> } = {
+          "1": {
             title: "Bali Paradise Retreat",
             description:
               "Experience the beauty of Bali with this all-inclusive package. Enjoy pristine beaches, lush rice terraces, and ancient temples. Our package includes luxury accommodations, daily breakfast, airport transfers, and guided tours to Bali's most iconic attractions.",
@@ -62,7 +72,7 @@ export default function PackageDetailsPage() {
             seller_id: "seller1",
             is_approved: true,
           },
-          2: {
+          "2": {
             title: "Manali Adventure Escape",
             description:
               "Discover the breathtaking landscapes of Manali with this adventure-packed package. Trek through snow-capped mountains, experience river rafting, and relax in cozy hilltop resorts. Includes accommodation, meals, and guided activities.",
@@ -74,7 +84,7 @@ export default function PackageDetailsPage() {
             seller_id: "seller2",
             is_approved: true,
           },
-          3: {
+          "3": {
             title: "Udaipur Royal Heritage Tour",
             description:
               "Explore the royal charm of Udaipur with a luxurious stay at heritage hotels. Visit grand palaces, cruise on Lake Pichola, and experience authentic Rajasthani culture. Includes guided tours, cultural performances, and exquisite dining experiences.",
@@ -88,35 +98,18 @@ export default function PackageDetailsPage() {
           },
         };
 
-        const packageId = params.id;
-        const mockPackage = packagesData[packageId] || null;
-
-        // const mockPackage = {
-        //   id: params.id as string,
-        //   title: "Bali Paradise Retreat",
-        //   description:
-        //     "Experience the beauty of Bali with this all-inclusive package. Enjoy pristine beaches, lush rice terraces, and ancient temples. Our package includes luxury accommodations, daily breakfast, airport transfers, and guided tours to Bali's most iconic attractions.",
-        //   destination: "Bali, Indonesia",
-        //   price: 1299,
-        //   duration: 7,
-        //   category: "Beach Getaways",
-        //   images: [
-        //     "/balicover.webp",
-        //     "/bali4.webp",
-        //     "/bali3.jpg",
-        //   ],
-        //   seller_id: "seller1",
-        //   is_approved: true,
-        // }
-
-        setPkg(mockPackage)
+        // Normalize params.id to a string.
+        const packageId = Array.isArray(params.id) ? params.id[0] : params.id;
+        const mockPackage =
+          packageId !== undefined ? { id: packageId, ...packagesData[packageId] } : null;
+        setPkg(mockPackage);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchPackage()
-  }, [params.id])
+    fetchPackage();
+  }, [params.id]);
 
   const handleBookNow = async () => {
     if (!user) {
@@ -124,9 +117,9 @@ export default function PackageDetailsPage() {
         title: "Authentication required",
         description: "Please log in to book this package",
         variant: "destructive",
-      })
-      router.push("/auth/login")
-      return
+      });
+      router.push("/auth/login");
+      return;
     }
 
     try {
@@ -135,25 +128,25 @@ export default function PackageDetailsPage() {
         user_id: user.id,
         travelers: travelers,
         status: "pending",
-      })
+      });
 
-      if (error) throw error
+      if (error) throw error;
 
       toast({
         title: "Booking successful!",
         description: "Your booking has been confirmed.",
-      })
+      });
 
-      router.push("/user/dashboard")
+      router.push("/user/dashboard");
     } catch (error) {
-      console.error("Error booking package:", error)
+      console.error("Error booking package:", error);
       toast({
         title: "Booking failed",
         description: "There was an error processing your booking. Please try again.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -174,17 +167,19 @@ export default function PackageDetailsPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!pkg) {
     return (
       <div className="container py-16 text-center">
         <h1 className="text-2xl font-bold mb-4">Package not found</h1>
-        <p className="text-muted-foreground mb-8">The package you're looking for doesn't exist or has been removed.</p>
+        <p className="text-muted-foreground mb-8">
+          The package you're looking for doesn't exist or has been removed.
+        </p>
         <Button onClick={() => router.push("/explore")}>Browse Packages</Button>
       </div>
-    )
+    );
   }
 
   // Sample itinerary data
@@ -192,7 +187,8 @@ export default function PackageDetailsPage() {
     {
       day: 1,
       title: "Arrival & Welcome Dinner",
-      description: "Airport pickup and transfer to your hotel. Evening welcome dinner with traditional performances.",
+      description:
+        "Airport pickup and transfer to your hotel. Evening welcome dinner with traditional performances.",
     },
     {
       day: 2,
@@ -203,29 +199,34 @@ export default function PackageDetailsPage() {
     {
       day: 3,
       title: "Beaches & Water Activities",
-      description: "Full day at Nusa Dua beach with optional water sports activities. Seafood dinner by the beach.",
+      description:
+        "Full day at Nusa Dua beach with optional water sports activities. Seafood dinner by the beach.",
     },
     {
       day: 4,
       title: "Temple Exploration",
-      description: "Visit Tanah Lot and Uluwatu temples. Watch the famous Kecak fire dance at sunset.",
+      description:
+        "Visit Tanah Lot and Uluwatu temples. Watch the famous Kecak fire dance at sunset.",
     },
     {
       day: 5,
       title: "Mount Batur Sunrise Trek",
-      description: "Early morning trek to Mount Batur to witness the spectacular sunrise. Afternoon at leisure.",
+      description:
+        "Early morning trek to Mount Batur to witness the spectacular sunrise. Afternoon at leisure.",
     },
     {
       day: 6,
       title: "Spa & Relaxation Day",
-      description: "Full day of pampering with traditional Balinese spa treatments. Optional yoga session.",
+      description:
+        "Full day of pampering with traditional Balinese spa treatments. Optional yoga session.",
     },
     {
       day: 7,
       title: "Departure",
-      description: "Free time for last-minute shopping. Airport transfer for your departure flight.",
+      description:
+        "Free time for last-minute shopping. Airport transfer for your departure flight.",
     },
-  ]
+  ];
 
   // Sample inclusions and exclusions
   const inclusions = [
@@ -237,7 +238,7 @@ export default function PackageDetailsPage() {
     "Entrance fees to attractions",
     "Welcome dinner",
     "Balinese spa treatment",
-  ]
+  ];
 
   const exclusions = [
     "International flights",
@@ -246,7 +247,7 @@ export default function PackageDetailsPage() {
     "Optional activities",
     "Meals not mentioned",
     "Tips and gratuities",
-  ]
+  ];
 
   return (
     <div className="container py-8">
@@ -263,7 +264,9 @@ export default function PackageDetailsPage() {
           {pkg.images.slice(0, 3).map((image, index) => (
             <div
               key={index}
-              className={`aspect-video overflow-hidden rounded-lg cursor-pointer border-2 ${activeImage === index ? "border-primary" : "border-transparent"}`}
+              className={`aspect-video overflow-hidden rounded-lg cursor-pointer border-2 ${
+                activeImage === index ? "border-primary" : "border-transparent"
+              }`}
               onClick={() => setActiveImage(index)}
             >
               <img
@@ -400,17 +403,22 @@ export default function PackageDetailsPage() {
                             {[1, 2, 3, 4, 5].map((star) => (
                               <Star
                                 key={star}
-                                className={`h-3 w-3 ${star <= 5 ? "fill-primary text-primary" : "text-muted"}`}
+                                className={`h-3 w-3 ${
+                                  star <= 5
+                                    ? "fill-primary text-primary"
+                                    : "text-muted"
+                                }`}
                               />
                             ))}
                           </div>
-                          <span className="text-xs text-muted-foreground ml-2">2 months ago</span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            2 months ago
+                          </span>
                         </div>
                       </div>
                     </div>
                     <p className="text-sm">
-                      Amazing experience! The tour was well organized and our guide was knowledgeable and friendly.
-                      Highly recommend this package.
+                      Amazing experience! The tour was well organized and our guide was knowledgeable and friendly. Highly recommend this package.
                     </p>
                   </div>
 
@@ -426,17 +434,22 @@ export default function PackageDetailsPage() {
                             {[1, 2, 3, 4, 5].map((star) => (
                               <Star
                                 key={star}
-                                className={`h-3 w-3 ${star <= 4 ? "fill-primary text-primary" : "text-muted"}`}
+                                className={`h-3 w-3 ${
+                                  star <= 4
+                                    ? "fill-primary text-primary"
+                                    : "text-muted"
+                                }`}
                               />
                             ))}
                           </div>
-                          <span className="text-xs text-muted-foreground ml-2">3 months ago</span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            3 months ago
+                          </span>
                         </div>
                       </div>
                     </div>
                     <p className="text-sm">
-                      Great value for money. The accommodations were excellent and the itinerary was perfect. Would book
-                      again!
+                      Great value for money. The accommodations were excellent and the itinerary was perfect. Would book again!
                     </p>
                   </div>
                 </div>
@@ -462,12 +475,7 @@ export default function PackageDetailsPage() {
                     Number of Travelers
                   </label>
                   <div className="flex items-center">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setTravelers(Math.max(1, travelers - 1))}
-                      disabled={travelers <= 1}
-                    >
+                    <Button variant="outline" size="icon" onClick={() => setTravelers(Math.max(1, travelers - 1))} disabled={travelers <= 1}>
                       -
                     </Button>
                     <span className="mx-4 font-medium">{travelers}</span>
@@ -481,12 +489,12 @@ export default function PackageDetailsPage() {
                   <div className="flex justify-between mb-2">
                     <span>Package Price</span>
                     <span>
-                      ${pkg.price} x {travelers}
+                      ₹{pkg.price} x {travelers}
                     </span>
                   </div>
                   <div className="flex justify-between font-medium text-lg">
                     <span>Total</span>
-                    <span>${pkg.price * travelers}</span>
+                    <span>₹{pkg.price * travelers}</span>
                   </div>
                 </div>
 
@@ -504,6 +512,5 @@ export default function PackageDetailsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-
