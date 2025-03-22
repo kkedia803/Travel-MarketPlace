@@ -20,6 +20,14 @@ const config = {
     },
     extend: {
       colors: {
+        navy: {
+          DEFAULT: "#000A26",
+          sapphire: "#0F52BA",
+        },
+        blue: {
+          powder: "#A6C6D8",
+          ice: "#D6E6F2",
+        },
         teal: {
           DEFAULT: "#107572",
           light: "#2ED3C7",
@@ -87,4 +95,3 @@ const config = {
 } satisfies Config
 
 export default config
-

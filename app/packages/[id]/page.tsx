@@ -26,10 +26,10 @@ interface Package {
 }
 
 interface PackageDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  packageData: Package | null
-  onSave: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  packageData: Package | null;
+  onSave: () => void;
 }
 
 export default function PackageDetailsPage() {
@@ -58,10 +58,9 @@ export default function PackageDetailsPage() {
         setPkg(data);
       } catch (error) {
         console.error("Error fetching package:", error);
-        // For demo purposes, let's add mock data
-
-        const packagesData = {
-          1: {
+        // For demo purposes, let's add mock data that includes the package id.
+        const packagesData: { [key: string]: Omit<Package, "id"> } = {
+          "1": {
             title: "Bali Paradise Retreat",
             description:
               "Experience the beauty of Bali with this all-inclusive package. Enjoy pristine beaches, lush rice terraces, and ancient temples. Our package includes luxury accommodations, daily breakfast, airport transfers, and guided tours to Bali's most iconic attractions.",
@@ -73,7 +72,7 @@ export default function PackageDetailsPage() {
             seller_id: "seller1",
             is_approved: true,
           },
-          2: {
+          "2": {
             title: "Manali Adventure Escape",
             description:
               "Discover the breathtaking landscapes of Manali with this adventure-packed package. Trek through snow-capped mountains, experience river rafting, and relax in cozy hilltop resorts. Includes accommodation, meals, and guided activities.",
@@ -85,7 +84,7 @@ export default function PackageDetailsPage() {
             seller_id: "seller2",
             is_approved: true,
           },
-          3: {
+          "3": {
             title: "Udaipur Royal Heritage Tour",
             description:
               "Explore the royal charm of Udaipur with a luxurious stay at heritage hotels. Visit grand palaces, cruise on Lake Pichola, and experience authentic Rajasthani culture. Includes guided tours, cultural performances, and exquisite dining experiences.",
@@ -99,28 +98,10 @@ export default function PackageDetailsPage() {
           },
         };
 
+        // Normalize params.id to a string.
         const packageId = Array.isArray(params.id) ? params.id[0] : params.id;
-        //const packageId = params.id;
-        const mockPackage = packagesData[packageId] || null;
-
-        // const mockPackage = {
-        //   id: params.id as string,
-        //   title: "Bali Paradise Retreat",
-        //   description:
-        //     "Experience the beauty of Bali with this all-inclusive package. Enjoy pristine beaches, lush rice terraces, and ancient temples. Our package includes luxury accommodations, daily breakfast, airport transfers, and guided tours to Bali's most iconic attractions.",
-        //   destination: "Bali, Indonesia",
-        //   price: 1299,
-        //   duration: 7,
-        //   category: "Beach Getaways",
-        //   images: [
-        //     "/balicover.webp",
-        //     "/bali4.webp",
-        //     "/bali3.jpg",
-        //   ],
-        //   seller_id: "seller1",
-        //   is_approved: true,
-        // }
-
+        const mockPackage =
+          packageId !== undefined ? { id: packageId, ...packagesData[packageId] } : null;
         setPkg(mockPackage);
       } finally {
         setLoading(false);
@@ -161,8 +142,7 @@ export default function PackageDetailsPage() {
       console.error("Error booking package:", error);
       toast({
         title: "Booking failed",
-        description:
-          "There was an error processing your booking. Please try again.",
+        description: "There was an error processing your booking. Please try again.",
         variant: "destructive",
       });
     }
@@ -275,9 +255,7 @@ export default function PackageDetailsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div className="md:col-span-3 aspect-video overflow-hidden rounded-lg">
           <img
-            src={
-              pkg.images[activeImage] || "/placeholder.svg?height=600&width=800"
-            }
+            src={pkg.images[activeImage] || "/placeholder.svg?height=600&width=800"}
             alt={pkg.title}
             className="w-full h-full object-cover"
           />
@@ -440,9 +418,7 @@ export default function PackageDetailsPage() {
                       </div>
                     </div>
                     <p className="text-sm">
-                      Amazing experience! The tour was well organized and our
-                      guide was knowledgeable and friendly. Highly recommend
-                      this package.
+                      Amazing experience! The tour was well organized and our guide was knowledgeable and friendly. Highly recommend this package.
                     </p>
                   </div>
 
@@ -473,8 +449,7 @@ export default function PackageDetailsPage() {
                       </div>
                     </div>
                     <p className="text-sm">
-                      Great value for money. The accommodations were excellent
-                      and the itinerary was perfect. Would book again!
+                      Great value for money. The accommodations were excellent and the itinerary was perfect. Would book again!
                     </p>
                   </div>
                 </div>
@@ -496,27 +471,15 @@ export default function PackageDetailsPage() {
                 <Separator />
 
                 <div>
-                  <label
-                    htmlFor="travelers"
-                    className="block text-sm font-medium mb-2"
-                  >
+                  <label htmlFor="travelers" className="block text-sm font-medium mb-2">
                     Number of Travelers
                   </label>
                   <div className="flex items-center">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setTravelers(Math.max(1, travelers - 1))}
-                      disabled={travelers <= 1}
-                    >
+                    <Button variant="outline" size="icon" onClick={() => setTravelers(Math.max(1, travelers - 1))} disabled={travelers <= 1}>
                       -
                     </Button>
                     <span className="mx-4 font-medium">{travelers}</span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setTravelers(travelers + 1)}
-                    >
+                    <Button variant="outline" size="icon" onClick={() => setTravelers(travelers + 1)}>
                       +
                     </Button>
                   </div>
@@ -541,10 +504,7 @@ export default function PackageDetailsPage() {
 
                 <div className="flex items-start gap-2 text-sm text-muted-foreground">
                   <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <p>
-                    No payment required now. You'll confirm your booking details
-                    in the next step.
-                  </p>
+                  <p>No payment required now. You'll confirm your booking details in the next step.</p>
                 </div>
               </div>
             </CardContent>
