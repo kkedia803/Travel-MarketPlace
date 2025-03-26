@@ -70,6 +70,13 @@ export default function SellerDashboard() {
     duration: 1,
     category: "",
     images: ["/placeholder.svg?height=400&width=600"],
+    maxPeople: 1,
+    boardingPoint: "",
+    discount: 0,
+    cancellationCharges: "",
+    itinerary: "",
+    inclusions: "",
+    exclusions: "",
   })
 
   useEffect(() => {
@@ -214,6 +221,13 @@ export default function SellerDashboard() {
         duration: 1,
         category: "",
         images: ["/placeholder.svg?height=400&width=600"],
+        maxPeople: 1,
+        boardingPoint: "",
+        discount: 0,
+        cancellationCharges: "",
+        itinerary: "",
+        inclusions: "",
+        exclusions: "",
       })
     } catch (error) {
       console.error("Error adding package:", error)
@@ -304,9 +318,74 @@ export default function SellerDashboard() {
                   rows={4}
                 />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="inclusions">Inclusions</Label>
+                  <Textarea
+                    id="inclusions"
+                    value={newPackage.inclusions}
+                    onChange={(e) => setNewPackage({ ...newPackage, inclusions: e.target.value })}
+                    placeholder="List the inclusions for your travel package..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="exclusions">Exclusions</Label>
+                  <Textarea
+                    id="exclusions"
+                    value={newPackage.exclusions}
+                    onChange={(e) => setNewPackage({ ...newPackage, exclusions: e.target.value })}
+                    placeholder="List the exclusions for your travel package..."
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="maxPeople">Maximum Number of People</Label>
+                  <Input
+                    id="maxPeople"
+                    type="number"
+                    min="1"
+                    value={newPackage.maxPeople || ""}
+                    onChange={(e) => setNewPackage({ ...newPackage, maxPeople: Number(e.target.value) })}
+                    placeholder="e.g. 10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="boardingPoint">Boarding Point</Label>
+                  <Input
+                    id="boardingPoint"
+                    value={newPackage.boardingPoint}
+                    onChange={(e) => setNewPackage({ ...newPackage, boardingPoint: e.target.value })}
+                    placeholder="e.g. Delhi International Airport"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="discount">Discount (%)</Label>
+                  <Input
+                    id="discount"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={newPackage.discount || ""}
+                    onChange={(e) => setNewPackage({ ...newPackage, discount: Number(e.target.value) })}
+                    placeholder="e.g. 10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cancellationCharges">Cancellation Policy</Label>
+                  <Textarea
+                    id="cancellationCharges"
+                    value={newPackage.cancellationCharges}
+                    onChange={(e) => setNewPackage({ ...newPackage, cancellationCharges: e.target.value })}
+                    placeholder="e.g. 50% refund if cancelled 7 days before departure"
+                  />
+                </div>
+              </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price (USD)</Label>
+                  <Label htmlFor="price">Price (INR)</Label>
                   <Input
                     id="price"
                     type="number"
@@ -534,4 +613,3 @@ export default function SellerDashboard() {
     </div>
   )
 }
-
