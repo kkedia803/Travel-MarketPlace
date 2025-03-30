@@ -59,7 +59,8 @@ export function DeletePackageDialog({ open, onOpenChange, packageData, onDelete 
         <DialogHeader>
           <DialogTitle>Delete Package</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete "{packageData?.id}"? This action cannot be undone.
+            {/* Are you sure you want to delete "{packageData?.id}"? This action cannot be undone. */}
+            Are you sure you want to delete "{packageData?.title}"? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

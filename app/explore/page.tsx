@@ -49,6 +49,8 @@ export default function ExplorePage() {
 
         setPackages(data || [])
         setFilteredPackages(data || [])
+        console.log(filteredPackages)
+        // console.log('packages set - ',packages)
       } catch (error) {
         console.error("Error fetching packages:", error)
         // For demo purposes, let's add some mock data
@@ -129,6 +131,7 @@ export default function ExplorePage() {
 
         setPackages(mockPackages)
         setFilteredPackages(mockPackages)
+        console.log('mockpackages', filteredPackages)
       } finally {
         setLoading(false)
       }
@@ -136,6 +139,10 @@ export default function ExplorePage() {
 
     fetchPackages()
   }, [])
+
+  useEffect(() => {
+    console.log("Updated packages:", packages);
+  }, [packages]);
 
   useEffect(() => {
     // Apply filters
