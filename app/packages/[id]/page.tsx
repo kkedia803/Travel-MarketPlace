@@ -41,6 +41,7 @@ export default function PackageDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [travelers, setTravelers] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
+  const [userType, setUserType] = useState<string | null>(null) // Track user type
 
   useEffect(() => {
     const fetchPackage = async () => {
@@ -111,6 +112,34 @@ export default function PackageDetailsPage() {
     fetchPackage();
   }, [params.id]);
 
+  useEffect(() => {
+    const fetchUserType = async () => {
+      setLoading(true);
+      try {
+        // Get the authenticated user
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          // Fetch user type from the "users" table
+          const { data, error } = await supabase
+            .from("profiles") // Replace with your actual table name
+            .select("role") // Replace with your column name
+            .eq("id", user.id) // Assuming "id" is the primary key
+            .single();
+
+          if (error) throw error;
+
+          setUserType(data?.role || "user"); // Default to "user" if null
+        }
+      } catch (error) {
+        console.error("Error fetching user type:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserType();
+  }, []);
   const handleBookNow = async () => {
     if (!user) {
       toast({
@@ -264,9 +293,8 @@ export default function PackageDetailsPage() {
           {pkg.images.slice(0, 3).map((image, index) => (
             <div
               key={index}
-              className={`aspect-video overflow-hidden rounded-lg cursor-pointer border-2 ${
-                activeImage === index ? "border-primary" : "border-transparent"
-              }`}
+              className={`aspect-video overflow-hidden rounded-lg cursor-pointer border-2 ${activeImage === index ? "border-primary" : "border-transparent"
+                }`}
               onClick={() => setActiveImage(index)}
             >
               <img
@@ -403,11 +431,10 @@ export default function PackageDetailsPage() {
                             {[1, 2, 3, 4, 5].map((star) => (
                               <Star
                                 key={star}
-                                className={`h-3 w-3 ${
-                                  star <= 5
-                                    ? "fill-primary text-primary"
-                                    : "text-muted"
-                                }`}
+                                className={`h-3 w-3 ${star <= 5
+                                  ? "fill-primary text-primary"
+                                  : "text-muted"
+                                  }`}
                               />
                             ))}
                           </div>
@@ -434,11 +461,10 @@ export default function PackageDetailsPage() {
                             {[1, 2, 3, 4, 5].map((star) => (
                               <Star
                                 key={star}
-                                className={`h-3 w-3 ${
-                                  star <= 4
-                                    ? "fill-primary text-primary"
-                                    : "text-muted"
-                                }`}
+                                className={`h-3 w-3 ${star <= 4
+                                  ? "fill-primary text-primary"
+                                  : "text-muted"
+                                  }`}
                               />
                             ))}
                           </div>
@@ -498,9 +524,15 @@ export default function PackageDetailsPage() {
                   </div>
                 </div>
 
-                <Button className="w-full" size="lg" onClick={handleBookNow}>
-                  Book Now
-                </Button>
+                {userType !== "seller" && (
+                  <Button className="w-full" size="lg" onClick={handleBookNow}>
+                    Book Now
+                  </Button>)}
+                {userType == "seller" && (
+                  <div className="w-full" style={{ display: "flex", justifyContent: "center", backgroundColor: "#f8d7da", padding: "10px", borderRadius: "5px" }}>
+                    You are a seller. You cannot book packages.
+                  </div>)}
+
 
                 <div className="flex items-start gap-2 text-sm text-muted-foreground">
                   <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />

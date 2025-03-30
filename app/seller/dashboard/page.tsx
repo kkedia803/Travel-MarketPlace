@@ -57,6 +57,14 @@ interface TravelPackage {
   seller_id: string;
   is_approved: boolean;
   created_at: string;
+  max_people: number;
+  boarding_point: string;
+  discount: number;
+  cancellation_policy: string;
+  itinerary: string[];
+  inclusion: string[];
+  exclusion: string[];
+  final_price: number;
 }
 
 interface Booking {
@@ -84,7 +92,23 @@ export default function SellerDashboard() {
   const [loading, setLoading] = useState(true);
   const [isAddPackageOpen, setIsAddPackageOpen] = useState(false);
   const [formStep, setFormStep] = useState(0);
-  const [newPackage, setNewPackage] = useState({
+  const [newPackage, setNewPackage] = useState<{
+    id?: string;
+    title: string;
+    description: string;
+    destination: string;
+    price: number;
+    duration: number;
+    category: string;
+    images: string[];
+    max_people: number;
+    boarding_point: string;
+    discount: number;
+    cancellation_policy: string;
+    itinerary: string[];
+    inclusion: string[];
+    exclusion: string[];
+  }>({
     title: "",
     description: "",
     destination: "",
@@ -92,15 +116,15 @@ export default function SellerDashboard() {
     duration: 1,
     category: "",
     images: ["/placeholder.svg?height=400&width=600"],
-    maxPeople: 1,
-    boardingPoint: "",
+    max_people: 1,
+    boarding_point: "",
     discount: 0,
-    cancellationCharges: "",
-    itinerary: "",
-    inclusions: "",
-    exclusions: "",
+    cancellation_policy: "",
+    itinerary: [] as string[],
+    inclusion: [] as string[],
+    exclusion: [] as string[],
   });
-  
+
 
   useEffect(() => {
     if (!user) {
@@ -132,7 +156,6 @@ export default function SellerDashboard() {
           .select(
             `
             *,
-            user:profiles (email, name),
             package:packages (title)
           `
           )
@@ -220,8 +243,12 @@ export default function SellerDashboard() {
     fetchData();
   }, [user, router]);
 
+
+
   const handleAddPackage = async () => {
     try {
+      console.log(newPackage)
+      console.log(newPackage.images)
       const { data, error } = await supabase
         .from("packages")
         .insert({
@@ -248,13 +275,13 @@ export default function SellerDashboard() {
         duration: 1,
         category: "",
         images: ["/placeholder.svg?height=400&width=600"],
-        maxPeople: 1,
-        boardingPoint: "",
+        max_people: 1,
+        boarding_point: "",
         discount: 0,
-        cancellationCharges: "",
-        itinerary: "",
-        inclusions: "",
-        exclusions: "",
+        cancellation_policy: "",
+        itinerary: [] as string[],
+        inclusion: [] as string[],
+        exclusion: [] as string[],
       });
     } catch (error) {
       console.error("Error adding package:", error);
@@ -264,6 +291,141 @@ export default function SellerDashboard() {
           "There was an error adding your package. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleBookingConfirm = async (bookingId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("bookings")
+        .update({ status: "confirmed" })
+        .eq("id", bookingId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Booking Confirmed",
+        description: "The booking has been successfully confirmed.",
+      });
+
+      setBookings((prev) =>
+        prev.map((booking) =>
+          booking.id === bookingId ? { ...booking, status: "confirmed" } : booking
+        )
+      );
+    } catch (error) {
+      console.error("Error confirming booking:", error);
+      toast({
+        title: "Failed to Confirm Booking",
+        description: "There was an error confirming the booking. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePkgEdit = (pkgId: string) => {
+    const pkgToEdit = packages.find((pkg) => pkg.id === pkgId);
+    if (pkgToEdit) {
+      const { final_price, ...editablePackage } = pkgToEdit; // Exclude final_price
+      setNewPackage(editablePackage);
+      setFormStep(0);
+      setIsAddPackageOpen(true);
+    }
+  };
+
+  const handleUpdatePackage = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("packages")
+        .update({
+          ...newPackage,
+          seller_id: user?.id,
+        })
+        .eq("id", newPackage.id)
+        .select();
+
+      if (error) throw error;
+
+      toast({
+        title: "Package updated successfully",
+        description: "Your package details have been updated.",
+      });
+
+      setPackages((prev) =>
+        prev.map((pkg) => (pkg.id === newPackage.id ? data[0] : pkg))
+      );
+      setIsAddPackageOpen(false);
+      setNewPackage({
+        title: "",
+        description: "",
+        destination: "",
+        price: 0,
+        duration: 1,
+        category: "",
+        images: ["/placeholder.svg?height=400&width=600"],
+        max_people: 1,
+        boarding_point: "",
+        discount: 0,
+        cancellation_policy: "",
+        itinerary: [] as string[],
+        inclusion: [] as string[],
+        exclusion: [] as string[],
+      });
+    } catch (error) {
+      console.error("Error updating package:", error);
+      toast({
+        title: "Failed to update package",
+        description: "There was an error updating your package. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePkgDelete = async (pkgId: string) => {
+    const { error } = await supabase.from("packages").delete().eq("id", pkgId);
+
+    if (error) {
+      console.error("Error deleting package:", error);
+      toast({
+        title: "Failed to Delete Package",
+        description: "There was an error deleting the package. Please try again.",
+        variant: "destructive",
+      });
+    } else {
+      setPackages((prev) => prev.filter((pkg) => pkg.id !== pkgId));
+      toast({
+        title: "Package Deleted",
+        description: "The package has been successfully deleted.",
+      });
+    }
+  }
+
+  const handleBookingCancelled = async (bookingId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("bookings")
+        .update({ status: "cancelled" })
+        .eq("id", bookingId);
+
+      if (error) throw error;
+
+      // toast({
+      //   title: "Booking Rejected",
+      //   description: "The booking has been successfully confirmed.",
+      // });
+
+      setBookings((prev) =>
+        prev.map((booking) =>
+          booking.id === bookingId ? { ...booking, status: "cancelled" } : booking
+        )
+      );
+    } catch (error) {
+      console.error("Error confirming booking:", error);
+      // toast({
+      //   title: "Failed to Confirm Booking",
+      //   description: "There was an error confirming the booking. Please try again.",
+      //   variant: "destructive",
+      // });
     }
   };
 
@@ -315,7 +477,28 @@ export default function SellerDashboard() {
           </p>
         </div>
         <Dialog open={isAddPackageOpen} onOpenChange={setIsAddPackageOpen}>
-          <DialogTrigger asChild>
+          <DialogTrigger
+            asChild
+            onClick={() => {
+              setNewPackage({
+                title: "",
+                description: "",
+                destination: "",
+                price: 0,
+                duration: 1,
+                category: "",
+                images: ["/placeholder.svg?height=400&width=600"],
+                max_people: 1,
+                boarding_point: "",
+                discount: 0,
+                cancellation_policy: "",
+                itinerary: [] as string[],
+                inclusion: [] as string[],
+                exclusion: [] as string[],
+              });
+              setFormStep(0); // Reset formStep to 0
+            }}
+          >
             <Button className="gap-2">
               <Plus className="h-4 w-4" /> Add New Package
             </Button>
@@ -335,20 +518,18 @@ export default function SellerDashboard() {
                   <div key={step} className="flex flex-col items-center">
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 
-                        ${
-                          index <= formStep
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground"
+                        ${index <= formStep
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
                         }`}
                     >
                       {index + 1}
                     </div>
                     <span
-                      className={`text-xs ${
-                        index <= formStep
-                          ? "text-primary font-medium"
-                          : "text-muted-foreground"
-                      }`}
+                      className={`text-xs ${index <= formStep
+                        ? "text-primary font-medium"
+                        : "text-muted-foreground"
+                        }`}
                     >
                       {step}
                     </span>
@@ -540,30 +721,30 @@ export default function SellerDashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="maxPeople">Maximum Number of People</Label>
+                    <Label htmlFor="max_people">Maximum Number of People</Label>
                     <Input
-                      id="maxPeople"
+                      id="max_people"
                       type="number"
                       min="1"
-                      value={newPackage.maxPeople || ""}
+                      value={newPackage.max_people || ""}
                       onChange={(e) =>
                         setNewPackage({
                           ...newPackage,
-                          maxPeople: Number(e.target.value),
+                          max_people: Number(e.target.value),
                         })
                       }
                       placeholder="e.g. 10"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="boardingPoint">Boarding Point</Label>
+                    <Label htmlFor="boarding_point">Boarding Point</Label>
                     <Input
-                      id="boardingPoint"
-                      value={newPackage.boardingPoint}
+                      id="boarding_point"
+                      value={newPackage.boarding_point}
                       onChange={(e) =>
                         setNewPackage({
                           ...newPackage,
-                          boardingPoint: e.target.value,
+                          boarding_point: e.target.value,
                         })
                       }
                       placeholder="e.g. Delhi International Airport"
@@ -575,11 +756,11 @@ export default function SellerDashboard() {
                   <Label htmlFor="itinerary">Itinerary</Label>
                   <Textarea
                     id="itinerary"
-                    value={newPackage.itinerary}
+                    value={Array.isArray(newPackage.itinerary) ? newPackage.itinerary.join("\n") : newPackage.itinerary}
                     onChange={(e) =>
                       setNewPackage({
                         ...newPackage,
-                        itinerary: e.target.value,
+                        itinerary: e.target.value.split("\n").filter(Boolean),
                       })
                     }
                     placeholder="Day 1: Arrival and welcome dinner
@@ -595,14 +776,14 @@ export default function SellerDashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="inclusions">Inclusions</Label>
+                    <Label htmlFor="inclusion">inclusion</Label>
                     <Textarea
-                      id="inclusions"
-                      value={newPackage.inclusions}
+                      id="inclusion"
+                      value={Array.isArray(newPackage.inclusion) ? newPackage.inclusion.join("\n") : newPackage.inclusion}
                       onChange={(e) =>
                         setNewPackage({
                           ...newPackage,
-                          inclusions: e.target.value,
+                          inclusion: e.target.value.split("\n").filter(Boolean),
                         })
                       }
                       placeholder="- Airport transfers
@@ -617,14 +798,14 @@ export default function SellerDashboard() {
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="exclusions">Exclusions</Label>
+                    <Label htmlFor="exclusion">exclusion</Label>
                     <Textarea
-                      id="exclusions"
-                      value={newPackage.exclusions}
+                      id="exclusion"
+                      value={Array.isArray(newPackage.exclusion) ? newPackage.exclusion.join("\n") : newPackage.exclusion}
                       onChange={(e) =>
                         setNewPackage({
                           ...newPackage,
-                          exclusions: e.target.value,
+                          exclusion: e.target.value.split("\n").filter(Boolean),
                         })
                       }
                       placeholder="- International flights
@@ -679,8 +860,8 @@ export default function SellerDashboard() {
                       value={
                         newPackage.discount
                           ? Math.round(
-                              newPackage.price * (1 - newPackage.discount / 100)
-                            )
+                            newPackage.price * (1 - newPackage.discount / 100)
+                          )
                           : newPackage.price
                       }
                       disabled
@@ -693,16 +874,16 @@ export default function SellerDashboard() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="cancellationCharges">
+                  <Label htmlFor="cancellation_policy">
                     Cancellation Policy
                   </Label>
                   <Textarea
-                    id="cancellationCharges"
-                    value={newPackage.cancellationCharges}
+                    id="cancellation_policy"
+                    value={newPackage.cancellation_policy}
                     onChange={(e) =>
                       setNewPackage({
                         ...newPackage,
-                        cancellationCharges: e.target.value,
+                        cancellation_policy: e.target.value,
                       })
                     }
                     placeholder="e.g. 
@@ -755,7 +936,7 @@ export default function SellerDashboard() {
                               </span>{" "}
                               {Math.round(
                                 newPackage.price *
-                                  (1 - newPackage.discount / 100)
+                                (1 - newPackage.discount / 100)
                               )}
                             </span>
                           ) : (
@@ -778,11 +959,11 @@ export default function SellerDashboard() {
                     </div>
                     <div>
                       <h5 className="font-medium mb-1">Max People</h5>
-                      <p>{newPackage.maxPeople || "Not specified"}</p>
+                      <p>{newPackage.max_people || "Not specified"}</p>
                     </div>
                     <div>
                       <h5 className="font-medium mb-1">Boarding Point</h5>
-                      <p>{newPackage.boardingPoint || "Not specified"}</p>
+                      <p>{newPackage.boarding_point || "Not specified"}</p>
                     </div>
                     <div>
                       <h5 className="font-medium mb-1">Discount</h5>
@@ -828,6 +1009,8 @@ export default function SellerDashboard() {
                   <Button onClick={nextFormStep} type="button">
                     Continue
                   </Button>
+                ) : newPackage.id ? (
+                  <Button onClick={handleUpdatePackage}>Update Package</Button>
                 ) : (
                   <Button onClick={handleAddPackage}>Submit Package</Button>
                 )}
@@ -929,13 +1112,19 @@ export default function SellerDashboard() {
                           Created on: {formatDate(pkg.created_at)}
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1"
+                            onClick={() => handlePkgEdit(pkg.id)}
+                          >
                             <Edit className="h-4 w-4" /> Edit
                           </Button>
                           <Button
                             variant="destructive"
                             size="sm"
                             className="gap-1"
+                            onClick={() => handlePkgDelete(pkg.id)}
                           >
                             <Trash className="h-4 w-4" /> Delete
                           </Button>
@@ -998,7 +1187,7 @@ export default function SellerDashboard() {
                       <div>
                         <p className="text-sm font-medium">Customer</p>
                         <p className="text-sm">
-                          {booking.user.name || booking.user.email}
+                          {/* {booking.user.name || booking.user.email} */}
                         </p>
                       </div>
                       <div>
@@ -1016,10 +1205,18 @@ export default function SellerDashboard() {
                   <CardFooter className="flex justify-end gap-2">
                     {booking.status === "pending" && (
                       <>
-                        <Button variant="outline" size="sm">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleBookingConfirm(booking.id)}
+                        >
                           Confirm
                         </Button>
-                        <Button variant="destructive" size="sm">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleBookingCancelled(booking.id)}
+                        >
                           Reject
                         </Button>
                       </>
