@@ -17,7 +17,7 @@ import {
 import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/app/contexts/auth-context"
 import { supabase } from "@/app/lib/supabase"
-import { Check, Eye, Package, User, Users, DollarSign, X, BarChart3 } from "lucide-react"
+import { Check, Eye, Package, User, Users, DollarSign, X, BarChart3, AlertCircle } from "lucide-react"
 
 interface TravelPackage {
   id: string
@@ -46,6 +46,14 @@ interface Seller {
   packages_count: number
 }
 
+interface Statistics {
+  totalUsers: number
+  totalSellers: number
+  totalPackages: number
+  totalBookings: number
+  revenue: number
+}
+
 export default function AdminDashboard() {
   const { user } = useAuth()
   const router = useRouter()
@@ -53,8 +61,16 @@ export default function AdminDashboard() {
   const [pendingPackages, setPendingPackages] = useState<TravelPackage[]>([])
   const [sellers, setSellers] = useState<Seller[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedPackage, setSelectedPackage] = useState<TravelPackage | null>(null)
   const [isPackageDetailsOpen, setIsPackageDetailsOpen] = useState(false)
+  const [statistics, setStatistics] = useState<Statistics>({
+    totalUsers: 0,
+    totalSellers: 0,
+    totalPackages: 0,
+    totalBookings: 0,
+    revenue: 0
+  })
 
   useEffect(() => {
     if (!user) {
@@ -69,6 +85,7 @@ export default function AdminDashboard() {
 
     const fetchData = async () => {
       setLoading(true)
+      setError(null)
 
       try {
         // Fetch pending packages
@@ -76,12 +93,12 @@ export default function AdminDashboard() {
           .from("packages")
           .select(`
             *,
-            seller:profiles (email, name)
+            seller:profiles (id, name)
           `)
           .eq("is_approved", false)
           .order("created_at", { ascending: false })
 
-        if (packagesError) throw packagesError
+        if (packagesError) throw new Error(`Error fetching pending packages: ${packagesError.message}`)
 
         // Fetch sellers
         const { data: sellersData, error: sellersError } = await supabase
@@ -90,15 +107,23 @@ export default function AdminDashboard() {
           .eq("role", "seller")
           .order("created_at", { ascending: false })
 
-        if (sellersError) throw sellersError
+        if (sellersError) throw new Error(`Error fetching sellers: ${sellersError.message}`)
 
         // Count packages for each seller
         const sellersWithCounts = await Promise.all(
           sellersData.map(async (seller) => {
-            const { count } = await supabase
+            const { count, error: countError } = await supabase
               .from("packages")
               .select("*", { count: "exact", head: true })
               .eq("seller_id", seller.id)
+
+            if (countError) {
+              console.error(`Error counting packages for seller ${seller.id}:`, countError)
+              return {
+                ...seller,
+                packages_count: 0,
+              }
+            }
 
             return {
               ...seller,
@@ -107,84 +132,94 @@ export default function AdminDashboard() {
           }),
         )
 
+        // Fetch statistics
+        // 1. Total users
+        const { count: usersCount, error: usersError } = await supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true })
+
+        if (usersError) throw new Error(`Error counting users: ${usersError.message}`)
+
+        // 2. Total packages
+        const { count: packagesCount, error: totalPackagesError } = await supabase
+          .from("packages")
+          .select("*", { count: "exact", head: true })
+
+        if (totalPackagesError) throw new Error(`Error counting packages: ${totalPackagesError.message}`)
+
+        // 3. Total bookings
+        const { count: bookingsCount, error: bookingsError } = await supabase
+          .from("bookings")
+          .select("*", { count: "exact", head: true })
+
+        if (bookingsError) throw new Error(`Error counting bookings: ${bookingsError.message}`)
+
+        // 4. Total revenue
+        const { data: bookingsData, error: revenueError } = await supabase
+          .from("bookings")
+          .select("package_id, travelers")
+          .eq("status", "confirmed")
+
+        if (revenueError) throw new Error(`Error fetching booking revenue data: ${revenueError.message}`)
+
+        // Calculate revenue based on package prices and number of travelers
+        let totalRevenue = 0
+        if (bookingsData && bookingsData.length > 0) {
+          const packageIds = [...new Set(bookingsData.map(booking => booking.package_id))]
+          
+          const { data: packagePrices, error: pricesError } = await supabase
+            .from("packages")
+            .select("id, price")
+            .in("id", packageIds)
+          
+          if (pricesError) throw new Error(`Error fetching package prices: ${pricesError.message}`)
+          
+          if (packagePrices) {
+            const priceMap = new Map(packagePrices.map(pkg => [pkg.id, pkg.price]))
+            
+            totalRevenue = bookingsData.reduce((sum, booking) => {
+              const price = priceMap.get(booking.package_id) || 0
+              return sum + (price * booking.travelers)
+            }, 0)
+          }
+        }
+
         setPendingPackages(packagesData || [])
         setSellers(sellersWithCounts)
+        setStatistics({
+          totalUsers: usersCount || 0,
+          totalSellers: sellersData?.length || 0,
+          totalPackages: packagesCount || 0,
+          totalBookings: bookingsCount || 0,
+          revenue: totalRevenue
+        })
       } catch (error) {
         console.error("Error fetching data:", error)
-        // For demo purposes, let's add mock data
-        const mockPendingPackages = [
-          {
-            id: "1",
-            title: "Swiss Alps Adventure",
-            description: "Explore the majestic Swiss Alps with guided tours and luxury accommodations.",
-            destination: "Switzerland",
-            price: 1899,
-            duration: 10,
-            category: "Mountain Escapes",
-            images: ["/placeholder.svg?height=400&width=600"],
-            seller_id: "seller1",
-            is_approved: false,
-            created_at: "2023-05-15T14:45:00Z",
-            seller: {
-              email: "seller1@example.com",
-              name: "Alpine Tours",
-            },
-          },
-          {
-            id: "2",
-            title: "Tokyo Cultural Experience",
-            description: "Immerse yourself in Japanese culture with this comprehensive Tokyo tour.",
-            destination: "Japan",
-            price: 2199,
-            duration: 12,
-            category: "Cultural Tours",
-            images: ["/placeholder.svg?height=400&width=600"],
-            seller_id: "seller2",
-            is_approved: false,
-            created_at: "2023-06-10T09:30:00Z",
-            seller: {
-              email: "seller2@example.com",
-              name: "Asia Explorers",
-            },
-          },
-        ] as TravelPackage[]
-
-        const mockSellers = [
-          {
-            id: "seller1",
-            email: "seller1@example.com",
-            name: "Alpine Tours",
-            role: "seller",
-            created_at: "2023-03-10T08:30:00Z",
-            packages_count: 5,
-          },
-          {
-            id: "seller2",
-            email: "seller2@example.com",
-            name: "Asia Explorers",
-            role: "seller",
-            created_at: "2023-04-15T14:45:00Z",
-            packages_count: 3,
-          },
-          {
-            id: "seller3",
-            email: "seller3@example.com",
-            name: "Beach Getaways Inc.",
-            role: "seller",
-            created_at: "2023-05-20T11:15:00Z",
-            packages_count: 7,
-          },
-        ] as Seller[]
-
-        setPendingPackages(mockPendingPackages)
-        setSellers(mockSellers)
+        setError(error instanceof Error ? error.message : "An unknown error occurred")
+        
+        toast({
+          title: "Error loading dashboard data",
+          description: error instanceof Error ? error.message : "Failed to load dashboard data",
+          variant: "destructive",
+        })
+        
+        // Initialize with empty data instead of mock data
+        setPendingPackages([])
+        setSellers([])
+        setStatistics({
+          totalUsers: 0,
+          totalSellers: 0,
+          totalPackages: 0,
+          totalBookings: 0,
+          revenue: 0
+        })
       } finally {
         setLoading(false)
       }
     }
 
     fetchData()
-  }, [user, router])
+  }, [user, router, toast])
 
   const handleApprovePackage = async (packageId: string) => {
     try {
@@ -193,6 +228,12 @@ export default function AdminDashboard() {
       if (error) throw error
 
       setPendingPackages((prev) => prev.filter((pkg) => pkg.id !== packageId))
+
+      // Update total packages count in statistics
+      setStatistics(prev => ({
+        ...prev,
+        totalPackages: prev.totalPackages // Count remains the same as the package still exists
+      }))
 
       toast({
         title: "Package approved",
@@ -217,6 +258,12 @@ export default function AdminDashboard() {
       if (error) throw error
 
       setPendingPackages((prev) => prev.filter((pkg) => pkg.id !== packageId))
+
+      // Update total packages count in statistics
+      setStatistics(prev => ({
+        ...prev,
+        totalPackages: Math.max(0, prev.totalPackages - 1)
+      }))
 
       toast({
         title: "Package rejected",
@@ -243,14 +290,17 @@ export default function AdminDashboard() {
     })
   }
 
-  // Mock statistics for the dashboard
-  const statistics = {
-    totalUsers: 124,
-    totalSellers: sellers.length,
-    totalPackages: 45,
-    totalBookings: 78,
-    revenue: 89750,
-  }
+  const ErrorDisplay = ({ message }: { message: string }) => (
+    <Card className="border-red-200 bg-red-50 dark:bg-red-900/10">
+      <CardContent className="p-6 flex items-center gap-4">
+        <AlertCircle className="h-6 w-6 text-red-500" />
+        <div>
+          <h3 className="font-medium">Error loading data</h3>
+          <p className="text-sm text-muted-foreground">{message}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
 
   return (
     <div className="container py-8">
@@ -260,6 +310,8 @@ export default function AdminDashboard() {
           <p className="text-muted-foreground">Manage the travel marketplace platform</p>
         </div>
       </div>
+
+      {error && <ErrorDisplay message={error} />}
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -300,7 +352,7 @@ export default function AdminDashboard() {
           <CardContent className="p-6 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
-              <p className="text-3xl font-bold">{statistics.revenue.toLocaleString()}</p>
+              <p className="text-3xl font-bold">₹{statistics.revenue.toLocaleString()}</p>
             </div>
             <div className="p-3 bg-primary/10 rounded-full">
               <DollarSign className="h-6 w-6 text-primary" />
@@ -566,7 +618,6 @@ export default function AdminDashboard() {
         </TabsContent>
       </Tabs>
 
-      {/* Package Details Dialog */}
       <Dialog open={isPackageDetailsOpen} onOpenChange={setIsPackageDetailsOpen}>
         <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
@@ -630,4 +681,3 @@ export default function AdminDashboard() {
     </div>
   )
 }
-
