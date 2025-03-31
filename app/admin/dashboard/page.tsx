@@ -327,7 +327,7 @@ export default function AdminDashboard() {
     try {
       // Fetch distinct destinations and their count
       const { data, error } = await supabase
-        .from('packages')
+        .from('bookings')
         .select('destination')
         .order('destination', { ascending: true });
 
@@ -350,7 +350,6 @@ export default function AdminDashboard() {
       console.error('Error fetching popular destination data:', error);
     }
   }
-
 
 
   // Function to fetch user growth data from Supabase

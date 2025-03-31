@@ -153,6 +153,7 @@ export default function PackageDetailsPage() {
 
     try {
       const { error } = await supabase.from("bookings").insert({
+        destination: pkg?.destination,
         package_id: pkg?.id,
         user_id: user.id,
         travelers: travelers,
