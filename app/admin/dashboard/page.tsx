@@ -54,6 +54,12 @@ interface TravelPackage {
   }
 }
 
+interface User {
+  id: string
+  email: string
+  name?: string
+}
+
 interface Seller {
   id: string
   email: string
@@ -64,6 +70,7 @@ interface Seller {
 }
 
 interface Statistics {
+  totalUsers: number
   totalSellers: number
   totalPackages: number
   totalBookings: number
@@ -86,6 +93,7 @@ export default function AdminDashboard() {
   const [selectedPackage, setSelectedPackage] = useState<TravelPackage | null>(null)
   const [isPackageDetailsOpen, setIsPackageDetailsOpen] = useState(false)
   const [statistics, setStatistics] = useState<Statistics>({
+    totalUsers: 0,
     totalSellers: 0,
     totalPackages: 0,
     totalBookings: 0,
@@ -99,6 +107,10 @@ export default function AdminDashboard() {
   const [revenueData, setRevenueData] = useState<{ name: string; revenue: number }[]>([])
   const [totalUsers, setTotalUsers] = useState(0)
   const [totalRevenue, setTotalRevenue] = useState(0)
+
+  const [isSellerPackagesOpen, setIsSellerPackagesOpen] = useState(false);
+  const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
+  const [sellerPackages, setSellerPackages] = useState<TravelPackage[]>([]);
 
   useEffect(() => {
     fetchUserGrowthData();
@@ -181,9 +193,18 @@ export default function AdminDashboard() {
 
         if (bookingsError) throw new Error(`Error counting bookings: ${bookingsError.message}`)
 
+        // Fetch total users (excluding sellers and admins)
+        const { count: usersCount, error: usersError } = await supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true })
+          .eq("role", "user") // Only include users with the role "user"
+
+        if (usersError) throw new Error(`Error counting users: ${usersError.message}`)
+
         setPendingPackages(packagesData || [])
         setSellers(sellersWithCounts)
         setStatistics({
+          totalUsers: usersCount || 0,
           totalSellers: sellersData?.length || 0,
           totalPackages: packagesCount || 0,
           totalBookings: bookingsCount || 0,
@@ -202,6 +223,7 @@ export default function AdminDashboard() {
         setPendingPackages([])
         setSellers([])
         setStatistics({
+          totalUsers: 0,
           totalSellers: 0,
           totalPackages: 0,
           totalBookings: 0,
@@ -365,10 +387,11 @@ export default function AdminDashboard() {
       const currentDate = new Date();
       const currentYear = currentDate.getFullYear();
 
-      // Fetch user registration data grouped by month
+      // Fetch user registration data grouped by month, excluding sellers and admins
       const { data, error } = await supabase
         .from('profiles')
         .select('created_at')
+        .eq('role', 'user') // Only include users with the role "user"
         .gte('created_at', `${currentYear}-01-01`) // Filter for current year
         .lte('created_at', `${currentYear}-12-31`);
 
@@ -457,6 +480,29 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleViewPackages = async (seller: Seller) => {
+    setSelectedSeller(seller);
+    setIsSellerPackagesOpen(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("packages")
+        .select("*")
+        .eq("seller_id", seller.id);
+
+      if (error) throw error;
+
+      setSellerPackages(data || []);
+    } catch (error) {
+      console.error("Error fetching seller packages:", error);
+      toast({
+        title: "Failed to fetch packages",
+        description: `There was an error fetching the seller's packages. Please try again. Seller Email: ${seller.email || "N/A"}`,
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", {
@@ -498,7 +544,7 @@ export default function AdminDashboard() {
           <CardContent className="p-6 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Total Users</p>
-              <p className="text-3xl font-bold">{totalUsers}</p>
+              <p className="text-3xl font-bold">{statistics.totalUsers}</p>
               <p className="text-3xl font-bold"></p>
             </div>
             <div className="p-3 bg-primary/10 rounded-full">
@@ -681,12 +727,19 @@ export default function AdminDashboard() {
                     </div>
                   </CardContent>
                   <CardFooter className="flex justify-end gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewPackages(seller)}
+                    >
                       View Packages
                     </Button>
-                    <Button variant="secondary" size="sm">
+                    <a
+                      className="btn btn-secondary btn-sm"
+                      href={`mailto:${seller?.email || ''}`}
+                    >
                       Contact Seller
-                    </Button>
+                    </a>
                   </CardFooter>
                 </Card>
               ))}
@@ -896,6 +949,39 @@ export default function AdminDashboard() {
             <Button onClick={() => selectedPackage && handleApprovePackage(selectedPackage.id)}>
               <Check className="mr-2 h-4 w-4" /> Approve Package
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isSellerPackagesOpen} onOpenChange={setIsSellerPackagesOpen}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>Seller Packages</DialogTitle>
+            <DialogDescription>
+              Viewing packages for {selectedSeller?.name || selectedSeller?.email}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            {sellerPackages.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No packages found for this seller.</p>
+            ) : (
+              sellerPackages.map((pkg) => (
+                <Card key={pkg.id}>
+                  <CardHeader className="pb-2">
+                    <CardTitle>{pkg.title}</CardTitle>
+                    <CardDescription>{pkg.destination}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm">{pkg.description}</p>
+                    <p className="text-sm font-medium">Price: ₹{pkg.price}</p>
+                    <p className="text-sm font-medium">Duration: {pkg.duration} days</p>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsSellerPackagesOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
