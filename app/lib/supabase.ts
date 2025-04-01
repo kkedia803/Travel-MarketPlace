@@ -8,6 +8,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 export type UserRole = "user" | "seller" | "admin"
 
 export interface UserDetails {
+  length: number
   id: string
   email: string
   role: UserRole
@@ -31,6 +32,7 @@ export async function getUserDetails(): Promise<UserDetails | null> {
         role: data.role || "user",
         name: data.name,
         avatar_url: data.avatar_url,
+        length: 0, // Add a default value for length
       }
     : null
 }

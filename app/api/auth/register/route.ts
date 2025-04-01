@@ -5,9 +5,15 @@ export async function POST(request: Request) {
   try {
     const { email, password, role } = await request.json()
 
+    // Sign up the user and include the role in the metadata
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          role: role || "user", // Store the role in user metadata
+        },
+      },
     })
 
     if (error) {
@@ -33,4 +39,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
-
