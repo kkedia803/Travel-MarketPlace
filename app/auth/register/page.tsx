@@ -32,10 +32,10 @@ export default function RegisterPage() {
     setError(null)
 
     try {
-      const { error } = await signUp(email, password, role)
+      const result = await signUp(email, password, role)
 
-      if (error) {
-        setError(error.message)
+      if ("error" in result && result.error) {
+        setError(result.error.message)
         return
       }
 
@@ -104,9 +104,9 @@ export default function RegisterPage() {
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="admin" id="user" />
-                      <Label htmlFor="user" className="font-normal">
-                        admin - I want to book trips
+                      <RadioGroupItem value="admin" id="admin" />
+                      <Label htmlFor="admin" className="font-normal">
+                        admin - I want to manage trips
                       </Label>
                     </div>
                   </RadioGroup>
