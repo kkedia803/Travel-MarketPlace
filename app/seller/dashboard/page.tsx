@@ -158,11 +158,13 @@ export default function SellerDashboard() {
   const [totalRevenue, setTotalRevenue] = useState(0)
 
   useEffect(() => {
-    fetchUserGrowthData();
-    fetchPopularDestinationData();
-    fetchBookingsData();
-    fetchRevenueData();
-  }, []);
+    if (user) {
+      fetchUserGrowthData(user.id);
+      fetchPopularDestinationData(user.id);
+      fetchBookingsData(user.id);
+      fetchRevenueData(user.id);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!user) {
@@ -280,8 +282,6 @@ export default function SellerDashboard() {
 
     fetchData();
   }, [user, router]);
-
-
 
   const handleAddPackage = async () => {
     try {
@@ -505,7 +505,7 @@ export default function SellerDashboard() {
 
   const formSteps = ["Basic Info", "Details", "Policies", "Review"];
 
-  async function fetchRevenueData() {
+  async function fetchRevenueData(sellerId: string) {
     try {
       const months = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -513,24 +513,41 @@ export default function SellerDashboard() {
       ];
   
       const currentYear = new Date().getFullYear();
+      
+      // First, get all packages by this seller
+      const { data: sellerPackages, error: packagesError } = await supabase
+        .from("packages")
+        .select("id")
+        .eq("seller_id", sellerId);
+        
+      if (packagesError) throw new Error(`Error fetching seller packages: ${packagesError.message}`);
+      
+      if (!sellerPackages || sellerPackages.length === 0) {
+        console.log("No packages found for this seller");
+        setRevenueData(months.map(name => ({ name, revenue: 0 })));
+        setTotalRevenue(0);
+        return;
+      }
+      
+      const packageIds = sellerPackages.map(pkg => pkg.id);
   
-      // Fetch confirmed bookings
+      // Fetch confirmed bookings for this seller's packages
       const { data: bookingsData, error: revenueError } = await supabase
         .from("bookings")
         .select("package_id, travelers, created_at")
         .eq("status", "confirmed")
-        .gte("created_at", `${currentYear}-01-01`) // Filter for the current year
+        .in("package_id", packageIds)
+        .gte("created_at", `${currentYear}-01-01`)
         .lte("created_at", `${currentYear}-12-31`);
   
       if (revenueError) throw new Error(`Error fetching booking revenue data: ${revenueError.message}`);
   
       if (!bookingsData || bookingsData.length === 0) {
-        console.log("No revenue data found");
+        console.log("No revenue data found for this seller");
+        setRevenueData(months.map(name => ({ name, revenue: 0 })));
+        setTotalRevenue(0);
         return;
       }
-  
-      // Get unique package IDs
-      const packageIds = [...new Set(bookingsData.map(booking => booking.package_id))];
   
       // Fetch package prices
       const { data: packagePrices, error: pricesError } = await supabase
@@ -563,8 +580,8 @@ export default function SellerDashboard() {
       const totalRevenue = monthlyRevenue.reduce((sum, count) => sum + count, 0);
   
       setRevenueData(revenueChartData);
-      setTotalRevenue(totalRevenue)
-      console.log("Revenue Chart Data:", revenueChartData);
+      setTotalRevenue(totalRevenue);
+      console.log("Revenue Chart Data for seller:", revenueChartData);
   
     } catch (error) {
       console.error("Error fetching revenue data:", error);
@@ -572,23 +589,37 @@ export default function SellerDashboard() {
   }
   
 
-  async function fetchBookingsData() {
+  async function fetchBookingsData(sellerId: string) {
     try {
-      // Define months array
       const months = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
       ];
 
-      // Get the current date
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
+      const currentYear = new Date().getFullYear();
+      
+      // First, get all packages by this seller
+      const { data: sellerPackages, error: packagesError } = await supabase
+        .from("packages")
+        .select("id")
+        .eq("seller_id", sellerId);
+        
+      if (packagesError) throw new Error(`Error fetching seller packages: ${packagesError.message}`);
+      
+      if (!sellerPackages || sellerPackages.length === 0) {
+        console.log("No packages found for this seller");
+        setMonthlyBooking(months.map(name => ({ name, bookings: 0 })));
+        return;
+      }
+      
+      const packageIds = sellerPackages.map(pkg => pkg.id);
 
-      // Fetch user registration data grouped by month
+      // Fetch bookings for this seller's packages
       const { data, error } = await supabase
         .from('bookings')
         .select('created_at')
-        .gte('created_at', `${currentYear}-01-01`) // Filter for current year
+        .in('package_id', packageIds)
+        .gte('created_at', `${currentYear}-01-01`)
         .lte('created_at', `${currentYear}-12-31`);
 
       if (error) throw error;
@@ -596,11 +627,13 @@ export default function SellerDashboard() {
       // Process the data to group by month
       const monthlyData = Array(12).fill(0);
 
-      data.forEach(user => {
-        const userDate = new Date(user.created_at);
-        const month = userDate.getMonth(); // 0-11
-        monthlyData[month]++;
-      });
+      if (data && data.length > 0) {
+        data.forEach(booking => {
+          const bookingDate = new Date(booking.created_at);
+          const month = bookingDate.getMonth(); // 0-11
+          monthlyData[month]++;
+        });
+      }
 
       const bookingGrowth = months.map((month, index) => ({
         name: month,
@@ -608,70 +641,127 @@ export default function SellerDashboard() {
       }));
 
       setMonthlyBooking(bookingGrowth.map(({ name, users }) => ({ name, bookings: users })));
-      console.log('Booking Growth Data:', bookingGrowth);
+      console.log('Booking Growth Data for seller:', bookingGrowth);
     } catch (error) {
-      console.error('Error fetching user growth data:', error);
+      console.error('Error fetching booking data:', error);
     }
   }
 
-  async function fetchPopularDestinationData() {
+  async function fetchPopularDestinationData(sellerId: string) {
     try {
-      // Fetch distinct destinations and their count
-      const { data, error } = await supabase
+      // First, get all packages by this seller
+      const { data: sellerPackages, error: packagesError } = await supabase
+        .from("packages")
+        .select("id, destination")
+        .eq("seller_id", sellerId);
+        
+      if (packagesError) throw new Error(`Error fetching seller packages: ${packagesError.message}`);
+      
+      if (!sellerPackages || sellerPackages.length === 0) {
+        console.log("No packages found for this seller");
+        setDestinationData([]);
+        return;
+      }
+      
+      const packageIds = sellerPackages.map(pkg => pkg.id);
+      
+      // Create a map of package IDs to destinations
+      const destinationMap = new Map(sellerPackages.map(pkg => [pkg.id, pkg.destination]));
+
+      // Fetch bookings for this seller's packages
+      const { data: bookingsData, error } = await supabase
         .from('bookings')
-        .select('destination')
-        .order('destination', { ascending: true });
+        .select('package_id')
+        .in('package_id', packageIds);
 
       if (error) throw error;
 
+      if (!bookingsData || bookingsData.length === 0) {
+        // If no bookings, just show the destinations of the seller's packages
+        const destinations = [...new Set(sellerPackages.map(pkg => pkg.destination))];
+        setDestinationData(destinations.map(name => ({ name, value: 1 })));
+        return;
+      }
+
       // Process data to count occurrences of each destination
-      const destinationCount = data.reduce<Record<string, number>>((acc, { destination }) => {
-        acc[destination] = (acc[destination] || 0) + 1;
-        return acc;
-      }, {});
+      const destinationCount: Record<string, number> = {};
+      
+      bookingsData.forEach(booking => {
+        const destination = destinationMap.get(booking.package_id);
+        if (destination) {
+          destinationCount[destination] = (destinationCount[destination] || 0) + 1;
+        }
+      });
 
       // Convert to an array sorted by popularity
       const popularDestinations = Object.entries(destinationCount)
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value);
 
-      console.log('Popular Destinations:', popularDestinations);
+      console.log('Popular Destinations for seller:', popularDestinations);
       setDestinationData(popularDestinations);
     } catch (error) {
       console.error('Error fetching popular destination data:', error);
     }
   }
 
-
-  // Function to fetch user growth data from Supabase
-  async function fetchUserGrowthData() {
+  async function fetchUserGrowthData(sellerId: string) {
     try {
-      // Define months array
       const months = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
       ];
 
-      // Get the current date
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
+      const currentYear = new Date().getFullYear();
+      
+      // First, get all packages by this seller
+      const { data: sellerPackages, error: packagesError } = await supabase
+        .from("packages")
+        .select("id")
+        .eq("seller_id", sellerId);
+        
+      if (packagesError) throw new Error(`Error fetching seller packages: ${packagesError.message}`);
+      
+      if (!sellerPackages || sellerPackages.length === 0) {
+        console.log("No packages found for this seller");
+        setUserGrowthData(months.map(name => ({ name, users: 0 })));
+        setTotalUsers(0);
+        return;
+      }
+      
+      const packageIds = sellerPackages.map(pkg => pkg.id);
 
-      // Fetch user registration data grouped by month, excluding sellers and admins
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('created_at')
-        .eq('role', 'user') // Only include users with the role "user"
-        .gte('created_at', `${currentYear}-01-01`) // Filter for current year
+      // Fetch unique users who booked this seller's packages
+      const { data: bookingsData, error } = await supabase
+        .from('bookings')
+        .select('user_id, created_at')
+        .in('package_id', packageIds)
+        .gte('created_at', `${currentYear}-01-01`)
         .lte('created_at', `${currentYear}-12-31`);
 
       if (error) throw error;
 
-      // Process the data to group by month
-      const monthlyData = Array(12).fill(0);
+      if (!bookingsData || bookingsData.length === 0) {
+        setUserGrowthData(months.map(name => ({ name, users: 0 })));
+        setTotalUsers(0);
+        return;
+      }
 
-      data.forEach(user => {
-        const userDate = new Date(user.created_at);
-        const month = userDate.getMonth(); // 0-11
+      // Process the data to find first booking date for each user
+      const userFirstBooking: Record<string, Date> = {};
+      
+      bookingsData.forEach(booking => {
+        const bookingDate = new Date(booking.created_at);
+        if (!userFirstBooking[booking.user_id] || bookingDate < userFirstBooking[booking.user_id]) {
+          userFirstBooking[booking.user_id] = bookingDate;
+        }
+      });
+
+      // Count new users per month
+      const monthlyData = Array(12).fill(0);
+      
+      Object.values(userFirstBooking).forEach(date => {
+        const month = date.getMonth(); // 0-11
         monthlyData[month]++;
       });
 
@@ -680,29 +770,29 @@ export default function SellerDashboard() {
         users: monthlyData[index]
       }));
 
-      const totalUsers = monthlyData.reduce((sum, count) => sum + count, 0);
+      const totalUsers = Object.keys(userFirstBooking).length;
 
       setUserGrowthData(userGrowth);
       setTotalUsers(totalUsers);
+      console.log('Customer Growth Data for seller:', userGrowth);
     } catch (error) {
-      console.error('Error fetching user growth data:', error);
+      console.error('Error fetching customer growth data:', error);
     }
   }
 
-  // Color palette for charts
-    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d']
-  
-    const ErrorDisplay = ({ message }: { message: string }) => (
-      <Card className="border-red-200 bg-red-50 dark:bg-red-900/10">
-        <CardContent className="p-6 flex items-center gap-4">
-          <AlertCircle className="h-6 w-6 text-red-500" />
-          <div>
-            <h3 className="font-medium">Error loading data</h3>
-            <p className="text-sm text-muted-foreground">{message}</p>
-          </div>
-        </CardContent>
-      </Card>
-    )
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d']
+
+  const ErrorDisplay = ({ message }: { message: string }) => (
+    <Card className="border-red-200 bg-red-50 dark:bg-red-900/10">
+      <CardContent className="p-6 flex items-center gap-4">
+        <AlertCircle className="h-6 w-6 text-red-500" />
+        <div>
+          <h3 className="font-medium">Error loading data</h3>
+          <p className="text-sm text-muted-foreground">{message}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
 
   return (
     <div className="container py-8">
@@ -876,8 +966,7 @@ export default function SellerDashboard() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="duration">
-                      Duration (Days){" "}
-                      <span className="text-destructive">*</span>
+                      Duration (Days){" "}<span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="duration"
@@ -1470,148 +1559,154 @@ export default function SellerDashboard() {
         </TabsContent>
 
         <TabsContent value="analytics">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Monthly Bookings Chart */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Monthly Bookings</CardTitle>
-                        <CardDescription>Booking trends over the past 6 months</CardDescription>
-                      </CardHeader>
-                      <CardContent className="h-80">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart
-                            data={monthlyBooking}
-                            margin={{
-                              top: 20,
-                              right: 30,
-                              left: 20,
-                              bottom: 5,
-                            }}
-                          >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip
-                              formatter={(value) => [`${value} bookings`, 'Bookings']}
-                              labelFormatter={(label) => `Month: ${label}`}
-                            />
-                            <Legend />
-                            <Bar dataKey="bookings" fill="#8884d8" name="Bookings" radius={[4, 4, 0, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </CardContent>
-                    </Card>
-        
-                    {/* Popular Destinations Chart */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Popular Destinations</CardTitle>
-                        <CardDescription>Most booked destinations</CardDescription>
-                      </CardHeader>
-                      <CardContent className="h-80">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={destinationData}
-                              cx="50%"
-                              cy="50%"
-                              labelLine={true}
-                              outerRadius={80}
-                              fill="#8884d8"
-                              dataKey="value"
-                              nameKey="name"
-                              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                            >
-                              {destinationData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                              ))}
-                            </Pie>
-                            <Tooltip
-                              formatter={(value) => [`${value}%`, 'Percentage']}
-                            />
-                            <Legend layout="vertical" verticalAlign="middle" align="right" />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </CardContent>
-                    </Card>
-        
-                    {/* Revenue Overview Chart */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Revenue Overview</CardTitle>
-                        <CardDescription>Monthly revenue breakdown</CardDescription>
-                      </CardHeader>
-                      <CardContent className="h-80">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart
-                            data={revenueData}
-                            margin={{
-                              top: 10,
-                              right: 30,
-                              left: 0,
-                              bottom: 0,
-                            }}
-                          >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip
-                              formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']}
-                              labelFormatter={(label) => `Month: ${label}`}
-                            />
-                            <Legend />
-                            <Area
-                              type="monotone"
-                              dataKey="revenue"
-                              stroke="#82ca9d"
-                              fill="#82ca9d"
-                              fillOpacity={0.3}
-                              name="Revenue"
-                            />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </CardContent>
-                    </Card>
-        
-                    {/* User Growth Chart */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>User Growth</CardTitle>
-                        <CardDescription>New user registrations over time</CardDescription>
-                      </CardHeader>
-                      <CardContent className="h-80">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart
-                            data={userGrowthData}
-                            margin={{
-                              top: 20,
-                              right: 30,
-                              left: 20,
-                              bottom: 5,
-                            }}
-                          >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip
-                              formatter={(value) => [`${value} users`, 'New Users']}
-                              labelFormatter={(label) => `Month: ${label}`}
-                            />
-                            <Legend />
-                            <Line
-                              type="monotone"
-                              dataKey="users"
-                              stroke="#0088FE"
-                              activeDot={{ r: 8 }}
-                              name="New Users"
-                              strokeWidth={2}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </CardContent>
-                    </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Monthly Bookings Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Monthly Bookings</CardTitle>
+                <CardDescription>Booking trends for your packages over the past year</CardDescription>
+              </CardHeader>
+              <CardContent className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={monthlyBooking}
+                    margin={{
+                      top: 20,
+                      right: 30,
+                      left: 20,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip
+                      formatter={(value) => [`${value} bookings`, 'Bookings']}
+                      labelFormatter={(label) => `Month: ${label}`}
+                    />
+                    <Legend />
+                    <Bar dataKey="bookings" fill="#8884d8" name="Bookings" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Popular Destinations Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Popular Destinations</CardTitle>
+                <CardDescription>Most booked destinations from your packages</CardDescription>
+              </CardHeader>
+              <CardContent className="h-80">
+                {destinationData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={destinationData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={true}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        nameKey="name"
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {destinationData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(value) => [`${value} bookings`, 'Bookings']}
+                      />
+                      <Legend layout="vertical" verticalAlign="middle" align="right" />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-muted-foreground">No destination data available</p>
                   </div>
-                </TabsContent>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Revenue Overview Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Revenue Overview</CardTitle>
+                <CardDescription>Monthly revenue from your packages</CardDescription>
+              </CardHeader>
+              <CardContent className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={revenueData}
+                    margin={{
+                      top: 10,
+                      right: 30,
+                      left: 0,
+                      bottom: 0,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip
+                      formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']}
+                      labelFormatter={(label) => `Month: ${label}`}
+                    />
+                    <Legend />
+                    <Area
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="#82ca9d"
+                      fill="#82ca9d"
+                      fillOpacity={0.3}
+                      name="Revenue"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Customer Growth Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Customer Growth</CardTitle>
+                <CardDescription>New customers booking your packages over time</CardDescription>
+              </CardHeader>
+              <CardContent className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={userGrowthData}
+                    margin={{
+                      top: 20,
+                      right: 30,
+                      left: 20,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip
+                      formatter={(value) => [`${value} customers`, 'New Customers']}
+                      labelFormatter={(label) => `Month: ${label}`}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="users"
+                      stroke="#0088FE"
+                      activeDot={{ r: 8 }}
+                      name="New Customers"
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
