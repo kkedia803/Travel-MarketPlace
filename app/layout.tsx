@@ -25,7 +25,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <AuthProvider>
-            <div className="flex min-h-screen flex-col">
+            <div className="flex min-h-screen flex-col poppins-black-italic">
               <Header />
               <main className="flex-1">{children}</main>
               <Toaster />
