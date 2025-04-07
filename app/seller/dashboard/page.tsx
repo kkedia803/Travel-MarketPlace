@@ -60,8 +60,8 @@ interface TravelPackage {
   max_people: number;
   boarding_point: string;
   discount: number;
-  cancellation_policy: string;
-  itinerary: string[];
+  cancellation_policy: string | string[];
+  itinerary: { day: number; title: string; description: string }[];
   inclusion: string[];
   exclusion: string[];
   final_price: number;
@@ -104,8 +104,8 @@ export default function SellerDashboard() {
     max_people: number;
     boarding_point: string;
     discount: number;
-    cancellation_policy: string;
-    itinerary: string[];
+    cancellation_policy: string | string[];
+    itinerary: { day: number; title: string; description: string }[];
     inclusion: string[];
     exclusion: string[];
   }>({
@@ -120,11 +120,70 @@ export default function SellerDashboard() {
     boarding_point: "",
     discount: 0,
     cancellation_policy: "",
-    itinerary: [] as string[],
+    itinerary: [{ day: 1, title: "", description: "" }],
     inclusion: [] as string[],
     exclusion: [] as string[],
   });
 
+  const handleAddItineraryLine = () => {
+    setNewPackage((prev) => ({
+      ...prev,
+      itinerary: [...prev.itinerary, { day: prev.itinerary.length + 1, title: "", description: "" }],
+    }));
+  };
+
+  const handleItineraryChange = (index: number, field: 'title' | 'description', value: string) => {
+    setNewPackage((prev) => {
+      const updatedItinerary = [...prev.itinerary];
+      updatedItinerary[index][field] = value;
+      return { ...prev, itinerary: updatedItinerary };
+    });
+  };
+
+  const handleAddInclusionItem = () => {
+    setNewPackage((prev) => ({
+      ...prev,
+      inclusion: [...prev.inclusion, ""],
+    }));
+  };
+
+  const handleInclusionChange = (index: number, value: string) => {
+    setNewPackage((prev) => {
+      const updatedInclusion = [...prev.inclusion];
+      updatedInclusion[index] = value;
+      return { ...prev, inclusion: updatedInclusion };
+    });
+  };
+
+  const handleAddExclusionItem = () => {
+    setNewPackage((prev) => ({
+      ...prev,
+      exclusion: [...prev.exclusion, ""],
+    }));
+  };
+
+  const handleExclusionChange = (index: number, value: string) => {
+    setNewPackage((prev) => {
+      const updatedExclusion = [...prev.exclusion];
+      updatedExclusion[index] = value;
+      return { ...prev, exclusion: updatedExclusion };
+    });
+  };
+
+  const handleAddCancellationPolicyItem = () => {
+    setNewPackage((prev) => ({
+      ...prev,
+      cancellation_policy: [...(Array.isArray(prev.cancellation_policy) ? prev.cancellation_policy : []), ""],
+    }));
+  };
+
+  const handleCancellationPolicyChange = (index: number, value: string) => {
+    setNewPackage((prev) => {
+      const updatedPolicy = [...(Array.isArray(prev.cancellation_policy) ? prev.cancellation_policy : [])];
+      updatedPolicy[index] = value;
+      return { ...prev, cancellation_policy: updatedPolicy };
+    });
+  };
 
   useEffect(() => {
     if (!user) {
@@ -243,12 +302,10 @@ export default function SellerDashboard() {
     fetchData();
   }, [user, router]);
 
-
-
   const handleAddPackage = async () => {
     try {
-      console.log(newPackage)
-      console.log(newPackage.images)
+      console.log(newPackage);
+      console.log(newPackage.images);
       const { data, error } = await supabase
         .from("packages")
         .insert({
@@ -279,7 +336,7 @@ export default function SellerDashboard() {
         boarding_point: "",
         discount: 0,
         cancellation_policy: "",
-        itinerary: [] as string[],
+        itinerary: [{ day: 1, title: "", description: "" }],
         inclusion: [] as string[],
         exclusion: [] as string[],
       });
@@ -327,7 +384,19 @@ export default function SellerDashboard() {
     const pkgToEdit = packages.find((pkg) => pkg.id === pkgId);
     if (pkgToEdit) {
       const { final_price, ...editablePackage } = pkgToEdit; // Exclude final_price
-      setNewPackage(editablePackage);
+      setNewPackage({
+        ...editablePackage,
+        itinerary: Array.isArray(editablePackage.itinerary)
+          ? editablePackage.itinerary.map((item, index) => ({
+            day: index + 1,
+            title: item.title || "",
+            description: item.description || "",
+          }))
+          : [{ day: 1, title: "", description: "" }],
+        cancellation_policy: Array.isArray(editablePackage.cancellation_policy)
+          ? editablePackage.cancellation_policy
+          : [editablePackage.cancellation_policy || ""],
+      });
       setFormStep(0);
       setIsAddPackageOpen(true);
     }
@@ -367,7 +436,7 @@ export default function SellerDashboard() {
         boarding_point: "",
         discount: 0,
         cancellation_policy: "",
-        itinerary: [] as string[],
+        itinerary: [{ day: 1, title: "", description: "" }],
         inclusion: [] as string[],
         exclusion: [] as string[],
       });
@@ -398,7 +467,7 @@ export default function SellerDashboard() {
         description: "The package has been successfully deleted.",
       });
     }
-  }
+  };
 
   const handleBookingCancelled = async (bookingId: string) => {
     try {
@@ -409,11 +478,6 @@ export default function SellerDashboard() {
 
       if (error) throw error;
 
-      // toast({
-      //   title: "Booking Rejected",
-      //   description: "The booking has been successfully confirmed.",
-      // });
-
       setBookings((prev) =>
         prev.map((booking) =>
           booking.id === bookingId ? { ...booking, status: "cancelled" } : booking
@@ -421,11 +485,6 @@ export default function SellerDashboard() {
       );
     } catch (error) {
       console.error("Error confirming booking:", error);
-      // toast({
-      //   title: "Failed to Confirm Booking",
-      //   description: "There was an error confirming the booking. Please try again.",
-      //   variant: "destructive",
-      // });
     }
   };
 
@@ -492,11 +551,11 @@ export default function SellerDashboard() {
                 boarding_point: "",
                 discount: 0,
                 cancellation_policy: "",
-                itinerary: [] as string[],
+                itinerary: [{ day: 1, title: "", description: "" }],
                 inclusion: [] as string[],
                 exclusion: [] as string[],
               });
-              setFormStep(0); // Reset formStep to 0
+              setFormStep(0);
             }}
           >
             <Button className="gap-2">
@@ -754,71 +813,94 @@ export default function SellerDashboard() {
 
                 <div className="space-y-2">
                   <Label htmlFor="itinerary">Itinerary</Label>
-                  <Textarea
-                    id="itinerary"
-                    value={Array.isArray(newPackage.itinerary) ? newPackage.itinerary.join("\n") : newPackage.itinerary}
-                    onChange={(e) =>
-                      setNewPackage({
-                        ...newPackage,
-                        itinerary: e.target.value.split("\n").filter(Boolean),
-                      })
-                    }
-                    placeholder="Day 1: Arrival and welcome dinner
-                    Day 2: City tour and local experiences
-                    ..."
-                    rows={6}
-                  />
+                  {newPackage.itinerary.map((item, index) => (
+                    <div key={index} className="flex flex-col gap-2 mb-4 p-3 border rounded-md">
+                      <p className="font-medium text-sm">Day {item.day}</p>
+                      <div className="space-y-2">
+                        <Label htmlFor={`itinerary-title-${index}`} className="text-sm">Title</Label>
+                        <Input
+                          id={`itinerary-title-${index}`}
+                          value={item.title}
+                          onChange={(e) => handleItineraryChange(index, 'title', e.target.value)}
+                          placeholder={`Day ${item.day}: Activity title`}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`itinerary-desc-${index}`} className="text-sm">Description</Label>
+                        <Textarea
+                          id={`itinerary-desc-${index}`}
+                          value={item.description}
+                          onChange={(e) => handleItineraryChange(index, 'description', e.target.value)}
+                          placeholder="Describe the activities and experiences for this day"
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={handleAddItineraryLine}
+                    className="mt-2"
+                  >
+                    Add Itinerary Day
+                  </Button>
                   <p className="text-xs text-muted-foreground">
-                    Provide a day-by-day breakdown of activities and experiences
-                    included in your package.
+                    Provide a day-by-day breakdown of activities and experiences included in your package.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="inclusion">inclusion</Label>
-                    <Textarea
-                      id="inclusion"
-                      value={Array.isArray(newPackage.inclusion) ? newPackage.inclusion.join("\n") : newPackage.inclusion}
-                      onChange={(e) =>
-                        setNewPackage({
-                          ...newPackage,
-                          inclusion: e.target.value.split("\n").filter(Boolean),
-                        })
-                      }
-                      placeholder="- Airport transfers
-                      - Accommodation
-                      - Daily breakfast
-                      ..."
-                      rows={5}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      List all services and amenities included in the package
-                      price.
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="exclusion">exclusion</Label>
-                    <Textarea
-                      id="exclusion"
-                      value={Array.isArray(newPackage.exclusion) ? newPackage.exclusion.join("\n") : newPackage.exclusion}
-                      onChange={(e) =>
-                        setNewPackage({
-                          ...newPackage,
-                          exclusion: e.target.value.split("\n").filter(Boolean),
-                        })
-                      }
-                      placeholder="- International flights
-                      - Travel insurance
-                      - Personal expenses
-                      ..."
-                      rows={5}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Clearly specify what is not included in the package price.
-                    </p>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="inclusion">Inclusion</Label>
+                  {newPackage.inclusion.map((item, index) => (
+                    <div key={index} className="flex items-center gap-4 mb-2">
+                      <Input
+                        id={`inclusion-${index}`}
+                        value={item}
+                        onChange={(e) => handleInclusionChange(index, e.target.value)}
+                        placeholder={`Inclusion item ${index + 1}`}
+                      />
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={handleAddInclusionItem}
+                    className="mt-2"
+                  >
+                    Add Inclusion Item
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    List all services and amenities included in the package price.
+                  </p>
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="exclusion">Exclusion</Label>
+                  {newPackage.exclusion.map((item, index) => (
+                    <div key={index} className="flex items-center gap-4 mb-2">
+                      <Input
+                        id={`exclusion-${index}`}
+                        value={item}
+                        onChange={(e) => handleExclusionChange(index, e.target.value)}
+                        placeholder={`Exclusion item ${index + 1}`}
+                      />
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={handleAddExclusionItem}
+                    className="mt-2"
+                  >
+                    Add Exclusion Item
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Clearly specify what is not included in the package price.
+                  </p>
+                </div>
+
+
               </div>
             )}
 
@@ -873,25 +955,28 @@ export default function SellerDashboard() {
                   </div>
                 </div>
 
+                
                 <div className="space-y-2">
-                  <Label htmlFor="cancellation_policy">
-                    Cancellation Policy
-                  </Label>
-                  <Textarea
-                    id="cancellation_policy"
-                    value={newPackage.cancellation_policy}
-                    onChange={(e) =>
-                      setNewPackage({
-                        ...newPackage,
-                        cancellation_policy: e.target.value,
-                      })
-                    }
-                    placeholder="e.g. 
-                    - Full refund if cancelled 30+ days before departure
-                    - 50% refund if cancelled 15-29 days before departure
-                    - No refund if cancelled less than 15 days before departure"
-                    rows={5}
-                  />
+                  <Label htmlFor="cancellation_policy">Cancellation Policy</Label>
+                  {Array.isArray(newPackage.cancellation_policy) &&
+                    newPackage.cancellation_policy.map((item, index) => (
+                      <div key={index} className="flex items-center gap-4 mb-2">
+                        <Input
+                          id={`cancellation-policy-${index}`}
+                          value={item}
+                          onChange={(e) => handleCancellationPolicyChange(index, e.target.value)}
+                          placeholder={`Policy item ${index + 1}`}
+                        />
+                      </div>
+                    ))}
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={handleAddCancellationPolicyItem}
+                    className="mt-2"
+                  >
+                    Add Policy Item
+                  </Button>
                   <p className="text-xs text-muted-foreground">
                     Clearly outline your cancellation and refund policies.
                   </p>

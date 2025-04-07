@@ -23,6 +23,11 @@ interface Package {
   images: string[];
   seller_id: string;
   is_approved: boolean;
+  discount?: number;
+  itinerary?: Array<{ day: number; title: string, description: string; activity: string }>;
+  inclusion?: string[];
+  exclusion?: string[];
+  cancellation_policy?: string[];
 }
 
 interface PackageDialogProps {
@@ -55,7 +60,7 @@ export default function PackageDetailsPage() {
           .single();
 
         if (error) throw error;
-
+        console.log(data)
         setPkg(data);
       } catch (error) {
         console.error("Error fetching package:", error);
@@ -212,73 +217,11 @@ export default function PackageDetailsPage() {
     );
   }
 
-  // Sample itinerary data
-  const itinerary = [
-    {
-      day: 1,
-      title: "Arrival & Welcome Dinner",
-      description:
-        "Airport pickup and transfer to your hotel. Evening welcome dinner with traditional performances.",
-    },
-    {
-      day: 2,
-      title: "Ubud Cultural Tour",
-      description:
-        "Visit the Sacred Monkey Forest, Ubud Palace, and local art markets. Lunch at a traditional Balinese restaurant.",
-    },
-    {
-      day: 3,
-      title: "Beaches & Water Activities",
-      description:
-        "Full day at Nusa Dua beach with optional water sports activities. Seafood dinner by the beach.",
-    },
-    {
-      day: 4,
-      title: "Temple Exploration",
-      description:
-        "Visit Tanah Lot and Uluwatu temples. Watch the famous Kecak fire dance at sunset.",
-    },
-    {
-      day: 5,
-      title: "Mount Batur Sunrise Trek",
-      description:
-        "Early morning trek to Mount Batur to witness the spectacular sunrise. Afternoon at leisure.",
-    },
-    {
-      day: 6,
-      title: "Spa & Relaxation Day",
-      description:
-        "Full day of pampering with traditional Balinese spa treatments. Optional yoga session.",
-    },
-    {
-      day: 7,
-      title: "Departure",
-      description:
-        "Free time for last-minute shopping. Airport transfer for your departure flight.",
-    },
-  ];
-
-  // Sample inclusions and exclusions
-  const inclusions = [
-    "Accommodation in 4-star hotels",
-    "Daily breakfast and selected meals",
-    "Airport transfers",
-    "All transportation within Bali",
-    "English-speaking guide",
-    "Entrance fees to attractions",
-    "Welcome dinner",
-    "Balinese spa treatment",
-  ];
-
-  const exclusions = [
-    "International flights",
-    "Travel insurance",
-    "Personal expenses",
-    "Optional activities",
-    "Meals not mentioned",
-    "Tips and gratuities",
-  ];
-
+  const parsed = JSON.parse(pkg.itinerary);
+  const itinerary = Array.isArray(parsed) ? parsed : [];
+  const inclusions = pkg.inclusion;
+  const exclusion = pkg.exclusion;
+  const cancellationPolicy = pkg.cancellation_policy;
   return (
     <div className="container py-8">
       {/* Image Gallery */}
@@ -380,7 +323,7 @@ export default function PackageDetailsPage() {
                     <Check className="mr-2 h-5 w-5 text-green-500" /> Inclusions
                   </h3>
                   <ul className="space-y-2">
-                    {inclusions.map((item, index) => (
+                    {inclusions?.map((item, index) => (
                       <li key={index} className="flex items-start">
                         <Check className="mr-2 h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
                         <span>{item}</span>
@@ -393,7 +336,7 @@ export default function PackageDetailsPage() {
                     <X className="mr-2 h-5 w-5 text-red-500" /> Exclusions
                   </h3>
                   <ul className="space-y-2">
-                    {exclusions.map((item, index) => (
+                    {exclusion?.map((item, index) => (
                       <li key={index} className="flex items-start">
                         <X className="mr-2 h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
                         <span>{item}</span>
@@ -513,15 +456,47 @@ export default function PackageDetailsPage() {
                 </div>
 
                 <div className="bg-accent rounded-lg p-4">
+                  {/* Original Price with Discount */}
                   <div className="flex justify-between mb-2">
-                    <span>Package Price</span>
+                    <span>Original Price</span>
+                    <div className="flex items-center">
+                      <span className="line-through text-muted-foreground mr-2">
+                        ₹{pkg.price} x {travelers}
+                      </span>
+                      <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
+                        {pkg.discount}% OFF
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Discounted Price */}
+                  <div className="flex justify-between mb-2">
+                    <span>Discounted Price</span>
                     <span>
-                      ₹{pkg.price} x {travelers}
+                      ₹{Math.round(pkg.price * (1 - (pkg.discount ?? 0) / 100))} x {travelers}
                     </span>
                   </div>
+
+                  <Separator className="my-2" />
+
+                  {/* Final Total */}
                   <div className="flex justify-between font-medium text-lg">
                     <span>Total</span>
-                    <span>₹{pkg.price * travelers}</span>
+                    <div className="flex flex-col items-end">
+                      <span className="line-through text-sm text-muted-foreground">
+                        ₹{pkg.price * travelers}
+                      </span>
+                      <span className="text-green-600">
+                        ₹{Math.round(pkg.price * (1 - (pkg.discount ?? 0) / 100) * travelers)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Savings */}
+                  <div className="flex justify-end mt-1">
+                    <span className="text-xs text-green-600">
+                      You save: ₹{Math.round(pkg.price * travelers) - Math.round(pkg.price * (1 - (pkg.discount ?? 0) / 100) * travelers)}
+                    </span>
                   </div>
                 </div>
 
