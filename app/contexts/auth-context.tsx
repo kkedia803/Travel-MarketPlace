@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, role: string) => {
-    const { error, data } = await supabase.auth.signUp({ email, password })
+    const { error, data } = await supabase.auth.signUp({ email, password, options: { data: { role } } })
 
     if (!error && data.user) {
       await supabase.from("profiles").insert({
@@ -107,6 +107,7 @@ async function getUserDetails(): Promise<UserDetails | null> {
         role: data.role || "user",
         name: data.name,
         avatar_url: data.avatar_url,
+        length: 0, // Add a default value for the length property
       }
     : null
 }
