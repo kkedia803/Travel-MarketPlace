@@ -4,7 +4,7 @@ import { useScroll, useTransform, motion } from 'framer-motion';
 import { useRef } from 'react';
 
 export const TextReveal = () => {
-    const container = useRef();
+    const container = useRef<HTMLDivElement | null>(null);
     const { scrollYProgress } = useScroll({
         target: container,
         offset: ["start end", 'end start']
@@ -22,7 +22,6 @@ export const TextReveal = () => {
                             initial={{ opacity: 0, y: -50 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.01 * i, ease: [0.33, 1, 0.68, 2] }}
-                            threshold={0.9999999}
                             viewport={{ once: true }}
 
                             className=''
