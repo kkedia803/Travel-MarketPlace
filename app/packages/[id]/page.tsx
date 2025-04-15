@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/app/contexts/auth-context";
 import { supabase } from "@/app/lib/supabase";
-import { Clock, MapPin, Star, Check, X, Info } from "lucide-react";
+import { Clock, MapPin, Star, Check, X, Info, Package } from "lucide-react";
 
 interface Package {
   id: string;
@@ -47,6 +47,11 @@ export default function PackageDetailsPage() {
   const [travelers, setTravelers] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [userType, setUserType] = useState<string | null>(null) // Track user type
+
+  const [rating, setRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+
+
 
   useEffect(() => {
     const fetchPackage = async () => {
@@ -182,6 +187,49 @@ export default function PackageDetailsPage() {
       });
     }
   };
+  
+  const handleReviewSubmit = async (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (rating === 0 || reviewText.trim() === "") {
+      alert("Please provide both a rating and a review!");
+      return;
+    }
+  
+    try {
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          rating,
+          comment: reviewText,
+          package_id:pkg?.id ,  // Make sure you pass the correct package ID here
+        }),
+      });
+  
+      const result = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to submit review");
+      }
+  
+      alert("Review submitted successfully!");
+      setRating(0);
+      setReviewText("");
+  
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("Something went wrong while submitting the review.");
+      }
+    }
+  };
+  
 
   if (loading) {
     return (
@@ -363,6 +411,7 @@ export default function PackageDetailsPage() {
 
                 {/* Sample reviews */}
                 <div className="space-y-6">
+                  {/* Existing hardcoded reviews */}
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -375,21 +424,17 @@ export default function PackageDetailsPage() {
                             {[1, 2, 3, 4, 5].map((star) => (
                               <Star
                                 key={star}
-                                className={`h-3 w-3 ${star <= 5
-                                  ? "fill-primary text-primary"
-                                  : "text-muted"
-                                  }`}
+                                className={`h-3 w-3 ${star <= 5 ? "fill-primary text-primary" : "text-muted"}`}
                               />
                             ))}
                           </div>
-                          <span className="text-xs text-muted-foreground ml-2">
-                            2 months ago
-                          </span>
+                          <span className="text-xs text-muted-foreground ml-2">2 months ago</span>
                         </div>
                       </div>
                     </div>
                     <p className="text-sm">
-                      Amazing experience! The tour was well organized and our guide was knowledgeable and friendly. Highly recommend this package.
+                      Amazing experience! The tour was well organized and our guide was knowledgeable and friendly.
+                      Highly recommend this package.
                     </p>
                   </div>
 
@@ -405,22 +450,43 @@ export default function PackageDetailsPage() {
                             {[1, 2, 3, 4, 5].map((star) => (
                               <Star
                                 key={star}
-                                className={`h-3 w-3 ${star <= 4
-                                  ? "fill-primary text-primary"
-                                  : "text-muted"
-                                  }`}
+                                className={`h-3 w-3 ${star <= 4 ? "fill-primary text-primary" : "text-muted"}`}
                               />
                             ))}
                           </div>
-                          <span className="text-xs text-muted-foreground ml-2">
-                            3 months ago
-                          </span>
+                          <span className="text-xs text-muted-foreground ml-2">3 months ago</span>
                         </div>
                       </div>
                     </div>
                     <p className="text-sm">
-                      Great value for money. The accommodations were excellent and the itinerary was perfect. Would book again!
+                      Great value for money. The accommodations were excellent and the itinerary was perfect.
+                      Would book again!
                     </p>
+                  </div>
+
+                  {/* Review submission form */}
+                  <div className="border-t pt-4">
+                    <h3 className="font-semibold text-lg mb-2">Write a Review</h3>
+                    <form onSubmit={handleReviewSubmit} className="space-y-3">
+                      <div className="flex items-center">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            onClick={() => setRating(star)}
+                            className={`h-6 w-6 cursor-pointer transition ${star <= rating ? "fill-primary text-primary" : "text-muted-foreground"
+                              }`}
+                          />
+                        ))}
+                      </div>
+                      <textarea
+                        value={reviewText}
+                        onChange={(e) => setReviewText(e.target.value)}
+                        placeholder="Share your experience..."
+                        className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      // rows="3"
+                      />
+                      <Button type="submit">Submit Review</Button>
+                    </form>
                   </div>
                 </div>
               </div>
