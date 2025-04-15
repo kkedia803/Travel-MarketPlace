@@ -50,7 +50,6 @@ import {
   DollarSign,
   MapPin,
 } from "lucide-react";
-
 import {
   AreaChart,
   Area,
@@ -67,7 +66,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer
-} from "recharts"
+} from "recharts";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 interface TravelPackage {
   id: string;
@@ -84,10 +84,10 @@ interface TravelPackage {
   max_people: number;
   boarding_point: string;
   discount: number;
-  cancellation_policy: string | string[];
-  itinerary: { day: number; title: string; description: string }[];
-  inclusion: string[];
-  exclusion: string[];
+  cancellation_policy: string | string[],
+  itinerary: { day: number; title: string; description: string }[],
+  inclusion: string[],
+  exclusion: string[],
   final_price: number;
 }
 
@@ -124,7 +124,7 @@ export default function SellerDashboard() {
     price: number;
     duration: number;
     category: string;
-    images: string[];
+    images: string[],
     max_people: number;
     boarding_point: string;
     discount: number;
@@ -139,7 +139,7 @@ export default function SellerDashboard() {
     price: 0,
     duration: 1,
     category: "",
-    images: ["/placeholder.svg?height=400&width=600"],
+    images: [],
     max_people: 1,
     boarding_point: "",
     discount: 0,
@@ -149,13 +149,13 @@ export default function SellerDashboard() {
     exclusion: [] as string[],
   });
 
-  const [monthlyData, setMonthlyData] = useState<{ name: string; value: number }[]>([])
-  const [monthlyBooking, setMonthlyBooking] = useState<{ name: string; bookings: number }[]>([])
-  const [destinationData, setDestinationData] = useState<{ name: string; value: number }[]>([])
-  const [userGrowthData, setUserGrowthData] = useState<{ name: string; users: number }[]>([])
-  const [revenueData, setRevenueData] = useState<{ name: string; revenue: number }[]>([])
-  const [totalUsers, setTotalUsers] = useState(0)
-  const [totalRevenue, setTotalRevenue] = useState(0)
+  const [monthlyData, setMonthlyData] = useState<{ name: string; value: number }[]>([]);
+  const [monthlyBooking, setMonthlyBooking] = useState<{ name: string; bookings: number }[]>([]);
+  const [destinationData, setDestinationData] = useState<{ name: string; value: number }[]>([]);
+  const [userGrowthData, setUserGrowthData] = useState<{ name: string; users: number }[]>([]);
+  const [revenueData, setRevenueData] = useState<{ name: string; revenue: number }[]>([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -241,7 +241,6 @@ export default function SellerDashboard() {
       setLoading(true);
 
       try {
-        // Fetch packages
         const { data: packagesData, error: packagesError } = await supabase
           .from("packages")
           .select("*")
@@ -250,7 +249,6 @@ export default function SellerDashboard() {
 
         if (packagesError) throw packagesError;
 
-        // Fetch bookings
         const { data: bookingsData, error: bookingsError } = await supabase
           .from("bookings")
           .select(
@@ -268,7 +266,6 @@ export default function SellerDashboard() {
         setBookings(bookingsData || []);
       } catch (error) {
         console.error("Error fetching data:", error);
-        // For demo purposes, let's add mock data
         const mockPackages = [
           {
             id: "1",
@@ -279,7 +276,7 @@ export default function SellerDashboard() {
             price: 1299,
             duration: 7,
             category: "Beach Getaways",
-            images: ["/placeholder.svg?height=400&width=600"],
+            images: ["/placeholder.svg?height=400&width=600"] as string[],
             seller_id: user.id,
             is_approved: true,
             created_at: "2023-04-10T08:30:00Z",
@@ -424,7 +421,7 @@ export default function SellerDashboard() {
   const handlePkgEdit = (pkgId: string) => {
     const pkgToEdit = packages.find((pkg) => pkg.id === pkgId);
     if (pkgToEdit) {
-      const { final_price, ...editablePackage } = pkgToEdit; // Exclude final_price
+      const { final_price, ...editablePackage } = pkgToEdit;
       setNewPackage({
         ...editablePackage,
         itinerary: Array.isArray(editablePackage.itinerary)
@@ -576,7 +573,6 @@ export default function SellerDashboard() {
   
       const currentYear = new Date().getFullYear();
       
-      // First, get all packages by this seller
       const { data: sellerPackages, error: packagesError } = await supabase
         .from("packages")
         .select("id")
@@ -593,7 +589,6 @@ export default function SellerDashboard() {
       
       const packageIds = sellerPackages.map(pkg => pkg.id);
   
-      // Fetch confirmed bookings for this seller's packages
       const { data: bookingsData, error: revenueError } = await supabase
         .from("bookings")
         .select("package_id, travelers, created_at")
@@ -611,7 +606,6 @@ export default function SellerDashboard() {
         return;
       }
   
-      // Fetch package prices
       const { data: packagePrices, error: pricesError } = await supabase
         .from("packages")
         .select("id, price")
@@ -619,21 +613,17 @@ export default function SellerDashboard() {
   
       if (pricesError) throw new Error(`Error fetching package prices: ${pricesError.message}`);
   
-      // Create a price map for quick lookup
       const priceMap = new Map(packagePrices.map(pkg => [pkg.id, pkg.price]));
   
-      // Initialize an array to store revenue for each month
       const monthlyRevenue = Array(12).fill(0);
   
-      // Calculate revenue per month
       bookingsData.forEach(booking => {
         const bookingDate = new Date(booking.created_at);
-        const month = bookingDate.getMonth(); // 0-11
+        const month = bookingDate.getMonth();
         const price = priceMap.get(booking.package_id) || 0;
         monthlyRevenue[month] += price * booking.travelers;
       });
   
-      // Format data for charts
       const revenueChartData = months.map((month, index) => ({
         name: month,
         revenue: monthlyRevenue[index]
@@ -660,7 +650,6 @@ export default function SellerDashboard() {
 
       const currentYear = new Date().getFullYear();
       
-      // First, get all packages by this seller
       const { data: sellerPackages, error: packagesError } = await supabase
         .from("packages")
         .select("id")
@@ -676,7 +665,6 @@ export default function SellerDashboard() {
       
       const packageIds = sellerPackages.map(pkg => pkg.id);
 
-      // Fetch bookings for this seller's packages
       const { data, error } = await supabase
         .from('bookings')
         .select('created_at')
@@ -686,13 +674,12 @@ export default function SellerDashboard() {
 
       if (error) throw error;
 
-      // Process the data to group by month
       const monthlyData = Array(12).fill(0);
 
       if (data && data.length > 0) {
         data.forEach(booking => {
           const bookingDate = new Date(booking.created_at);
-          const month = bookingDate.getMonth(); // 0-11
+          const month = bookingDate.getMonth();
           monthlyData[month]++;
         });
       }
@@ -711,7 +698,6 @@ export default function SellerDashboard() {
 
   async function fetchPopularDestinationData(sellerId: string) {
     try {
-      // First, get all packages by this seller
       const { data: sellerPackages, error: packagesError } = await supabase
         .from("packages")
         .select("id, destination")
@@ -727,10 +713,8 @@ export default function SellerDashboard() {
       
       const packageIds = sellerPackages.map(pkg => pkg.id);
       
-      // Create a map of package IDs to destinations
       const destinationMap = new Map(sellerPackages.map(pkg => [pkg.id, pkg.destination]));
 
-      // Fetch bookings for this seller's packages
       const { data: bookingsData, error } = await supabase
         .from('bookings')
         .select('package_id')
@@ -739,13 +723,11 @@ export default function SellerDashboard() {
       if (error) throw error;
 
       if (!bookingsData || bookingsData.length === 0) {
-        // If no bookings, just show the destinations of the seller's packages
         const destinations = [...new Set(sellerPackages.map(pkg => pkg.destination))];
         setDestinationData(destinations.map(name => ({ name, value: 1 })));
         return;
       }
 
-      // Process data to count occurrences of each destination
       const destinationCount: Record<string, number> = {};
       
       bookingsData.forEach(booking => {
@@ -755,7 +737,6 @@ export default function SellerDashboard() {
         }
       });
 
-      // Convert to an array sorted by popularity
       const popularDestinations = Object.entries(destinationCount)
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value);
@@ -776,7 +757,6 @@ export default function SellerDashboard() {
 
       const currentYear = new Date().getFullYear();
       
-      // First, get all packages by this seller
       const { data: sellerPackages, error: packagesError } = await supabase
         .from("packages")
         .select("id")
@@ -793,7 +773,6 @@ export default function SellerDashboard() {
       
       const packageIds = sellerPackages.map(pkg => pkg.id);
 
-      // Fetch unique users who booked this seller's packages
       const { data: bookingsData, error } = await supabase
         .from('bookings')
         .select('user_id, created_at')
@@ -809,7 +788,6 @@ export default function SellerDashboard() {
         return;
       }
 
-      // Process the data to find first booking date for each user
       const userFirstBooking: Record<string, Date> = {};
       
       bookingsData.forEach(booking => {
@@ -819,11 +797,10 @@ export default function SellerDashboard() {
         }
       });
 
-      // Count new users per month
       const monthlyData = Array(12).fill(0);
       
       Object.values(userFirstBooking).forEach(date => {
-        const month = date.getMonth(); // 0-11
+        const month = date.getMonth();
         monthlyData[month]++;
       });
 
@@ -842,7 +819,7 @@ export default function SellerDashboard() {
     }
   }
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d']
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
   const ErrorDisplay = ({ message }: { message: string }) => (
     <Card className="border-red-200 bg-red-50 dark:bg-red-900/10">
@@ -854,7 +831,7 @@ export default function SellerDashboard() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 
   return (
     <div className="container py-8">
@@ -1086,9 +1063,15 @@ export default function SellerDashboard() {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <Button variant="outline" type="button" className="h-10">
-                      Upload Image
-                    </Button>
+                    <ImageUpload 
+                      currentImages={newPackage.images}
+                      onUploadComplete={(urls) => {
+                        setNewPackage(prev => ({
+                          ...prev,
+                          images: urls
+                        }));
+                      }}
+                      maxImages={3}/>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Upload a high-quality image that showcases your destination
@@ -1228,8 +1211,6 @@ export default function SellerDashboard() {
                     Clearly specify what is not included in the package price.
                   </p>
                 </div>
-
-
               </div>
             )}
 
@@ -1284,7 +1265,6 @@ export default function SellerDashboard() {
                   </div>
                 </div>
 
-                
                 <div className="space-y-2">
                   <Label htmlFor="cancellation_policy">Cancellation Policy</Label>
                   {Array.isArray(newPackage.cancellation_policy) &&
@@ -1602,7 +1582,6 @@ export default function SellerDashboard() {
                       <div>
                         <p className="text-sm font-medium">Customer</p>
                         <p className="text-sm">
-                          {/* {booking.user.name || booking.user.email} */}
                         </p>
                       </div>
                       <div>
@@ -1648,7 +1627,6 @@ export default function SellerDashboard() {
 
         <TabsContent value="analytics">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Monthly Bookings Chart */}
             <Card>
               <CardHeader>
                 <CardTitle>Your Monthly Bookings</CardTitle>
@@ -1679,7 +1657,6 @@ export default function SellerDashboard() {
               </CardContent>
             </Card>
 
-            {/* Popular Destinations Chart */}
             <Card>
               <CardHeader>
                 <CardTitle>Your Popular Destinations</CardTitle>
@@ -1718,7 +1695,6 @@ export default function SellerDashboard() {
               </CardContent>
             </Card>
 
-            {/* Revenue Overview Chart */}
             <Card>
               <CardHeader>
                 <CardTitle>Your Revenue Overview</CardTitle>
@@ -1756,7 +1732,6 @@ export default function SellerDashboard() {
               </CardContent>
             </Card>
 
-            {/* Customer Growth Chart */}
             <Card>
               <CardHeader>
                 <CardTitle>Your Customer Growth</CardTitle>
