@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Compass, Globe, Locate, LocateFixedIcon, LocateIcon, Map, Shield, Star } from "lucide-react"
@@ -5,6 +7,22 @@ import { MaskText } from "@/components/MaskText"
 import { TextReveal } from "@/components/TextReveal"
 import Image from "next/image"
 import BusSearchUI from "@/components/SearchBar"
+import { useState, useEffect } from "react"
+import { supabase } from "@/app/lib/supabase"
+
+
+interface Package {
+  id: string
+  title: string
+  description: string
+  destination: string
+  price: number
+  duration: number
+  category: string
+  images: string[]
+  seller_id: string
+  is_approved: boolean
+}
 
 export default function Home() {
   // Featured destinations data
@@ -12,6 +30,113 @@ export default function Home() {
   // #A6C6D8
   // #0F52BA
   // #000A26
+    const [loading, setLoading] = useState(true)
+    const [filteredPackages, setFilteredPackages] = useState<Package[]>([])
+    const [packages, setPackages] = useState<Package[]>([])
+
+    
+    useEffect(() => {
+      const fetchPackages = async () => {
+        setLoading(true)
+  
+        try {
+          const { data, error } = await supabase.from("packages").select("*").eq("is_approved", true)
+  
+          if (error) throw error
+  
+          setPackages(data || [])
+          setFilteredPackages(data || [])
+          console.log(filteredPackages)
+          // console.log('packages set - ',packages)
+        } catch (error) {
+          console.error("Error fetching packages:", error)
+          // For demo purposes, let's add some mock data
+          const mockPackages = [
+            {
+              id: "1",
+              title: "Bali Paradise",
+              description: "Experience the beauty of Bali with this all-inclusive package.",
+              destination: "Bali, Indonesia",
+              price: 1299,
+              duration: 7,
+              category: "Beach Getaways",
+              images: ["/placeholder.svg?height=400&width=600"],
+              seller_id: "seller1",
+              is_approved: true,
+            },
+            {
+              id: "2",
+              title: "Swiss Alps Adventure",
+              description: "Explore the majestic Swiss Alps with guided tours and luxury accommodations.",
+              destination: "Switzerland",
+              price: 1899,
+              duration: 10,
+              category: "Mountain Escapes",
+              images: ["/placeholder.svg?height=400&width=600"],
+              seller_id: "seller2",
+              is_approved: true,
+            },
+            {
+              id: "3",
+              title: "Santorini Getaway",
+              description: "Relax in the beautiful island of Santorini with stunning views and beaches.",
+              destination: "Greece",
+              price: 1599,
+              duration: 5,
+              category: "Beach Getaways",
+              images: ["/placeholder.svg?height=400&width=600"],
+              seller_id: "seller3",
+              is_approved: true,
+            },
+            {
+              id: "4",
+              title: "Tokyo Cultural Experience",
+              description: "Immerse yourself in Japanese culture with this comprehensive Tokyo tour.",
+              destination: "Japan",
+              price: 2199,
+              duration: 12,
+              category: "Cultural Tours",
+              images: ["/placeholder.svg?height=400&width=600"],
+              seller_id: "seller1",
+              is_approved: true,
+            },
+            {
+              id: "5",
+              title: "Amazon Rainforest Expedition",
+              description: "Discover the wonders of the Amazon rainforest with expert guides.",
+              destination: "Brazil",
+              price: 2499,
+              duration: 14,
+              category: "Adventure",
+              images: ["/placeholder.svg?height=400&width=600"],
+              seller_id: "seller2",
+              is_approved: true,
+            },
+            {
+              id: "6",
+              title: "Paris Luxury Weekend",
+              description: "Experience the city of lights with this luxury weekend getaway.",
+              destination: "France",
+              price: 1299,
+              duration: 3,
+              category: "Luxury",
+              images: ["/placeholder.svg?height=400&width=600"],
+              seller_id: "seller3",
+              is_approved: true,
+            },
+          ]
+  
+          setPackages(mockPackages)
+          setFilteredPackages(mockPackages)
+          console.log('mockpackages', filteredPackages)
+        } finally {
+          setLoading(false)
+        }
+      }
+  
+      fetchPackages()
+    }, [])
+
   const featuredDestinations = [
     {
       id: 1,
@@ -225,13 +350,13 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:max-w-6xl mx-auto">
-            {featuredDestinations.map((destination) => (
+            {packages.map((destination) => (
               <div
                 key={destination.id}
                 className="flex flex-col shadow-neutral-300 text-[#000A26] rounded-xl shadow-sm hover:shadow-md hover:shadow-[#0F52BA] transition-shadow bg-neutral-100 hover:scale-105 hover:transition-all hover:duration-300 hover:ease-in-out"
               >
                 <Image
-                  src={destination.image || "/placeholder.svg"}
+                  src={destination.images[0] || "/placeholder.svg"}
                   width={100}
                   height={100}
                   alt={destination.title}
@@ -242,10 +367,10 @@ export default function Home() {
                     <h3 className="text-lg font-medium">{destination.title}</h3>
                     <div className="flex items-center">
                       <Star className="h-4 w-4 fill-amber-400 text-amber-400 bg-white mr-1" />
-                      <span className="text-sm font-semibold">{destination.rating}</span>
+                      {/* <span className="text-sm font-semibold">{destination.rating}</span> */}
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1 flex gap-1 items-center"><LocateIcon />{destination.location}</p>
+                  <p className="text-sm text-muted-foreground mt-1 flex gap-1 items-center"><LocateIcon />{destination.destination}</p>
                   <div className="mt-4 items-center justify-between">
                     <p className="font-semibold">
                       ₹{destination.price}

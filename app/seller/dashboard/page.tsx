@@ -149,13 +149,13 @@ export default function SellerDashboard() {
     exclusion: [] as string[],
   });
 
-  const [monthlyData, setMonthlyData] = useState<{ name: string; value: number }[]>([]);
+  // const [monthlyData, setMonthlyData] = useState<{ name: string; value: number }[]>([]);
   const [monthlyBooking, setMonthlyBooking] = useState<{ name: string; bookings: number }[]>([]);
   const [destinationData, setDestinationData] = useState<{ name: string; value: number }[]>([]);
   const [userGrowthData, setUserGrowthData] = useState<{ name: string; users: number }[]>([]);
   const [revenueData, setRevenueData] = useState<{ name: string; revenue: number }[]>([]);
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [totalRevenue, setTotalRevenue] = useState(0);
+  // const [totalUsers, setTotalUsers] = useState(0);
+  // const [totalRevenue, setTotalRevenue] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -583,7 +583,7 @@ export default function SellerDashboard() {
       if (!sellerPackages || sellerPackages.length === 0) {
         console.log("No packages found for this seller");
         setRevenueData(months.map(name => ({ name, revenue: 0 })));
-        setTotalRevenue(0);
+        // setTotalRevenue(0);
         return;
       }
       
@@ -602,7 +602,7 @@ export default function SellerDashboard() {
       if (!bookingsData || bookingsData.length === 0) {
         console.log("No revenue data found for this seller");
         setRevenueData(months.map(name => ({ name, revenue: 0 })));
-        setTotalRevenue(0);
+        // setTotalRevenue(0);
         return;
       }
   
@@ -632,7 +632,7 @@ export default function SellerDashboard() {
       const totalRevenue = monthlyRevenue.reduce((sum, count) => sum + count, 0);
   
       setRevenueData(revenueChartData);
-      setTotalRevenue(totalRevenue);
+      // setTotalRevenue(totalRevenue);
       console.log("Revenue Chart Data for seller:", revenueChartData);
   
     } catch (error) {
@@ -767,7 +767,7 @@ export default function SellerDashboard() {
       if (!sellerPackages || sellerPackages.length === 0) {
         console.log("No packages found for this seller");
         setUserGrowthData(months.map(name => ({ name, users: 0 })));
-        setTotalUsers(0);
+        // setTotalUsers(0);
         return;
       }
       
@@ -784,7 +784,7 @@ export default function SellerDashboard() {
 
       if (!bookingsData || bookingsData.length === 0) {
         setUserGrowthData(months.map(name => ({ name, users: 0 })));
-        setTotalUsers(0);
+        // setTotalUsers(0);
         return;
       }
 
@@ -812,7 +812,7 @@ export default function SellerDashboard() {
       const totalUsers = Object.keys(userFirstBooking).length;
 
       setUserGrowthData(userGrowth);
-      setTotalUsers(totalUsers);
+      // setTotalUsers(totalUsers);
       console.log('Customer Growth Data for seller:', userGrowth);
     } catch (error) {
       console.error('Error fetching customer growth data:', error);

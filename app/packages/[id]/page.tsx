@@ -29,6 +29,12 @@ interface Package {
   exclusion?: string[];
   cancellation_policy?: string[];
 }
+interface Review {
+  rating: number;
+  review_text: string;
+  created_at: string;
+  profile_id: string;
+};
 
 interface PackageDialogProps {
   open: boolean;
@@ -47,6 +53,7 @@ export default function PackageDetailsPage() {
   const [travelers, setTravelers] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [userType, setUserType] = useState<string | null>(null) // Track user type
+  const [reviews, setReviews] = useState<Review[]>([]);
 
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
@@ -122,6 +129,69 @@ export default function PackageDetailsPage() {
     fetchPackage();
   }, [params.id]);
 
+  const handleReviewSubmit = async (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
+    const { data: { session } } = await supabase.auth.getSession();
+
+
+    try {
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // "Authorization": `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          profile_id: session?.user.email,
+          rating,
+          review_text: reviewText,
+          package_id: pkg?.id || "",
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to submit review");
+      }
+
+      alert("Review submitted successfully!");
+      setRating(0);
+      setReviewText("");
+
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("Something went wrong while submitting the review.");
+      }
+    }
+  };
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("reviews")
+          .select("rating, review_text, created_at, profile_id")
+          .eq("package_id", pkg?.id)
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        setReviews(data);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
+
+    if (pkg) {
+      fetchReviews();
+    }
+
+  }, [pkg?.id, handleReviewSubmit])
+
   useEffect(() => {
     const fetchUserType = async () => {
       setLoading(true);
@@ -187,49 +257,9 @@ export default function PackageDetailsPage() {
       });
     }
   };
-  
-  const handleReviewSubmit = async (e: { preventDefault: () => void; }) => {
-    e.preventDefault();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (rating === 0 || reviewText.trim() === "") {
-      alert("Please provide both a rating and a review!");
-      return;
-    }
-  
-    try {
-      const response = await fetch("/api/reviews", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({
-          rating,
-          comment: reviewText,
-          package_id:pkg?.id ,  // Make sure you pass the correct package ID here
-        }),
-      });
-  
-      const result = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to submit review");
-      }
-  
-      alert("Review submitted successfully!");
-      setRating(0);
-      setReviewText("");
-  
-    } catch (error) {
-      console.error("Error submitting review:", error);
-      if (error instanceof Error) {
-        alert(error.message);
-      } else {
-        alert("Something went wrong while submitting the review.");
-      }
-    }
-  };
-  
+
+
+
 
   if (loading) {
     return (
@@ -397,7 +427,7 @@ export default function PackageDetailsPage() {
 
             <TabsContent value="reviews" className="pt-4">
               <div className="space-y-6">
-                <div className="flex items-center gap-4">
+                {/* <div className="flex items-center gap-4">
                   <div className="bg-primary/10 rounded-full p-3">
                     <Star className="h-6 w-6 fill-primary text-primary" />
                   </div>
@@ -405,88 +435,76 @@ export default function PackageDetailsPage() {
                     <h3 className="font-semibold text-lg">4.8 out of 5</h3>
                     <p className="text-muted-foreground">Based on 24 reviews</p>
                   </div>
-                </div>
+                </div> */}
 
                 <Separator />
 
                 {/* Sample reviews */}
                 <div className="space-y-6">
                   {/* Existing hardcoded reviews */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="font-medium text-primary">JD</span>
-                      </div>
-                      <div>
-                        <p className="font-medium">John Doe</p>
-                        <div className="flex items-center">
-                          <div className="flex">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`h-3 w-3 ${star <= 5 ? "fill-primary text-primary" : "text-muted"}`}
-                              />
-                            ))}
+                  {reviews.map((review, index) => (
+                    <div key={index} className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="font-medium text-primary">
+                            {review.profile_id?.slice(0, 2).toUpperCase() || "JD"}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium">{review.profile_id}</p>
+                          <div className="flex items-center">
+                            <div className="flex">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`h-3 w-3 ${star <= review.rating ? "fill-primary text-primary" : "text-muted"}`}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-xs text-muted-foreground ml-2">
+                              {/* Replace this with your date formatting logic */}
+                              {new Date(review.created_at).toLocaleDateString()}
+                            </span>
                           </div>
-                          <span className="text-xs text-muted-foreground ml-2">2 months ago</span>
                         </div>
                       </div>
+                      <p className="text-sm">
+                        {review.review_text}
+                      </p>
                     </div>
-                    <p className="text-sm">
-                      Amazing experience! The tour was well organized and our guide was knowledgeable and friendly.
-                      Highly recommend this package.
-                    </p>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="font-medium text-primary">JS</span>
-                      </div>
-                      <div>
-                        <p className="font-medium">Jane Smith</p>
-                        <div className="flex items-center">
-                          <div className="flex">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`h-3 w-3 ${star <= 4 ? "fill-primary text-primary" : "text-muted"}`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs text-muted-foreground ml-2">3 months ago</span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-sm">
-                      Great value for money. The accommodations were excellent and the itinerary was perfect.
-                      Would book again!
-                    </p>
-                  </div>
+                  ))}
 
                   {/* Review submission form */}
                   <div className="border-t pt-4">
                     <h3 className="font-semibold text-lg mb-2">Write a Review</h3>
-                    <form onSubmit={handleReviewSubmit} className="space-y-3">
-                      <div className="flex items-center">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            onClick={() => setRating(star)}
-                            className={`h-6 w-6 cursor-pointer transition ${star <= rating ? "fill-primary text-primary" : "text-muted-foreground"
-                              }`}
-                          />
-                        ))}
-                      </div>
-                      <textarea
-                        value={reviewText}
-                        onChange={(e) => setReviewText(e.target.value)}
-                        placeholder="Share your experience..."
-                        className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      // rows="3"
-                      />
-                      <Button type="submit">Submit Review</Button>
-                    </form>
+
+                    {userType == "seller" && (
+                      <div className="w-full" style={{ display: "flex", justifyContent: "center", backgroundColor: "#f8d7da", padding: "10px", borderRadius: "5px" }}>
+                        You are a seller. You cannot review packages.
+                      </div>)}
+
+                    {userType !== "seller" && (
+
+                      <form onSubmit={handleReviewSubmit} className="space-y-3">
+                        <div className="flex items-center">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              onClick={() => setRating(star)}
+                              className={`h-6 w-6 cursor-pointer transition ${star <= rating ? "fill-primary text-primary" : "text-muted-foreground"
+                                }`}
+                            />
+                          ))}
+                        </div>
+                        <textarea
+                          value={reviewText}
+                          onChange={(e) => setReviewText(e.target.value)}
+                          placeholder="Share your experience..."
+                          className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        // rows="3"
+                        />
+                        <Button type="submit">Submit Review</Button>
+                      </form>)}
                   </div>
                 </div>
               </div>

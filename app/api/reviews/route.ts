@@ -1,25 +1,21 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/app/lib/supabase";
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
-
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from "next/headers";
 
 export async function POST(request: Request) {
     try {
-        const { rating, comment, package_id } = await request.json();
-        const supabaseServerClient = createServerSupabaseClient({ headers: request.headers });
-        const { data: { user } } = await supabaseServerClient.auth.getUser();
+        const supabase = createRouteHandlerClient({ cookies });
+        // const { data: { user } } = await supabase.auth.getUser();
 
-        // Get authenticated user
-        // const {
-        //     data: { user },
-        // } = await supabase.auth.getUser();
-        console.log(user)
-        if (!user) {
+        const { rating, review_text, package_id, profile_id } = await request.json();
+
+        // console.log(cookies)
+        if (!profile_id) {
             return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
 
-        // Validate input
-        if (!rating || !comment || !package_id) {
+        if (!rating || !review_text || !package_id) {
             return NextResponse.json({ error: "All fields are required" }, { status: 400 });
         }
 
@@ -27,19 +23,13 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Rating must be between 1 and 5" }, { status: 400 });
         }
 
-        // Insert into Supabase reviews table
         const { data, error } = await supabase.from("reviews").insert([
-            {
-                package_id,
-                user_id: user.id,
-                rating,
-                comment,
-            },
+            { package_id, rating, review_text, profile_id }
         ]);
 
         if (error) {
             console.error("Error inserting review:", error);
-            return NextResponse.json({ error: "Failed to submit review" }, { status: 500 });
+            // return NextResponse.json({ error: "Failed to submit review" }, { status: 500 });
         }
 
         return NextResponse.json({ message: "Review submitted successfully", review: data }, { status: 201 });
@@ -60,7 +50,7 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase
         .from("reviews")
-        .select("rating, comment, created_at, profiles(name)")
+        .select("rating, review_text, created_at, profile_id")
         .eq("package_id", package_id)
         .order("created_at", { ascending: false });
 
