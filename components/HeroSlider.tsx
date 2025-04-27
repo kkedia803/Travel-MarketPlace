@@ -23,19 +23,19 @@ interface SlideProps {
 const slides: SlideProps[] = [
     {
         imageUrl: "/utt.gif",
-        interval: 15000,
+        interval: 10000,
         text: "UTTARAKHAND",
         subtext:"Explore the majestic beauty of the Himalayas, serene rivers, and ancient temples. Uttarakhand offers a perfect escape for nature lovers and adventure seekers."
     },
     {
         imageUrl: "/manal.gif",
-        interval: 10000000,
+        interval: 10000,
         text: "MANALI",
         subtext:"Nestled in the heart of Himachal, Manali charms with its snow-capped peaks and vibrant local culture. An ideal destination for trekking, skiing, and romantic getaways."
     },
     {
         imageUrl: "/lakshwa.gif",
-        interval: 100000000,
+        interval: 10000,
         text: "LAKSHADWEEP",
         subtext:"Discover the untouched paradise of Lakshadweep, with crystal-clear waters and exotic marine life. Perfect for snorkeling, beach hopping, and peaceful island retreats."
     },
@@ -178,12 +178,12 @@ export default function HeroSlider() {
                                             </p>
                                             <div className="flex flex-col sm:flex-row gap-4 mt-8">
                                                 <Link href="/explore">
-                                                    <Button className="font-onest md:w-fit w-40 gap-2 backdrop-blur-sm bg-transparent border border-white/70 md:text-sm text-xs hover:bg-white/10 transition-colors">
-                                                        Explore Packages <ArrowRight className="h-4 w-4" />
+                                                    <Button className="font-onest md:w-fit w-48 gap-2 backdrop-blur-sm bg-transparent border border-white/70 md:text-base text-lg hover:bg-white/10 transition-colors">
+                                                        Explore Packages <ArrowRight className="h-5 w-5" />
                                                     </Button>
                                                 </Link>
                                                 <Link href="/auth/register?role=seller">
-                                                    <Button variant="outline" className="font-onest md:w-fit w-40 bg-white/90 md:text-sm text-xs hover:bg-white/100">
+                                                    <Button variant="outline" className="font-onest md:w-fit w-48 bg-white/90 md:text-base text-lg hover:bg-white/100">
                                                         Become a Seller
                                                     </Button>
                                                 </Link>
