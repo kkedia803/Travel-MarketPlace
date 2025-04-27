@@ -3,13 +3,11 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Compass, Globe, Locate, LocateFixedIcon, LocateIcon, Map, Shield, Star } from "lucide-react"
-import { MaskText } from "@/components/MaskText"
-import { TextReveal } from "@/components/TextReveal"
 import Image from "next/image"
 import BusSearchUI from "@/components/SearchBar"
 import { useState, useEffect } from "react"
 import { supabase } from "@/app/lib/supabase"
-
+import HeroSlider from "@/components/HeroSlider"
 
 interface Package {
   id: string
@@ -25,154 +23,33 @@ interface Package {
 }
 
 export default function Home() {
-  // Featured destinations data
-  // #D6E6F2
-  // #A6C6D8
-  // #0F52BA
-  // #000A26
-    const [loading, setLoading] = useState(true)
-    const [filteredPackages, setFilteredPackages] = useState<Package[]>([])
-    const [packages, setPackages] = useState<Package[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filteredPackages, setFilteredPackages] = useState<Package[]>([])
+  const [packages, setPackages] = useState<Package[]>([])
 
-    
-    useEffect(() => {
-      const fetchPackages = async () => {
-        setLoading(true)
-  
-        try {
-          const { data, error } = await supabase.from("packages").select("*").eq("is_approved", true)
-  
-          if (error) throw error
-  
-          setPackages(data || [])
-          setFilteredPackages(data || [])
-          console.log(filteredPackages)
-          // console.log('packages set - ',packages)
-        } catch (error) {
-          console.error("Error fetching packages:", error)
-          // For demo purposes, let's add some mock data
-          const mockPackages = [
-            {
-              id: "1",
-              title: "Bali Paradise",
-              description: "Experience the beauty of Bali with this all-inclusive package.",
-              destination: "Bali, Indonesia",
-              price: 1299,
-              duration: 7,
-              category: "Beach Getaways",
-              images: ["/placeholder.svg?height=400&width=600"],
-              seller_id: "seller1",
-              is_approved: true,
-            },
-            {
-              id: "2",
-              title: "Swiss Alps Adventure",
-              description: "Explore the majestic Swiss Alps with guided tours and luxury accommodations.",
-              destination: "Switzerland",
-              price: 1899,
-              duration: 10,
-              category: "Mountain Escapes",
-              images: ["/placeholder.svg?height=400&width=600"],
-              seller_id: "seller2",
-              is_approved: true,
-            },
-            {
-              id: "3",
-              title: "Santorini Getaway",
-              description: "Relax in the beautiful island of Santorini with stunning views and beaches.",
-              destination: "Greece",
-              price: 1599,
-              duration: 5,
-              category: "Beach Getaways",
-              images: ["/placeholder.svg?height=400&width=600"],
-              seller_id: "seller3",
-              is_approved: true,
-            },
-            {
-              id: "4",
-              title: "Tokyo Cultural Experience",
-              description: "Immerse yourself in Japanese culture with this comprehensive Tokyo tour.",
-              destination: "Japan",
-              price: 2199,
-              duration: 12,
-              category: "Cultural Tours",
-              images: ["/placeholder.svg?height=400&width=600"],
-              seller_id: "seller1",
-              is_approved: true,
-            },
-            {
-              id: "5",
-              title: "Amazon Rainforest Expedition",
-              description: "Discover the wonders of the Amazon rainforest with expert guides.",
-              destination: "Brazil",
-              price: 2499,
-              duration: 14,
-              category: "Adventure",
-              images: ["/placeholder.svg?height=400&width=600"],
-              seller_id: "seller2",
-              is_approved: true,
-            },
-            {
-              id: "6",
-              title: "Paris Luxury Weekend",
-              description: "Experience the city of lights with this luxury weekend getaway.",
-              destination: "France",
-              price: 1299,
-              duration: 3,
-              category: "Luxury",
-              images: ["/placeholder.svg?height=400&width=600"],
-              seller_id: "seller3",
-              is_approved: true,
-            },
-          ]
-  
-          setPackages(mockPackages)
-          setFilteredPackages(mockPackages)
-          console.log('mockpackages', filteredPackages)
-        } finally {
-          setLoading(false)
-        }
+  useEffect(() => {
+    const fetchPackages = async () => {
+      setLoading(true)
+
+      try {
+        const { data, error } = await supabase.from("packages").select("*").eq("is_approved", true)
+
+        if (error) throw error
+
+        setPackages(data || [])
+        setFilteredPackages(data || [])
+        console.log(filteredPackages)
+        // console.log('packages set - ',packages)
+      } catch (error) {
+        console.error("Error fetching packages:", error)
+      } finally {
+        setLoading(false)
       }
-  
-      fetchPackages()
-    }, [])
+    }
 
-  const featuredDestinations = [
-    {
-      id: 1,
-      title: "Bali Paradise",
-      image: "/balicover.webp",
-      location: "Bali, Indonesia",
-      price: 22999,
-      rating: 4.8,
-    },
-    {
-      id: 2,
-      title: "Manali Adventure",
-      image: "https://kplexpeditions.com/wp-content/uploads/2023/09/Spiti-Winter-Trip-Himachal-Prade.jpg.webp",
-      location: "Kullu Manali",
-      price: 5899,
-      rating: 4.9,
-    },
-    {
-      id: 3,
-      title: "Royal Udaipur",
-      image: "/udaipurcover.jpeg",
-      location: "Udaipur",
-      price: 9599,
-      rating: 4.7,
-    },
-    {
-      id: 4,
-      title: "Royal Udaipur",
-      image: "/udaipurcover.jpeg",
-      location: "Udaipur",
-      price: 9599,
-      rating: 4.7,
-    },
-  ]
+    fetchPackages()
+  }, [])
 
-  // Categories data
   const categories = [
     { name: "Beach Getaways", src: "https://img.freepik.com/free-photo/beautiful-tropical-beach-sea_74190-6772.jpg?t=st=1743502150~exp=1743505750~hmac=254b72ee61c7a2793b77b7ea4aa418d21ba15acd979367fb166412f2010f2e4d&w=1380" },
     { name: "Mountain Escapes", src: "https://img.freepik.com/free-photo/traveling-with-off-road-car_23-2151473117.jpg?uid=R111481632&ga=GA1.1.648242056.1663832767&semt=ais_hybrid" },
@@ -182,42 +59,8 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
-      <section className="relative py-28 md:py-32 px-4 md:h-screen">
-        <div className="absolute inset-0 md:mx-10 mx-5 md:my-10 py-10 rounded-3xl bg-cover bg-center bgfixed bg-neutral-400 bg-blend-multiply bg-[url(https://img.freepik.com/free-photo/silhouette-person-standing-top-hill-beautiful-colorful-sky-morning_181624-24501.jpg)] z-1"
-        />
-        <div className="container relative z-10 mx-auto max-w-8xl py-5">
-          <div className="flex flex-col items-center text-center space-y-6">
-            <h1 className="text-4xl md:text-9xl font-semibold tracking-wider bg-clip-text text-transparent bg-gradient-to-b from-stone-800 from-[20%] to-white/0 to-[80%] uppercase">
-              {/* Adventure */}
-              <MaskText />
-              {/* <span className="text-white">Adventure</span> */}
-            </h1>
-            <p className="text-xs md:text-xl max-w-3xl text-balance text-[#D6E6F2]">
-              {/* Explore curated travel packages from verified sellers around the world. Book with confidence and create
-              memories that last a lifetime. */}
-              <TextReveal />
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 mt-8">
-              <Link href="/explore">
-                <Button className="md:w-fit w-40 gap-2 backdrop-blur-sm bg-transparent border border-neutral-800 md:text-sm text-xs">
-                  Explore Packages <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/auth/register?role=seller">
-                <Button variant="outline" className="md:w-fit w-40 bg-white/90 md:text-sm text-xs">
-                  Become a Seller
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="my-52">
-          <BusSearchUI />
-        </div>
-      </section>
-
+      {/* Hero Slider Section */}
+      <HeroSlider />
 
       {/* Categories Section */}
       <section className="py-16">
@@ -448,4 +291,3 @@ export default function Home() {
     </div>
   )
 }
-

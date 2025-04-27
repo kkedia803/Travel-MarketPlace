@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Compass, LogOut, Menu, Package, User } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 
 export function Header() {
@@ -22,6 +22,21 @@ export function Header() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const heroHeight = 600; // change according to your hero height (px)
+      if (window.scrollY > heroHeight) {
+        setScrolled(true)
+      } else {
+        setScrolled(false)
+      }
+    }
+  
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const handleSignOut = async () => {
     await signOut()
@@ -57,12 +72,12 @@ export function Header() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-xl my-5">
-      <div className="container flex h-16 items-center justify-between">
+    <header className={` ${pathname!=='/'?"sticky":"fixed"} top-0 z-50 w-full backdrop-blur-xl ${pathname!=='/'?"bg-black/30":""} ${scrolled?"bg-black/30":""}`}>
+      <div className=" flex h-16 items-center justify-between pl-0 pr-5 sm:pl-14 sm:pr-14 ">
         <div className="flex items-center gap-2">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button variant="ghost" size="icon" className="md:hidden text-white/90">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
@@ -90,20 +105,19 @@ export function Header() {
             </SheetContent>
           </Sheet>
           <Link href="/" className="flex items-center space-x-2">
-            <Compass className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">TracoIt</span>
+            <Compass className="h-8 w-8 text-primary text-white " />
+            <span className={`font-bold text-2xl text-white font-bulgatti`}>TracoIt</span>
           </Link>
           <nav className="hidden md:flex gap-6 ml-6">
             {navItems.map((item, index) => (
               <Link
-                key={index}
-                href={item.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === item.href ? "text-primary" : "text-foreground/60"
-                }`}
-              >
-                {item.name}
-              </Link>
+              key={index}
+              href={item.href}
+              className={`text-base font-onest font-medium transition-colors hover:text-stone-300 text-white/90`}
+            >
+              {item.name}
+            </Link>
+            
             ))}
           </nav>
         </div>
@@ -148,12 +162,12 @@ export function Header() {
           ) : (
             <div className="flex items-center gap-2">
               <Link href="/auth/login">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="text-white/90 font-onest">
                   Log in
                 </Button>
               </Link>
               <Link href="/auth/register">
-                <Button size="sm">Sign up</Button>
+                <Button size="sm" className="font-onest">Sign up</Button>
               </Link>
             </div>
           )}

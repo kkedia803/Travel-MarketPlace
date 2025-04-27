@@ -80,3 +80,34 @@
     @apply bg-background text-foreground;
   }
 }
+
+@font-face {
+  font-family: 'glitten'; /* The name you'll use in your CSS */
+  src: url('/fonts/glitten/Glitten/Glitten-Regular.woff') format('woff2'),
+       url('/fonts/glitten/Glitten/Glitten-Regular.otf') format('opentype'),
+       url('/fonts/glitten/Glitten/Glitten-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+@font-face {
+  font-family: 'bulgatti'; /* The name you'll use in your CSS */
+  src: url('/fonts/bulgatti/Bulgatti.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'boruna'; /* The name you'll use in your CSS */
+  src: url('/fonts/boruna-demo-version/Boruna-DemoVersion-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'onest'; /* The name you'll use in your CSS */
+  src: url('/fonts/Onest/static/Onest-Light.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

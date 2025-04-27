@@ -89,6 +89,12 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      fontFamily:{
+        glitten:['glitten','sans-serif'],
+        bulgatti:['bulgatti','sans-serif'],
+        boruna:['boruna','sans-serif'],
+        onest:['onest','sans-serif'],
+      }
     },
   },
   plugins: [require("tailwindcss-animate")],

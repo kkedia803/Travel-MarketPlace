@@ -3,7 +3,7 @@
 import { useScroll, useTransform, motion } from 'framer-motion';
 import { useRef } from 'react';
 
-export const TextReveal = () => {
+export const TextReveal = ({text}: {text: string}) => {
     const container = useRef<HTMLDivElement | null>(null);
     const { scrollYProgress } = useScroll({
         target: container,
@@ -11,10 +11,10 @@ export const TextReveal = () => {
     })
     const translateY = useTransform(scrollYProgress, [0, 1], ["80%", "-80%"]);
     const scale = useTransform(scrollYProgress, [0, 1], ['80%', '100%']);
-    const word = "Explore curated travel packages from verified sellers around the world. Book with confidence and create memories that last a lifetime.";
+    const word = `${text}`
     return (
         <div>
-            <div ref={container} className='bg-cover bg-clip-text'
+            <div ref={container} className='bg-cover bg-clip-text font-onest font-light'
             >
                 {
                     word.split("").map((letter, i) => {
@@ -24,7 +24,7 @@ export const TextReveal = () => {
                             transition={{ delay: 0.01 * i, ease: [0.33, 1, 0.68, 2] }}
                             viewport={{ once: true }}
 
-                            className=''
+                            className="text-white "
                             style={{ translateY, scale }}
                         >{letter}</motion.span>
                     })
