@@ -275,7 +275,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary text-primary-foreground">
+      {/* <section className="py-16 bg-primary text-primary-foreground">
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Start Your Journey?</h2>
           <p className="text-lg mb-8 max-w-2xl mx-auto opacity-90">
@@ -287,7 +287,7 @@ export default function Home() {
             </Button>
           </Link>
         </div>
-      </section>
+      </section> */}
     </div>
   )
 }

@@ -6,13 +6,13 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "./contexts/auth-context"
 import { Toaster } from "@/components/ui/toaster"
 import { Header } from "./components/header"
+import { Footer } from "./components/footer"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "TracoIt - Travel Marketplace",
+  title: "TracoIt",
   description: "Find and book amazing travel experiences",
-    // generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -29,6 +29,7 @@ export default function RootLayout({
               <Header />
               <main className="flex-1">{children}</main>
               <Toaster />
+              <Footer/>
             </div>
           </AuthProvider>
         </ThemeProvider>
@@ -36,7 +37,3 @@ export default function RootLayout({
     </html>
   )
 }
-
-
-
-import './globals.css'

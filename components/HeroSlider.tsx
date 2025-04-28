@@ -178,12 +178,12 @@ export default function HeroSlider() {
                                             </p>
                                             <div className="flex flex-col sm:flex-row gap-4 mt-8">
                                                 <Link href="/explore">
-                                                    <Button className="font-onest md:w-fit w-48 gap-2 backdrop-blur-sm bg-transparent border border-white/70 md:text-base text-lg hover:bg-white/10 transition-colors">
+                                                    <Button className="font-onest md:w-fit gap-2 backdrop-blur-sm bg-transparent border border-white/70 text-xs w-40 md:text-base md:text-lg md:w-48 hover:bg-white/10 transition-colors">
                                                         Explore Packages <ArrowRight className="h-5 w-5" />
                                                     </Button>
                                                 </Link>
                                                 <Link href="/auth/register?role=seller">
-                                                    <Button variant="outline" className="font-onest md:w-fit w-48 bg-white/90 md:text-base text-lg hover:bg-white/100">
+                                                    <Button variant="outline" className="font-onest md:w-fit  bg-white/90 text-xs w-40 md:text-base md:text-lg md:w-48 hover:bg-white/100">
                                                         Become a Seller
                                                     </Button>
                                                 </Link>

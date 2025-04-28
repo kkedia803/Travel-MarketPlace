@@ -73,7 +73,7 @@ export function Header() {
 
   return (
     <header className={` ${pathname!=='/'?"sticky":"fixed"} top-0 z-50 w-full backdrop-blur-[27px] ${pathname!=='/'?"bg-black/30":""} ${scrolled?"bg-black/30":""}`}>
-      <div className=" flex h-16 sm:h-24 items-center justify-between pl-0 pr-5 sm:pl-14 sm:pr-14 ">
+      <div className=" flex h-16 sm:h-20 items-center justify-between pl-0 pr-5 sm:pl-14 sm:pr-14 ">
         <div className="flex items-center gap-2">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -167,7 +167,7 @@ export function Header() {
                 </Button>
               </Link>
               <Link href="/auth/register">
-                <Button  className="font-onest sm:text-xl bg-stone-800">Sign up</Button>
+                <Button  className="font-onest sm:text-xl bg-stone-800 hover:bg-blue-ice hover:text-black">Sign up</Button>
               </Link>
             </div>
           )}
