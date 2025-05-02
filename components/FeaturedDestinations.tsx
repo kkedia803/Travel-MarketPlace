@@ -46,9 +46,11 @@ export default function FeaturedDestination() {
         <section className="py-16">
             <div className="container mx-auto">
                 <div className="flex justify-between items-center mb-12">
+
                     <h2 className="text-4xl font-semibold font-glitten tracking-wider">Featured Destinations</h2>
+
                     <Link href="/explore">
-                        <Button variant="ghost" className="gap-2 text-xl font-semibold font-glitten">
+                        <Button variant="ghost" className=" hidden sm:inline gap-2 text-xl font-semibold font-glitten">
                             View All <ArrowRight className="h-4 w-4" />
                         </Button>
                     </Link>
