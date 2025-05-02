@@ -10,6 +10,8 @@ import { supabase } from "@/app/lib/supabase"
 import HeroSlider from "@/components/HeroSlider"
 import ParallaxFeatures from "@/components/ParallaxFeatures";
 import FeaturedDestination from "@/components/FeaturedDestinations";
+import ExplorebyCategory from "@/components/ExplorebyCat";
+import WhyChoose from "@/components/WhyChoose";
 
 interface Package {
   id: string
@@ -64,46 +66,13 @@ export default function Home() {
       {/* Hero Slider Section */}
       <HeroSlider />
 
+      {/* Why Choose Us Section */}
+      <WhyChoose />
+
       {/* Categories Section */}
-      <section className="py-16">
-        <div className="container mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-neutral-900 capitalize">Explore by Category</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:max-w-6xl mx-auto">
-            {categories.map((category, index) => (
-              <div
-                key={index}
-                className="flex flex-col itemscenter shadow-neutral-300 text-[#000A26] rounded-xl shadow-sm hover:shadow-md hover:shadow-[#0F52BA] transition-shadow bg-neutral-100 hover:scale-105 hover:transition-all hover:duration-300 hover:ease-in-out"
-              >
-                {/* <div className="p-4 rounded-full mb-4 bg-[#D6E6F2] text-[#000A26]">{category.icon}</div> */}
-                <Image
-                  className="rounded-xl mb-4 w-full h-full scale-105"
-                  src={category.src}
-                  width={100}
-                  height={100}
-                  alt='idnex'
-                />
-                <div className=" itemscenter p-4">
-                  <h3 className="text-lg font-medium">{category.name}</h3>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="hover:bg-[#000A26] bg-[#A6C6D8] text-[#000A26] hover:text-white transition-colors"
-                  >
-                    <Link
-                      href={`/explore?category=${encodeURIComponent(category.name)}`}
-                    >
-                      Explore Now
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ExplorebyCategory/>
 
       {/* Featured Section */}
-      {/* Features */}
       <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
         <div className="relative p-6 md:p-16">
           {/* Grid */}
@@ -223,21 +192,6 @@ export default function Home() {
       </section>
 
 
-
-      {/* CTA Section */}
-      {/* <section className="py-16 bg-primary text-primary-foreground">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Start Your Journey?</h2>
-          <p className="text-lg mb-8 max-w-2xl mx-auto opacity-90">
-            Join thousands of travelers who have found their perfect getaway through TracoIt.
-          </p>
-          <Link href="/explore">
-            <Button size="lg" variant="secondary" className="gap-2">
-              Explore Packages <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </section> */}
     </div>
   )
 }
