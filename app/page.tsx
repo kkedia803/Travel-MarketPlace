@@ -8,6 +8,8 @@ import BusSearchUI from "@/components/SearchBar"
 import { useState, useEffect } from "react"
 import { supabase } from "@/app/lib/supabase"
 import HeroSlider from "@/components/HeroSlider"
+import ParallaxFeatures from "@/components/ParallaxFeatures";
+import FeaturedDestination from "@/components/FeaturedDestinations";
 
 interface Package {
   id: string
@@ -182,61 +184,7 @@ export default function Home() {
 
 
       {/* Featured Destinations */}
-      <section className="py-16">
-        <div className="container mx-auto">
-          <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold">Featured Destinations</h2>
-            <Link href="/explore">
-              <Button variant="ghost" className="gap-2">
-                View All <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:max-w-6xl mx-auto">
-            {packages.map((destination) => (
-              <div
-                key={destination.id}
-                className="flex flex-col shadow-neutral-300 text-[#000A26] rounded-xl shadow-sm hover:shadow-md hover:shadow-[#0F52BA] transition-shadow bg-neutral-100 hover:scale-105 hover:transition-all hover:duration-300 hover:ease-in-out"
-              >
-                <Image
-                  src={destination.images[0] || "/placeholder.svg"}
-                  width={100}
-                  height={100}
-                  alt={destination.title}
-                  className="rounded-xl mb-4 w-full h-full scale-105"
-                />
-                <div className="p-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium">{destination.title}</h3>
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 fill-amber-400 text-amber-400 bg-white mr-1" />
-                      {/* <span className="text-sm font-semibold">{destination.rating}</span> */}
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1 flex gap-1 items-center"><LocateIcon />{destination.destination}</p>
-                  <div className="mt-4 items-center justify-between">
-                    <p className="font-semibold">
-                      ₹{destination.price}
-                      <span className="text-sm font-normal text-muted-foreground"> /person</span>
-                    </p>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="hover:bg-[#000A26] bg-[#A6C6D8] text-[#000A26] hover:text-white transition-colors"
-                    >
-                      <Link
-                        href={`/packages/${destination.id}`}
-                      >
-                        View Details
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <FeaturedDestination />
 
       {/* Trust Badges */}
       <section className="py-16 bg-accent">
@@ -273,6 +221,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+
 
       {/* CTA Section */}
       {/* <section className="py-16 bg-primary text-primary-foreground">

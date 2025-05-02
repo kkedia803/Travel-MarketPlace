@@ -111,3 +111,10 @@
   font-weight: normal;
   font-style: normal;
 }
+
+@font-face {
+  font-family: 'calsans'; /* The name you'll use in your CSS */
+  src: url('/fonts/Cal_Sans/CalSans-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

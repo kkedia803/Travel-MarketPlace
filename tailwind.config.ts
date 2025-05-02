@@ -94,6 +94,7 @@ const config = {
         bulgatti:['bulgatti','sans-serif'],
         boruna:['boruna','sans-serif'],
         onest:['onest','sans-serif'],
+        calsans:['calsans','sans-serif']
       }
     },
   },
