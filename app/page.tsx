@@ -1,17 +1,11 @@
 "use client";
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Compass, Globe, Locate, LocateFixedIcon, LocateIcon, Map, Shield, Star } from "lucide-react"
-import Image from "next/image"
-import BusSearchUI from "@/components/SearchBar"
 import { useState, useEffect } from "react"
 import { supabase } from "@/app/lib/supabase"
 import HeroSlider from "@/components/HeroSlider"
-import ParallaxFeatures from "@/components/ParallaxFeatures";
 import FeaturedPackages from "@/components/FeaturedPackages";
 import FavDestinations from "@/components/FavDestinations";
-import ExploreByCat from "@/components/ExploreByCat"
+import ExploreCategory from "@/components/ExploreCategory";
 import WhyChoose from "@/components/WhyChoose";
 
 interface Package {
@@ -64,11 +58,11 @@ export default function Home() {
       <WhyChoose />
 
       {/* Explore by Category */}
-      <ExploreByCat />
-
+      <ExploreCategory />
+      
       {/* Featured Packages */}
       <FeaturedPackages />
-      
+
       {/* Favourite Destinations Section */}
       <FavDestinations />
 
