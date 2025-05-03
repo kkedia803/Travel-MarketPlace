@@ -31,7 +31,7 @@ export function Footer() {
             whileInView={{ y: '0', opacity: 1 }}
             transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1], }}
             viewport={{ once: true }}
-            className='pt-4 overflow-hidden'
+            className='overflow-hidden'
         >
             <motion.footer
                 initial={{ y: '20%', opacity: 0 }}

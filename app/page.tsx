@@ -7,6 +7,7 @@ import FeaturedPackages from "@/components/FeaturedPackages";
 import FavDestinations from "@/components/FavDestinations";
 import ExploreCategory from "@/components/ExploreCategory";
 import WhyChoose from "@/components/WhyChoose";
+import OurContent from "@/components/OurContent";
 
 interface Package {
   id: string
@@ -65,6 +66,9 @@ export default function Home() {
 
       {/* Favourite Destinations Section */}
       <FavDestinations />
+
+      {/* Our Content Section */}
+      <OurContent/>
 
     </div>
   )

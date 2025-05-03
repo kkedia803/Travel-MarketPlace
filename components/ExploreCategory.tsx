@@ -20,6 +20,14 @@ export default function ExploreCategory() {
     {
       name: "Adventure",
       blurColor: "from-transparent to-green-600"
+    },
+    {
+      name: "Luxury",
+      blurColor: "from-transparent to-rose-900"
+    },
+    {
+      name: "Budget",
+      blurColor: "from-transparent to-stone-600"
     }
   ];
 
@@ -28,7 +36,7 @@ export default function ExploreCategory() {
     <section className="py-16 bg-slate-200">
       <div className="container mx-auto">
         <h2 className="mb-12 text-neutral-900 text-4xl font-semibold font-glitten tracking-wider">Explore by Category</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 md:max-w-full mx-auto gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 md:max-w-full mx-auto gap-8">
           {categories.map((category, index) => (
             <Link
               key={index}
