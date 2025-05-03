@@ -14,6 +14,7 @@ interface Package {
     description: string
     destination: string
     price: number
+    discount: number
     duration: number
     category: string
     images: string[]
@@ -21,7 +22,7 @@ interface Package {
     is_approved: boolean
 }
 
-export default function FeaturedDestination() {
+export default function FeaturedPackages() {
     const [loading, setLoading] = useState(true)
     const [packages, setPackages] = useState<Package[]>([])
     const [hoveredId, setHoveredId] = useState<string | null>(null)
@@ -47,11 +48,11 @@ export default function FeaturedDestination() {
             <div className="container mx-auto">
                 <div className="flex justify-between items-center mb-12">
 
-                    <h2 className="text-4xl font-semibold font-glitten tracking-wider">Featured Destinations</h2>
+                    <h2 className="text-4xl font-semibold font-glitten tracking-wider">Featured Packages</h2>
 
                     <Link href="/explore">
                         <Button variant="ghost" className=" hidden sm:inline gap-2 text-xl font-semibold font-glitten">
-                            View All <ArrowRight className="h-4 w-4" />
+                            View All <ArrowRight className="h-4 w-4 inline" />
                         </Button>
                     </Link>
                 </div>

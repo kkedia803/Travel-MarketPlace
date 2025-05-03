@@ -1,9 +1,6 @@
 import { Metadata } from 'next'
 import Image from 'next/image'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
 
 export const metadata: Metadata = {
   title: 'About Us | TracoIt',
@@ -173,21 +170,6 @@ export default function AboutPage() {
         </div>
       </section>
       
-      {/* CTA */}
-      <section className="bg-primary text-primary-foreground rounded-xl p-10 text-center space-y-6">
-        <h2 className="text-3xl font-bold">Ready to Start Your Journey?</h2>
-        <p className="text-xl max-w-3xl mx-auto">
-          Join thousands of travelers who have discovered unique experiences through TracoIt.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-          <Button asChild size="lg" variant="secondary">
-            <Link href="/packages">Explore Packages</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="bg-transparent">
-            <Link href="/contact">Contact Us</Link>
-          </Button>
-        </div>
-      </section>
     </div>
   )
 }
