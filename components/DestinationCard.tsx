@@ -53,7 +53,7 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
     <div
       onMouseEnter={() => setHoveredId(destination.id)}
       onMouseLeave={() => setHoveredId(null)}
-      className={`transform will-change-transform transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${isHovered ? (isThisHovered ? "scale-105 md:scale-125 z-20" : "scale-75 opacity-80") : "scale-100"
+      className={`min-w-72 sm:min-w-0 transform will-change-transform transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${isHovered ? (isThisHovered ? "scale-105 md:scale-125 z-20" : "scale-75 opacity-80") : "scale-100"
         }`}
     >
       <TooltipProvider>

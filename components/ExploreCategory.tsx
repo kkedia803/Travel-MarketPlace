@@ -36,12 +36,13 @@ export default function ExploreCategory() {
     <section className="py-16 bg-slate-200">
       <div className="container mx-auto">
         <h2 className="mb-12 text-neutral-900 text-4xl font-semibold font-glitten tracking-wider">Explore by Category</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 md:max-w-full mx-auto gap-8">
+        <div className="flex md:grid overflow-x-auto md:overflow-visible gap-8 scrollbar-hide md:grid-cols-2 lg:grid-cols-6">
+
           {categories.map((category, index) => (
             <Link
               key={index}
               href={`/explore?category=${category.name}`}
-              className="relative flex flex-col h-48 itemscenter shadow-neutral-300 text-[#000A26] shadow-sm hover:scale-105 ease-in-out duration-300 overflow-hidden rounded-md"
+              className="min-w-[60%] relative flex flex-col h-48 itemscenter shadow-neutral-300 text-[#000A26] shadow-sm hover:scale-105 ease-in-out duration-300 overflow-hidden rounded-md"
             >
               {/* Blur effect overlay */}
               <div

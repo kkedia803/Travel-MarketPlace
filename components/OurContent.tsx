@@ -18,13 +18,13 @@ export default function OurContent() {
     <section className="py-16">
       <div className="container mx-auto">
         <h2 className="mb-12 text-neutral-900 text-4xl font-semibold font-glitten tracking-wider">Have a look at Travel Content!</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 md:max-w-full mx-auto gap-8">
+        <div className="flex md:grid overflow-x-auto md:overflow-visible scrollbar-hide md:grid-cols-2 lg:grid-cols-6 md:max-w-full mx-auto gap-8">
           {categories.map((category, index) => (
             <Link
               target="_blank"
               key={index}
               href={`${category.url}`}
-              className="group h-auto w-auto relative flex flex-col itemscenter shadow-neutral-300 text-[#000A26] shadow-sm hover:scale-105 ease-in-out duration-300"
+              className="min-w-52 group h-auto w-auto relative flex flex-col itemscenter shadow-neutral-300 text-[#000A26] shadow-sm hover:scale-105 ease-in-out duration-300"
             >
               {category.type === "reel" ? (
                 <Image

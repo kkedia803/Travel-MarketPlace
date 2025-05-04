@@ -57,7 +57,7 @@ export default function FeaturedPackages() {
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 md:max-w-full mx-auto gap-5">
+                <div className="flex md:grid overflow-x-auto md:overflow-visible scrollbar-hide md:grid-cols-2 lg:grid-cols-4 md:max-w-full mx-auto gap-5">
                     {packages.map((destination) => {
                         const isHovered = hoveredId !== null
                         const isThisHovered = hoveredId === destination.id
