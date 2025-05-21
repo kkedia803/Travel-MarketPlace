@@ -8,6 +8,7 @@ import FavDestinations from "@/components/FavDestinations";
 import ExploreCategory from "@/components/ExploreCategory";
 import WhyChoose from "@/components/WhyChoose";
 import OurContent from "@/components/OurContent";
+import ComingSoonTravel from "@/components/ComingSoonTravel";
 
 interface Package {
   id: string
@@ -56,19 +57,22 @@ export default function Home() {
       <HeroSlider />
 
       {/* Why Choose Us Section */}
-      <WhyChoose />
+      {/* <WhyChoose /> */}
 
-      {/* Explore by Category */}
-      <ExploreCategory />
-      
+      {/* Coming Soon Travel Section */}
+      <ComingSoonTravel />
+
       {/* Featured Packages */}
       <FeaturedPackages />
 
       {/* Favourite Destinations Section */}
       <FavDestinations />
 
+      {/* Explore by Category */}
+      <ExploreCategory />
+
       {/* Our Content Section */}
-      <OurContent/>
+      <OurContent />
 
     </div>
   )

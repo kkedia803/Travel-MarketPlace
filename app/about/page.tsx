@@ -23,13 +23,13 @@ export default function AboutPage() {
         <div className="space-y-6">
           <h2 className="text-3xl font-bold">Our Story</h2>
           <p className="text-lg text-muted-foreground">
-            TracoIt was founded in 2023 with a simple mission: to make unique travel experiences accessible to everyone while supporting local travel providers.
+            Tracolt is created to remove the obstacles that often prevent people from experiencing the world. We believe that everyone deserves the opportunity to explore, regardless of whether their friends are available or they're on a tight budget.
           </p>
           <p className="text-lg text-muted-foreground">
-            What started as a small platform connecting travelers with local guides has grown into a global marketplace where travelers can discover and book authentic experiences directly from local experts.
+            Our platform solves the common challenges of finding and booking group trip/backpack trips. No more waiting for others or settling for less! Tracolt offers a wide array of options from various travel agents, allowing you to easily compare itineraries, prices, and find the perfect trip that matches your solo or group travel plans. But Tracolt goes beyond just trips. We also simplify booking your essential travel needs, including train, flight, and bus tickets, as well as hotel accommodations, making us your comprehensive travel solution.
           </p>
           <p className="text-lg text-muted-foreground">
-            Today, we're proud to host thousands of travel packages from providers across the globe, helping travelers create unforgettable memories while supporting local economies.
+            Tracolt functions as a comprehensive e-commerce marketplace within the travel industry. We've gathered a diverse range of travel agents, from small independent operators to large established companies, all in one place. This allows you to browse a huge selection of trips and find the ideal adventure, no matter your preferences or budget.
           </p>
         </div>
         <div className="relative h-[400px] rounded-lg overflow-hidden">
@@ -43,7 +43,7 @@ export default function AboutPage() {
       </section>
       
       {/* Our Mission */}
-      <section className="bg-primary/5 rounded-xl p-10 text-center space-y-6">
+      {/* <section className="bg-primary/5 rounded-xl p-10 text-center space-y-6">
         <h2 className="text-3xl font-bold">Our Mission</h2>
         <p className="text-xl max-w-3xl mx-auto">
           To create a world where travelers can easily discover authentic experiences, and where local travel providers can thrive by sharing their expertise and passion.
@@ -83,7 +83,7 @@ export default function AboutPage() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </section> */}
       
       {/* How It Works */}
       <section className="space-y-10">
@@ -126,7 +126,7 @@ export default function AboutPage() {
       </section>
       
       {/* Why Choose Us */}
-      <section className="space-y-10">
+      {/* <section className="space-y-10">
         <div className="text-center space-y-4">
           <h2 className="text-3xl font-bold">Why Choose Us</h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -168,7 +168,7 @@ export default function AboutPage() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </section> */}
       
     </div>
   )
