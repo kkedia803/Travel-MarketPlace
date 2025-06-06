@@ -16,6 +16,7 @@ interface Package {
   destination: string
   discount: number
   price: number
+  final_price: number
   duration: number
   category: string
   images: string[]
@@ -93,7 +94,7 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
                     <div className="flex items-center gap-2">
                       <IndianRupeeIcon className="h-4 w-4 text-teal" />
                       <p className="text-sm font-medium">
-                        <span className="text-muted-foreground">Price:</span> ₹{destination.price.toLocaleString()}<span>/person</span>
+                        <span className="text-muted-foreground">Price:</span> ₹{destination.final_price.toLocaleString()}<span>/person</span>
                       </p>
                     </div>
                     <div className="flex items-center gap-2">

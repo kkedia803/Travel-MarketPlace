@@ -16,7 +16,7 @@ const categories = [
 return(
     <section className="py-16 bg-slate-200">
         <div className="container mx-auto">
-          <h2 className="mb-12 text-neutral-900 text-4xl font-semibold font-glitten tracking-wider">Your Favourite Destinations</h2>
+          <h2 className="mb-12 text-neutral-900 text-4xl font-semibold font-glitten tracking-wider">Your Favourite Grouptrips</h2>
           <div className="flex md:grid overflow-x-auto md:overflow-visible gap-8 scrollbar-hide md:grid-cols-2 lg:grid-cols-4 md:max-w-full mx-auto">
             {categories.map((category, index) => (
               <Link

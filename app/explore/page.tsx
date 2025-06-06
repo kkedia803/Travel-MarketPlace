@@ -18,6 +18,7 @@ interface Package {
   description: string
   destination: string
   price: number
+  final_price?: number
   duration: number
   category: string
   images: string[]
@@ -35,6 +36,7 @@ export default function ExplorePage() {
   const [priceRange, setPriceRange] = useState([0, 25000])
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategory ? [initialCategory] : [])
   const [filteredPackages, setFilteredPackages] = useState<Package[]>([])
+  const [showPopup, setShowPopup] = useState(false)
 
   const categories = ["Beach Getaways", "Mountain Escapes", "Cultural Tours", "Adventure", "Luxury", "Budget"]
 
@@ -54,83 +56,7 @@ export default function ExplorePage() {
       } catch (error) {
         console.error("Error fetching packages:", error)
         // For demo purposes, let's add some mock data
-        const mockPackages = [
-          {
-            id: "1",
-            title: "Bali Paradise",
-            description: "Experience the beauty of Bali with this all-inclusive package.",
-            destination: "Bali, Indonesia",
-            price: 1299,
-            duration: 7,
-            category: "Beach Getaways",
-            images: ["/placeholder.svg?height=400&width=600"],
-            seller_id: "seller1",
-            is_approved: true,
-          },
-          {
-            id: "2",
-            title: "Swiss Alps Adventure",
-            description: "Explore the majestic Swiss Alps with guided tours and luxury accommodations.",
-            destination: "Switzerland",
-            price: 1899,
-            duration: 10,
-            category: "Mountain Escapes",
-            images: ["/placeholder.svg?height=400&width=600"],
-            seller_id: "seller2",
-            is_approved: true,
-          },
-          {
-            id: "3",
-            title: "Santorini Getaway",
-            description: "Relax in the beautiful island of Santorini with stunning views and beaches.",
-            destination: "Greece",
-            price: 1599,
-            duration: 5,
-            category: "Beach Getaways",
-            images: ["/placeholder.svg?height=400&width=600"],
-            seller_id: "seller3",
-            is_approved: true,
-          },
-          {
-            id: "4",
-            title: "Tokyo Cultural Experience",
-            description: "Immerse yourself in Japanese culture with this comprehensive Tokyo tour.",
-            destination: "Japan",
-            price: 2199,
-            duration: 12,
-            category: "Cultural Tours",
-            images: ["/placeholder.svg?height=400&width=600"],
-            seller_id: "seller1",
-            is_approved: true,
-          },
-          {
-            id: "5",
-            title: "Amazon Rainforest Expedition",
-            description: "Discover the wonders of the Amazon rainforest with expert guides.",
-            destination: "Brazil",
-            price: 2499,
-            duration: 14,
-            category: "Adventure",
-            images: ["/placeholder.svg?height=400&width=600"],
-            seller_id: "seller2",
-            is_approved: true,
-          },
-          {
-            id: "6",
-            title: "Paris Luxury Weekend",
-            description: "Experience the city of lights with this luxury weekend getaway.",
-            destination: "France",
-            price: 1299,
-            duration: 3,
-            category: "Luxury",
-            images: ["/placeholder.svg?height=400&width=600"],
-            seller_id: "seller3",
-            is_approved: true,
-          },
-        ]
 
-        setPackages(mockPackages)
-        setFilteredPackages(mockPackages)
         console.log('mockpackages', filteredPackages)
       } finally {
         setLoading(false)
@@ -176,8 +102,62 @@ export default function ExplorePage() {
     )
   }
 
+  useEffect(() => {
+    // Check if popup was dismissed before
+    if (typeof window !== "undefined" && localStorage.getItem("explorePopupDismissed") === "true") {
+      setShowPopup(false)
+      return
+    }
+    const timer = setTimeout(() => setShowPopup(true), 2000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    if (showPopup) {
+      document.body.classList.add("overflow-hidden")
+    } else {
+      document.body.classList.remove("overflow-hidden")
+    }
+    return () => {
+      document.body.classList.remove("overflow-hidden")
+    }
+  }, [showPopup])
+
+  const handleClosePopup = () => {
+    setShowPopup(false)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("explorePopupDismissed", "true")
+    }
+  }
   return (
-    <div className="container py-8">
+    <div className="container py-8 relative">
+      {/* Popup Modal */}
+      {showPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+              onClick={handleClosePopup}
+              aria-label="Close"
+            >
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <h2 className="text-xl font-bold mb-2 text-center">This month's Top Travel Agencies!</h2>
+            <p className="mb-4 text-gray-600">
+              <ol>
+                <li>1. Agency One - Specializing in luxury travel experiences.</li>
+                <li>2. Agency Two - Known for budget-friendly packages.</li>
+                <li>3. Agency Three - Experts in adventure and outdoor tours.</li>
+              </ol>
+            </p>
+            {/* <Button onClick={() => setShowPopup(false)} className="w-full">Get Started</Button> */}
+          </div>
+        </div>
+      )}
+
       <h1 className="text-3xl font-bold mb-8">Explore Travel Packages</h1>
 
       <div className="flex flex-col md:flex-row gap-8">
@@ -250,7 +230,7 @@ export default function ExplorePage() {
                   className="w-full"
                   onClick={() => {
                     setSearchTerm("")
-                    setPriceRange([0, 5000])
+                    setPriceRange([0, 25000])
                     setSelectedCategories([])
                   }}
                 >
@@ -312,7 +292,7 @@ export default function ExplorePage() {
                     <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{pkg.description}</p>
                     <div className="mt-4 flex items-center justify-between">
                       <p className="font-semibold">
-                        ₹{pkg.price}
+                        ₹{pkg.final_price?.toLocaleString() || pkg.price}
                         <span className="text-sm font-normal text-muted-foreground"> /person</span>
                       </p>
                       <p className="text-sm text-muted-foreground">{pkg.duration} days</p>

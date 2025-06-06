@@ -14,6 +14,7 @@ interface Package {
     description: string
     destination: string
     price: number
+    final_price:number
     discount: number
     duration: number
     category: string

@@ -23,19 +23,19 @@ interface SlideProps {
 const slides: SlideProps[] = [
     {
         imageUrl: "/utt.gif",
-        interval: 10000,
+        interval: 5000,
         text: "UTTARAKHAND",
         subtext:"Explore the majestic beauty of the Himalayas, serene rivers, and ancient temples. Uttarakhand offers a perfect escape for nature lovers and adventure seekers."
     },
     {
         imageUrl: "/manal.gif",
-        interval: 10000,
+        interval: 5000,
         text: "MANALI",
         subtext:"Nestled in the heart of Himachal, Manali charms with its snow-capped peaks and vibrant local culture. An ideal destination for trekking, skiing, and romantic getaways."
     },
     {
         imageUrl: "/lakshwa.gif",
-        interval: 10000,
+        interval: 5000,
         text: "LAKSHADWEEP",
         subtext:"Discover the untouched paradise of Lakshadweep, with crystal-clear waters and exotic marine life. Perfect for snorkeling, beach hopping, and peaceful island retreats."
     },

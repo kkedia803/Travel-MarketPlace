@@ -286,9 +286,9 @@ export default function PackageDetailsPage() {
   if (!pkg) {
     return (
       <div className="container py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">Package not found</h1>
+        <h1 className="text-2xl font-bold mb-4">Finding your package...</h1>
         <p className="text-muted-foreground mb-8">
-          The package you're looking for doesn't exist or has been removed.
+          Asking database people nicely. They said they’ll get back to us.
         </p>
         <Button onClick={() => router.push("/explore")}>Browse Packages</Button>
       </div>

@@ -62,11 +62,11 @@ export default function Home() {
       {/* Coming Soon Travel Section */}
       <ComingSoonTravel />
 
-      {/* Featured Packages */}
-      <FeaturedPackages />
-
       {/* Favourite Destinations Section */}
       <FavDestinations />
+
+      {/* Featured Packages */}
+      <FeaturedPackages />
 
       {/* Explore by Category */}
       <ExploreCategory />
