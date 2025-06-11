@@ -10,26 +10,42 @@ export const metadata: Metadata = {
 }
 
 export default async function ProfilePage() {
-  // const cookieStore = cookies()
-  // const supabase = createServerComponentClient({ cookies: () => cookieStore })
-  const supabase = createServerComponentClient({ cookies });
-  
-  const { data: { session } } = await supabase.auth.getSession()
-  
-  if (!session) {
-    redirect('/login')
+
+  const cookieStore = cookies()
+  const supabase = createServerComponentClient({ cookies: () => cookieStore })
+
+
+  const {
+    data: { session: session },
+    error: sessionError,
+  } = await supabase.auth.getSession()
+
+  if (sessionError) {
+    console.error('Session fetch error:', sessionError.message)
   }
-  
-  const { data: profile } = await supabase
+
+  if (!session) {
+    redirect('/auth/login');
+  }
+
+  const { data: profile, error } = await supabase
     .from('profiles')
     .select('*')
-    .eq('id', session.user.id)
-    .single()
-  
+    .eq('id', session?.user.id)
+    .single();
+
+  if (error) {
+    return <div>Error loading profile: {error.message}</div>;
+  }
+
+  if (!profile) {
+    return <div>No profile found.</div>;
+  }
+
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
       <ProfileForm initialProfile={profile} />
     </div>
-  )
+  );
 }
