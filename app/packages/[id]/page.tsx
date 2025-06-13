@@ -295,7 +295,8 @@ export default function PackageDetailsPage() {
     );
   }
 
-  const parsed = JSON.parse(pkg.itinerary);
+  // const parsed = JSON.parse(pkg.itinerary);
+  const parsed = pkg.itinerary;
   const itinerary = Array.isArray(parsed) ? parsed : [];
   const inclusions = pkg.inclusion;
   const exclusion = pkg.exclusion;

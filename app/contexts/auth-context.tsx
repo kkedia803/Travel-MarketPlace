@@ -76,7 +76,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+
     await supabase.auth.signOut()
+
+    localStorage.removeItem("sb-auth-token")
+
+    // 🧹 Clear cookies (client-side)
+  const cookieNames = ['sb-auth-token', 'sb-refresh-token']
+  cookieNames.forEach(name => {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
+  })
+
     setUser(null)
   }
 
@@ -102,13 +112,13 @@ async function getUserDetails(): Promise<UserDetails | null> {
 
   return data
     ? {
-        id: user.id,
-        email: user.email || "",
-        role: data.role || "user",
-        name: data.name,
-        avatar_url: data.avatar_url,
-        length: 0, // Add a default value for the length property
-      }
+      id: user.id,
+      email: user.email || "",
+      role: data.role || "user",
+      name: data.name,
+      avatar_url: data.avatar_url,
+      length: 0, // Add a default value for the length property
+    }
     : null
 }
 

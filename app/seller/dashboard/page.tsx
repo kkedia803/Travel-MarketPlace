@@ -266,72 +266,7 @@ export default function SellerDashboard() {
         setBookings(bookingsData || []);
       } catch (error) {
         console.error("Error fetching data:", error);
-        const mockPackages = [
-          {
-            id: "1",
-            title: "Bali Paradise",
-            description:
-              "Experience the beauty of Bali with this all-inclusive package.",
-            destination: "Bali, Indonesia",
-            price: 1299,
-            duration: 7,
-            category: "Beach Getaways",
-            images: ["/placeholder.svg?height=400&width=600"] as string[],
-            seller_id: user.id,
-            is_approved: true,
-            created_at: "2023-04-10T08:30:00Z",
-          },
-          {
-            id: "2",
-            title: "Swiss Alps Adventure",
-            description:
-              "Explore the majestic Swiss Alps with guided tours and luxury accommodations.",
-            destination: "Switzerland",
-            price: 1899,
-            duration: 10,
-            category: "Mountain Escapes",
-            images: ["/placeholder.svg?height=400&width=600"],
-            seller_id: user.id,
-            is_approved: false,
-            created_at: "2023-05-15T14:45:00Z",
-          },
-        ] as TravelPackage[];
-
-        const mockBookings = [
-          {
-            id: "1",
-            package_id: "1",
-            user_id: "user1",
-            travelers: 2,
-            status: "confirmed",
-            created_at: "2023-05-20T10:30:00Z",
-            user: {
-              email: "john@example.com",
-              name: "John Doe",
-            },
-            package: {
-              title: "Bali Paradise",
-            },
-          },
-          {
-            id: "2",
-            package_id: "1",
-            user_id: "user2",
-            travelers: 1,
-            status: "pending",
-            created_at: "2023-06-05T16:20:00Z",
-            user: {
-              email: "jane@example.com",
-              name: "Jane Smith",
-            },
-            package: {
-              title: "Bali Paradise",
-            },
-          },
-        ] as Booking[];
-
-        setPackages(mockPackages);
-        setBookings(mockBookings);
+        
       } finally {
         setLoading(false);
       }
@@ -342,8 +277,7 @@ export default function SellerDashboard() {
 
   const handleAddPackage = async () => {
     try {
-      console.log(newPackage);
-      console.log(newPackage.images);
+      console.log("Submitting package:", newPackage);
       const { data, error } = await supabase
         .from("packages")
         .insert({
@@ -352,6 +286,8 @@ export default function SellerDashboard() {
           is_approved: false,
         })
         .select();
+
+      console.log("Supabase response:", { data, error });
 
       if (error) throw error;
 
@@ -382,8 +318,7 @@ export default function SellerDashboard() {
       console.error("Error adding package:", error);
       toast({
         title: "Failed to add package",
-        description:
-          "There was an error adding your package. Please try again.",
+        description: "There was an error adding your package. Please try again.",
         variant: "destructive",
       });
     }
