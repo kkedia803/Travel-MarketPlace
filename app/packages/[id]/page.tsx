@@ -20,6 +20,8 @@ import {
   Ticket,
   TentTree,
   MountainSnow,
+  Building2,
+  Phone
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast"
 import { DayPicker } from "react-day-picker";
@@ -56,7 +58,12 @@ interface Package {
   exclusion?: string[];
   cancellation_policy?: string[];
   start_dates?: string[];
+  profiles?: {
+    company_name: string;
+    phone_number: string;
+  }
 }
+
 interface Review {
   rating: number;
   review_text: string;
@@ -106,7 +113,8 @@ export default function PackageDetailsPage() {
       try {
         const { data: packageData, error: packageError } = await supabase
           .from("packages")
-          .select("*")
+          .select(`*,
+            profiles(phone_number, company_name)`)
           .eq("id", params.id)
           .single();
 
@@ -125,6 +133,7 @@ export default function PackageDetailsPage() {
           setPackageFeatures(null); // Optional fallback
         } else {
           setPackageFeatures(featureData);
+          console.log("Package features:", featureData);
         }
       } catch (error) {
         console.error("Error fetching package:", error);
@@ -389,6 +398,7 @@ export default function PackageDetailsPage() {
         <div className="md:col-span-3">
           {/* Main Image with Arrows */}
           <div className="relative aspect-video overflow-hidden rounded-lg mb-4">
+
             {/* Left Arrow */}
             {activeImage > 0 && (
               <button
@@ -438,6 +448,7 @@ export default function PackageDetailsPage() {
         {/* Right: Key Points Section as Grid */}
         {packageFeatures && (
           <div className="md:col-span-1 px-5 py-5 hidden md:block">
+
             <h2 className="text-2xl font-semibold mb-1 text-gray-800 pt-2">
               What's Included
             </h2>
@@ -490,7 +501,29 @@ export default function PackageDetailsPage() {
 
       {/* Package Title and Basic Info */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{pkg.title}</h1>
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
+          <h1 className="text-3xl font-bold mb-2">{pkg.title}</h1>
+          {pkg.profiles?.company_name ? (
+            <Badge className="flex items-center gap-2 flex-col mb-1">
+              <div className="flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-white" />
+                <span>
+                  <span className="font-medium text-white text-sm">Sold by:</span>{' '}
+                  <span className="text-lg">{pkg.profiles?.company_name || "Unknown"}</span>
+                </span>
+              </div>
+
+              {/* <div className="flex items-center gap-2 text-md ">
+                <Phone className="w-4 h-4 text-white" />
+                <span>
+                  <span className="font-medium text-white text-sm">Contact:</span>{' '}
+                  <span className="text-lg">{pkg.profiles?.phone_number || "Unknown"}</span>
+                </span>
+              </div> */}
+            </Badge>
+          ) : ''}
+
+        </div>
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <div className="flex items-center">
             <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
