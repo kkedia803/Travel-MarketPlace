@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +35,7 @@ import {
 import { toast } from "@/hooks/use-toast"
 import { useAuth } from "@/app/contexts/auth-context";
 import { supabase } from "@/app/lib/supabase";
+import cities from "@/app/lib/cities";
 import {
   Eye,
   Check,
@@ -49,6 +50,7 @@ import {
   Clock,
   DollarSign,
   MapPin,
+  ChevronDown,
 } from "lucide-react";
 import {
   AreaChart,
@@ -78,6 +80,7 @@ interface TravelPackage {
   destination: string;
   price: number;
   duration: number;
+  nights: number;
   category: string;
   images: string[];
   seller_id: string;
@@ -143,29 +146,14 @@ export default function SellerDashboard() {
   const [loading, setLoading] = useState(true);
   const [isAddPackageOpen, setIsAddPackageOpen] = useState(false);
   const [formStep, setFormStep] = useState(0);
-  const [newPackage, setNewPackage] = useState<{
-    id?: string;
-    title: string;
-    description: string;
-    destination: string;
-    price: number;
-    duration: number;
-    category: string;
-    images: string[],
-    max_people: number;
-    boarding_point: string;
-    discount: number;
-    cancellation_policy: string[];
-    itinerary: { day: number; title: string; description: string }[];
-    inclusion: string[];
-    exclusion: string[];
-    start_dates?: string[];
-  }>({
+  const [newPackage, setNewPackage] = useState<Omit<TravelPackage, "final_price" | "seller_id" | "is_approved" | "created_at">>({
+    id: "",
     title: "",
     description: "",
     destination: "",
     price: 0,
-    duration: 1,
+    duration: 1, // days
+    nights: 0,   // <-- add this line
     category: "",
     images: [],
     max_people: 1,
@@ -185,7 +173,10 @@ export default function SellerDashboard() {
   const [selectedFeatures, setSelectedFeatures] = useState<{
     [key in FeatureKey]?: boolean;
   }>({});
-
+  
+  // const [showDropdown, setShowDropdown] = useState(false);
+  // const [filteredDestinations, setFilteredDestinations] = useState<string[]>([]);
+  // const dropdownRef = useRef<HTMLDivElement>(null);
 
 
   // const [monthlyData, setMonthlyData] = useState<{ name: string; value: number }[]>([]);
@@ -380,20 +371,23 @@ export default function SellerDashboard() {
       setSelectedDates([]);
       setSelectedFeatures({});
       setNewPackage({
-        title: "",
-        description: "",
-        destination: "",
-        price: 0,
-        duration: 1,
-        category: "",
-        images: ["/placeholder.svg?height=400&width=600"],
-        max_people: 1,
-        boarding_point: "",
-        discount: 0,
-        cancellation_policy: [] as string[],
-        itinerary: [{ day: 1, title: "", description: "" }],
-        inclusion: [] as string[],
-        exclusion: [] as string[],
+              id: "",
+              title: "",
+              description: "",
+              destination: "",
+              price: 0,
+              duration: 1,
+              nights: 0,
+              category: "",
+              images: ["/placeholder.svg?height=400&width=600"],
+              max_people: 1,
+              boarding_point: "",
+              discount: 0,
+              cancellation_policy: [] as string[],
+              itinerary: [{ day: 1, title: "", description: "" }],
+              inclusion: [] as string[],
+              exclusion: [] as string[],
+              start_dates: [] as string[],
       });
     } catch (error) {
       console.error("Error adding package:", error);
@@ -443,20 +437,22 @@ export default function SellerDashboard() {
       const { final_price, ...editablePackage } = pkgToEdit;
       console.log(editablePackage)
       setNewPackage({
-        ...editablePackage,
-        itinerary: Array.isArray(editablePackage.itinerary)
-          ? editablePackage.itinerary.map((item, index) => ({
-            day: index + 1,
-            title: item.title || "",
-            description: item.description || "",
-          }))
-          : [{ day: 1, title: "", description: "" }],
-        cancellation_policy: Array.isArray(editablePackage.cancellation_policy)
-          ? editablePackage.cancellation_policy
-          : [editablePackage.cancellation_policy || ""],
-        // start_dates: editablePackage.start_dates || [],
-        // start_dates: (editablePackage.start_dates || []).map((d => new Date(d).toISOString().split("T")[0])),
-      });
+              ...editablePackage,
+              id: editablePackage.id || "",
+              nights: editablePackage.nights ?? 0,
+              itinerary: Array.isArray(editablePackage.itinerary)
+                ? editablePackage.itinerary.map((item, index) => ({
+                  day: index + 1,
+                  title: item.title || "",
+                  description: item.description || "",
+                }))
+                : [{ day: 1, title: "", description: "" }],
+              cancellation_policy: Array.isArray(editablePackage.cancellation_policy)
+                ? editablePackage.cancellation_policy
+                : [editablePackage.cancellation_policy || ""],
+              // start_dates: editablePackage.start_dates || [],
+              // start_dates: (editablePackage.start_dates || []).map((d => new Date(d).toISOString().split("T")[0])),
+            });
       setSelectedDates(
         (editablePackage.start_dates || []).map(parseLocalDate)
       );
@@ -542,22 +538,24 @@ export default function SellerDashboard() {
       );
       setIsAddPackageOpen(false);
       setNewPackage({
-        title: "",
-        description: "",
-        destination: "",
-        price: 0,
-        duration: 1,
-        category: "",
-        images: ["/placeholder.svg?height=400&width=600"],
-        max_people: 1,
-        boarding_point: "",
-        discount: 0,
-        cancellation_policy: [] as string[],
-        itinerary: [{ day: 1, title: "", description: "" }],
-        inclusion: [] as string[],
-        exclusion: [] as string[],
-        start_dates: [] as string[],
-      });
+              id: "",
+              title: "",
+              description: "",
+              destination: "",
+              price: 0,
+              duration: 1,
+              nights: 0,
+              category: "",
+              images: ["/placeholder.svg?height=400&width=600"],
+              max_people: 1,
+              boarding_point: "",
+              discount: 0,
+              cancellation_policy: [] as string[],
+              itinerary: [{ day: 1, title: "", description: "" }],
+              inclusion: [] as string[],
+              exclusion: [] as string[],
+              start_dates: [] as string[],
+            });
       setSelectedFeatures({});
     } catch (error) {
       console.error("Error updating package:", error);
@@ -940,6 +938,42 @@ export default function SellerDashboard() {
     </Card>
   );
 
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [filteredCities, setFilteredCities] = useState<typeof cities>([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleDestinationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewPackage(prev => ({ ...prev, destination: value }));
+
+    if (value.length > 0) {
+      const filtered = cities.filter(
+        ({ city, state }) =>
+          city.toLowerCase().includes(value.toLowerCase()) ||
+          state.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredCities(filtered);
+      setShowDropdown(true);
+    } else {
+      setShowDropdown(false);
+    }
+  };
+
+  const selectDestination = (destination: string) => {
+    setNewPackage(prev => ({ ...prev, destination }));
+    setShowDropdown(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <div className="container py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -954,21 +988,24 @@ export default function SellerDashboard() {
             asChild
             onClick={() => {
               setNewPackage({
-                title: "",
-                description: "",
-                destination: "",
-                price: 0,
-                duration: 1,
-                category: "",
-                images: ["/placeholder.svg?height=400&width=600"],
-                max_people: 1,
-                boarding_point: "",
-                discount: 0,
-                cancellation_policy: [] as string[],
-                itinerary: [{ day: 1, title: "", description: "" }],
-                inclusion: [] as string[],
-                exclusion: [] as string[],
-              });
+                              id: "",
+                              title: "",
+                              description: "",
+                              destination: "",
+                              price: 0,
+                              duration: 1,
+                              nights: 0,
+                              category: "",
+                              images: ["/placeholder.svg?height=400&width=600"],
+                              max_people: 1,
+                              boarding_point: "",
+                              discount: 0,
+                              cancellation_policy: [] as string[],
+                              itinerary: [{ day: 1, title: "", description: "" }],
+                              inclusion: [] as string[],
+                              exclusion: [] as string[],
+                              start_dates: [] as string[],
+                            });
               setFormStep(0);
             }}
           >
@@ -1049,22 +1086,52 @@ export default function SellerDashboard() {
                       package's unique appeal.
                     </p>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 relative" ref={dropdownRef}>
                     <Label htmlFor="destination">
+                      <MapPin className="w-4 h-4 inline mr-1" />
                       Destination <span className="text-destructive">*</span>
                     </Label>
-                    <Input
-                      id="destination"
-                      value={newPackage.destination}
-                      onChange={(e) =>
-                        setNewPackage({
-                          ...newPackage,
-                          destination: e.target.value,
-                        })
-                      }
-                      placeholder="e.g. Bali, Indonesia"
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="destination"
+                        value={newPackage.destination}
+                        onChange={handleDestinationChange}
+                        onFocus={() => {
+                          if (newPackage.destination.length > 0) {
+                            const filtered = cities.filter(
+                              ({ city, state }) =>
+                                city.toLowerCase().includes(newPackage.destination.toLowerCase()) ||
+                                state.toLowerCase().includes(newPackage.destination.toLowerCase())
+                            );
+                            setFilteredCities(filtered);
+                            setShowDropdown(true);
+                          }
+                        }}
+                        placeholder="Start typing city or state..."
+                        required
+                        className="pr-10"
+                      />
+                      <ChevronDown className="absolute right-3 top-3.5 w-5 h-5 text-gray-400" />
+                    </div>
+                    {showDropdown && filteredCities.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {filteredCities.slice(0, 10).map(({ city, state }, index) => (
+                          <div
+                            key={index}
+                            onClick={() => selectDestination(`${city}, ${state}`)}
+                            className="px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-100 last:border-b-0 flex items-center gap-2"
+                          >
+                            <MapPin className="w-4 h-4 text-indigo-500" />
+                            <span className="text-gray-800">{city}, <span className="text-gray-500">{state}</span></span>
+                          </div>
+                        ))}
+                        {filteredCities.length > 10 && (
+                          <div className="px-4 py-2 text-sm text-gray-500 bg-gray-50">
+                            ... and {filteredCities.length - 10} more cities
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1091,7 +1158,7 @@ export default function SellerDashboard() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="price">
                       Price (INR) <span className="text-destructive">*</span>
@@ -1129,6 +1196,24 @@ export default function SellerDashboard() {
                     />
                   </div>
                   <div className="space-y-2">
+                    <Label htmlFor="nights">
+                      Duration (Nights) <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="nights"
+                      type="number"
+                      value={newPackage.nights || ""}
+                      onChange={(e) =>
+                        setNewPackage({
+                          ...newPackage,
+                          nights: Number(e.target.value),
+                        })
+                      }
+                      placeholder="e.g. 6"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="category">
                       Category <span className="text-destructive">*</span>
                     </Label>
@@ -1143,23 +1228,19 @@ export default function SellerDashboard() {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Beach Getaways">Beach Getaways</SelectItem>
-                        <SelectItem value="Mountain Escapes">Mountain Escapes</SelectItem>
-                        <SelectItem value="Desert Adventures">Desert Adventures</SelectItem>
-                        <SelectItem value="Forest & Wildlife">Forest & Wildlife</SelectItem>
-                        <SelectItem value="Island Holidays">Island Holidays</SelectItem>
-                        <SelectItem value="Hill Stations">Hill Stations</SelectItem>
-                        <SelectItem value="Adventure & Trekking">Adventure & Trekking</SelectItem>
-                        <SelectItem value="Cultural Tours">Cultural Tours</SelectItem>
-                        <SelectItem value="Pilgrimage & Spiritual">Pilgrimage & Spiritual</SelectItem>
-                        <SelectItem value="Wellness & Yoga Retreats">Wellness & Yoga Retreats</SelectItem>
-                        <SelectItem value="Luxury Escapes">Luxury Escapes</SelectItem>
-                        <SelectItem value="Budget Travel">Budget Travel</SelectItem>
-                        <SelectItem value="Family Friendly">Family Friendly</SelectItem>
-                        <SelectItem value="Solo Travel">Solo Travel</SelectItem>
-                        <SelectItem value="Weekend Getaways">Weekend Getaways</SelectItem>
+                        <SelectItem value="Beach Getaways">
+                          Beach Getaways
+                        </SelectItem>
+                        <SelectItem value="Mountain Escapes">
+                          Mountain Escapes
+                        </SelectItem>
+                        <SelectItem value="Cultural Tours">
+                          Cultural Tours
+                        </SelectItem>
+                        <SelectItem value="Adventure">Adventure</SelectItem>
+                        <SelectItem value="Luxury">Luxury</SelectItem>
+                        <SelectItem value="Budget">Budget</SelectItem>
                       </SelectContent>
-
                     </Select>
                   </div>
                   <div className="space-y-2">
@@ -1671,7 +1752,9 @@ export default function SellerDashboard() {
                         </div>
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span>Duration: {pkg.duration} days</span>
+                          <span>
+                            Duration: {pkg.duration} days{typeof pkg.nights === "number" && pkg.nights > 0 ? ` ${pkg.nights} nights` : ""}
+                          </span>
                         </div>
                         <div className="flex items-center">
                           <Package className="h-4 w-4 mr-2 text-muted-foreground" />

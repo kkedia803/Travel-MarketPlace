@@ -81,12 +81,24 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: false })
       .limit(5)
     
+    // Define types for bookings and packages
+    type Package = { id: string; title: string; price?: number; seller_id: string };
+    type Profile = { id: string; name: string; email: string };
+    type Booking = {
+      id: string;
+      travelers: number;
+      status: string;
+      created_at: string;
+      packages: Package | Package[];
+      profiles?: Profile | Profile[];
+    };
+
     // Format recent bookings
-    const recentBookings = recentBookingsRaw?.map(booking => ({
+    const recentBookings = (recentBookingsRaw as Booking[] | undefined)?.map(booking => ({
       id: booking.id,
-      packageId: booking.packages.id,
-      packageTitle: booking.packages.title,
-      userName: booking.profiles.name,
+      packageId: Array.isArray(booking.packages) ? booking.packages[0]?.id : (booking.packages as Package).id,
+      packageTitle: Array.isArray(booking.packages) ? booking.packages[0]?.title : (booking.packages as Package).title,
+      userName: Array.isArray(booking.profiles) ? booking.profiles[0]?.name : (booking.profiles as Profile | undefined)?.name,
       travelers: booking.travelers,
       status: booking.status,
       createdAt: booking.created_at
