@@ -95,6 +95,7 @@ interface TravelPackage {
   exclusion: string[],
   final_price: number;
   start_dates: string[];
+  status?:string;
 }
 
 
@@ -1131,6 +1132,26 @@ export default function SellerDashboard() {
                         )}
                       </div>
                     )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="status">
+                      Package Status <span className="text-destructive">*</span>
+                    </Label>
+                    <Select
+                      value={newPackage.status}
+                      onValueChange={(value) =>
+                        setNewPackage({ ...newPackage, status: value })
+                      }
+                      required
+                    >
+                      <SelectTrigger id="category">
+                        <SelectValue placeholder="Select package status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 

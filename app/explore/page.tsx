@@ -62,7 +62,7 @@ export default function ExplorePage() {
     const fetchPackages = async () => {
       setLoading(true)
       try {
-        const { data, error } = await supabase.from("packages").select("*").eq("is_approved", true)
+        const { data, error } = await supabase.from("packages").select("*").eq("is_approved", true).eq("status", "active")
         if (error) throw error
         setPackages(data || [])
       } catch (error) {
