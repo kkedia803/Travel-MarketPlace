@@ -80,6 +80,7 @@ interface TravelPackage {
   destination: string;
   price: number;
   duration: number;
+  nights: number;
   category: string;
   images: string[];
   seller_id: string;
@@ -145,29 +146,14 @@ export default function SellerDashboard() {
   const [loading, setLoading] = useState(true);
   const [isAddPackageOpen, setIsAddPackageOpen] = useState(false);
   const [formStep, setFormStep] = useState(0);
-  const [newPackage, setNewPackage] = useState<{
-    id?: string;
-    title: string;
-    description: string;
-    destination: string;
-    price: number;
-    duration: number;
-    category: string;
-    images: string[],
-    max_people: number;
-    boarding_point: string;
-    discount: number;
-    cancellation_policy: string[];
-    itinerary: { day: number; title: string; description: string }[];
-    inclusion: string[];
-    exclusion: string[];
-    start_dates?: string[];
-  }>({
+  const [newPackage, setNewPackage] = useState<Omit<TravelPackage, "final_price" | "seller_id" | "is_approved" | "created_at">>({
+    id: "",
     title: "",
     description: "",
     destination: "",
     price: 0,
-    duration: 1,
+    duration: 1, // days
+    nights: 0,   // <-- add this line
     category: "",
     images: [],
     max_people: 1,
@@ -284,45 +270,6 @@ export default function SellerDashboard() {
     });
   };
 
-    // Comprehensive list of Indian destinations
-  const indianDestinations = [
-    // Popular Tourist Destinations
-    'Goa', 'Kerala (Backwaters)', 'Rajasthan (Jaipur)', 'Rajasthan (Udaipur)', 'Rajasthan (Jodhpur)',
-    'Agra (Taj Mahal)', 'Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Bangalore', 'Hyderabad',
-    
-    // Hill Stations
-    'Shimla', 'Manali', 'Dharamshala', 'Mussoorie', 'Nainital', 'Darjeeling', 'Gangtok',
-    'Ooty', 'Kodaikanal', 'Munnar', 'Coorg', 'Mount Abu', 'Lansdowne', 'Kasauli',
-    
-    // Beach Destinations
-    'Goa (North)', 'Goa (South)', 'Pondicherry', 'Varkala', 'Kovalam', 'Puri', 'Digha',
-    'Gokarna', 'Tarkarli', 'Mandarmani', 'Andaman Islands', 'Lakshadweep',
-    
-    // Adventure & Trekking
-    'Leh Ladakh', 'Spiti Valley', 'Rishikesh', 'Auli', 'Valley of Flowers', 'Kedarnath',
-    'Badrinath', 'Rohtang Pass', 'Solang Valley', 'Triund', 'Hampta Pass',
-    
-    // Cultural & Historical
-    'Varanasi', 'Amritsar', 'Khajuraho', 'Ajanta Ellora', 'Hampi', 'Mysore', 'Madurai',
-    'Kanchipuram', 'Thanjavur', 'Mahabalipuram', 'Konark', 'Bhubaneswar',
-    
-    // Wildlife & Nature
-    'Jim Corbett National Park', 'Ranthambore', 'Kaziranga', 'Periyar', 'Bandhavgarh',
-    'Kanha', 'Sundarbans', 'Gir Forest', 'Bharatpur', 'Nagarhole',
-    
-    // Northeastern States
-    'Shillong', 'Cherrapunji', 'Aizawl', 'Imphal', 'Kohima', 'Itanagar', 'Tawang',
-    'Ziro Valley', 'Majuli Island', 'Mawlynnong',
-    
-    // Spiritual Destinations
-    'Haridwar', 'Vrindavan', 'Mathura', 'Bodh Gaya', 'Sarnath', 'Ajmer', 'Pushkar',
-    'Tirupati', 'Shirdi', 'Dwarka', 'Somnath', 'Rameshwaram',
-    
-    // Unique Destinations
-    'Rann of Kutch', 'Khardung La', 'Magnetic Hill', 'Living Root Bridges',
-    'Loktak Lake', 'Dal Lake', 'Chilika Lake', 'Pangong Tso', 'Tso Moriri'
-  ];
-
   useEffect(() => {
     if (!user) {
       router.push("/auth/login");
@@ -424,20 +371,23 @@ export default function SellerDashboard() {
       setSelectedDates([]);
       setSelectedFeatures({});
       setNewPackage({
-        title: "",
-        description: "",
-        destination: "",
-        price: 0,
-        duration: 1,
-        category: "",
-        images: ["/placeholder.svg?height=400&width=600"],
-        max_people: 1,
-        boarding_point: "",
-        discount: 0,
-        cancellation_policy: [] as string[],
-        itinerary: [{ day: 1, title: "", description: "" }],
-        inclusion: [] as string[],
-        exclusion: [] as string[],
+              id: "",
+              title: "",
+              description: "",
+              destination: "",
+              price: 0,
+              duration: 1,
+              nights: 0,
+              category: "",
+              images: ["/placeholder.svg?height=400&width=600"],
+              max_people: 1,
+              boarding_point: "",
+              discount: 0,
+              cancellation_policy: [] as string[],
+              itinerary: [{ day: 1, title: "", description: "" }],
+              inclusion: [] as string[],
+              exclusion: [] as string[],
+              start_dates: [] as string[],
       });
     } catch (error) {
       console.error("Error adding package:", error);
@@ -487,20 +437,22 @@ export default function SellerDashboard() {
       const { final_price, ...editablePackage } = pkgToEdit;
       console.log(editablePackage)
       setNewPackage({
-        ...editablePackage,
-        itinerary: Array.isArray(editablePackage.itinerary)
-          ? editablePackage.itinerary.map((item, index) => ({
-            day: index + 1,
-            title: item.title || "",
-            description: item.description || "",
-          }))
-          : [{ day: 1, title: "", description: "" }],
-        cancellation_policy: Array.isArray(editablePackage.cancellation_policy)
-          ? editablePackage.cancellation_policy
-          : [editablePackage.cancellation_policy || ""],
-        // start_dates: editablePackage.start_dates || [],
-        // start_dates: (editablePackage.start_dates || []).map((d => new Date(d).toISOString().split("T")[0])),
-      });
+              ...editablePackage,
+              id: editablePackage.id || "",
+              nights: editablePackage.nights ?? 0,
+              itinerary: Array.isArray(editablePackage.itinerary)
+                ? editablePackage.itinerary.map((item, index) => ({
+                  day: index + 1,
+                  title: item.title || "",
+                  description: item.description || "",
+                }))
+                : [{ day: 1, title: "", description: "" }],
+              cancellation_policy: Array.isArray(editablePackage.cancellation_policy)
+                ? editablePackage.cancellation_policy
+                : [editablePackage.cancellation_policy || ""],
+              // start_dates: editablePackage.start_dates || [],
+              // start_dates: (editablePackage.start_dates || []).map((d => new Date(d).toISOString().split("T")[0])),
+            });
       setSelectedDates(
         (editablePackage.start_dates || []).map(parseLocalDate)
       );
@@ -586,22 +538,24 @@ export default function SellerDashboard() {
       );
       setIsAddPackageOpen(false);
       setNewPackage({
-        title: "",
-        description: "",
-        destination: "",
-        price: 0,
-        duration: 1,
-        category: "",
-        images: ["/placeholder.svg?height=400&width=600"],
-        max_people: 1,
-        boarding_point: "",
-        discount: 0,
-        cancellation_policy: [] as string[],
-        itinerary: [{ day: 1, title: "", description: "" }],
-        inclusion: [] as string[],
-        exclusion: [] as string[],
-        start_dates: [] as string[],
-      });
+              id: "",
+              title: "",
+              description: "",
+              destination: "",
+              price: 0,
+              duration: 1,
+              nights: 0,
+              category: "",
+              images: ["/placeholder.svg?height=400&width=600"],
+              max_people: 1,
+              boarding_point: "",
+              discount: 0,
+              cancellation_policy: [] as string[],
+              itinerary: [{ day: 1, title: "", description: "" }],
+              inclusion: [] as string[],
+              exclusion: [] as string[],
+              start_dates: [] as string[],
+            });
       setSelectedFeatures({});
     } catch (error) {
       console.error("Error updating package:", error);
@@ -1034,21 +988,24 @@ export default function SellerDashboard() {
             asChild
             onClick={() => {
               setNewPackage({
-                title: "",
-                description: "",
-                destination: "",
-                price: 0,
-                duration: 1,
-                category: "",
-                images: ["/placeholder.svg?height=400&width=600"],
-                max_people: 1,
-                boarding_point: "",
-                discount: 0,
-                cancellation_policy: [] as string[],
-                itinerary: [{ day: 1, title: "", description: "" }],
-                inclusion: [] as string[],
-                exclusion: [] as string[],
-              });
+                              id: "",
+                              title: "",
+                              description: "",
+                              destination: "",
+                              price: 0,
+                              duration: 1,
+                              nights: 0,
+                              category: "",
+                              images: ["/placeholder.svg?height=400&width=600"],
+                              max_people: 1,
+                              boarding_point: "",
+                              discount: 0,
+                              cancellation_policy: [] as string[],
+                              itinerary: [{ day: 1, title: "", description: "" }],
+                              inclusion: [] as string[],
+                              exclusion: [] as string[],
+                              start_dates: [] as string[],
+                            });
               setFormStep(0);
             }}
           >
@@ -1201,7 +1158,7 @@ export default function SellerDashboard() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="price">
                       Price (INR) <span className="text-destructive">*</span>
@@ -1235,6 +1192,24 @@ export default function SellerDashboard() {
                         })
                       }
                       placeholder="e.g. 7"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="nights">
+                      Duration (Nights) <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="nights"
+                      type="number"
+                      value={newPackage.nights || ""}
+                      onChange={(e) =>
+                        setNewPackage({
+                          ...newPackage,
+                          nights: Number(e.target.value),
+                        })
+                      }
+                      placeholder="e.g. 6"
                       required
                     />
                   </div>
@@ -1777,7 +1752,9 @@ export default function SellerDashboard() {
                         </div>
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span>Duration: {pkg.duration} days</span>
+                          <span>
+                            Duration: {pkg.duration} days{typeof pkg.nights === "number" && pkg.nights > 0 ? ` ${pkg.nights} nights` : ""}
+                          </span>
                         </div>
                         <div className="flex items-center">
                           <Package className="h-4 w-4 mr-2 text-muted-foreground" />
