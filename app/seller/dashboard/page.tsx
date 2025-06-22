@@ -74,7 +74,7 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 
 interface TravelPackage {
-  id: string;
+  id?: string;
   title: string;
   description: string;
   destination: string;
@@ -147,7 +147,6 @@ export default function SellerDashboard() {
   const [isAddPackageOpen, setIsAddPackageOpen] = useState(false);
   const [formStep, setFormStep] = useState(0);
   const [newPackage, setNewPackage] = useState<Omit<TravelPackage, "final_price" | "seller_id" | "is_approved" | "created_at">>({
-    id: "",
     title: "",
     description: "",
     destination: "",
@@ -173,7 +172,7 @@ export default function SellerDashboard() {
   const [selectedFeatures, setSelectedFeatures] = useState<{
     [key in FeatureKey]?: boolean;
   }>({});
-  
+
   // const [showDropdown, setShowDropdown] = useState(false);
   // const [filteredDestinations, setFilteredDestinations] = useState<string[]>([]);
   // const dropdownRef = useRef<HTMLDivElement>(null);
@@ -371,23 +370,23 @@ export default function SellerDashboard() {
       setSelectedDates([]);
       setSelectedFeatures({});
       setNewPackage({
-              id: "",
-              title: "",
-              description: "",
-              destination: "",
-              price: 0,
-              duration: 1,
-              nights: 0,
-              category: "",
-              images: ["/placeholder.svg?height=400&width=600"],
-              max_people: 1,
-              boarding_point: "",
-              discount: 0,
-              cancellation_policy: [] as string[],
-              itinerary: [{ day: 1, title: "", description: "" }],
-              inclusion: [] as string[],
-              exclusion: [] as string[],
-              start_dates: [] as string[],
+        
+        title: "",
+        description: "",
+        destination: "",
+        price: 0,
+        duration: 1,
+        nights: 0,
+        category: "",
+        images: ["/placeholder.svg?height=400&width=600"],
+        max_people: 1,
+        boarding_point: "",
+        discount: 0,
+        cancellation_policy: [] as string[],
+        itinerary: [{ day: 1, title: "", description: "" }],
+        inclusion: [] as string[],
+        exclusion: [] as string[],
+        start_dates: [] as string[],
       });
     } catch (error) {
       console.error("Error adding package:", error);
@@ -437,22 +436,22 @@ export default function SellerDashboard() {
       const { final_price, ...editablePackage } = pkgToEdit;
       console.log(editablePackage)
       setNewPackage({
-              ...editablePackage,
-              id: editablePackage.id || "",
-              nights: editablePackage.nights ?? 0,
-              itinerary: Array.isArray(editablePackage.itinerary)
-                ? editablePackage.itinerary.map((item, index) => ({
-                  day: index + 1,
-                  title: item.title || "",
-                  description: item.description || "",
-                }))
-                : [{ day: 1, title: "", description: "" }],
-              cancellation_policy: Array.isArray(editablePackage.cancellation_policy)
-                ? editablePackage.cancellation_policy
-                : [editablePackage.cancellation_policy || ""],
-              // start_dates: editablePackage.start_dates || [],
-              // start_dates: (editablePackage.start_dates || []).map((d => new Date(d).toISOString().split("T")[0])),
-            });
+        ...editablePackage,
+        id: editablePackage.id || "",
+        nights: editablePackage.nights ?? 0,
+        itinerary: Array.isArray(editablePackage.itinerary)
+          ? editablePackage.itinerary.map((item, index) => ({
+            day: index + 1,
+            title: item.title || "",
+            description: item.description || "",
+          }))
+          : [{ day: 1, title: "", description: "" }],
+        cancellation_policy: Array.isArray(editablePackage.cancellation_policy)
+          ? editablePackage.cancellation_policy
+          : [editablePackage.cancellation_policy || ""],
+        // start_dates: editablePackage.start_dates || [],
+        // start_dates: (editablePackage.start_dates || []).map((d => new Date(d).toISOString().split("T")[0])),
+      });
       setSelectedDates(
         (editablePackage.start_dates || []).map(parseLocalDate)
       );
@@ -538,24 +537,24 @@ export default function SellerDashboard() {
       );
       setIsAddPackageOpen(false);
       setNewPackage({
-              id: "",
-              title: "",
-              description: "",
-              destination: "",
-              price: 0,
-              duration: 1,
-              nights: 0,
-              category: "",
-              images: ["/placeholder.svg?height=400&width=600"],
-              max_people: 1,
-              boarding_point: "",
-              discount: 0,
-              cancellation_policy: [] as string[],
-              itinerary: [{ day: 1, title: "", description: "" }],
-              inclusion: [] as string[],
-              exclusion: [] as string[],
-              start_dates: [] as string[],
-            });
+       
+        title: "",
+        description: "",
+        destination: "",
+        price: 0,
+        duration: 1,
+        nights: 0,
+        category: "",
+        images: ["/placeholder.svg?height=400&width=600"],
+        max_people: 1,
+        boarding_point: "",
+        discount: 0,
+        cancellation_policy: [] as string[],
+        itinerary: [{ day: 1, title: "", description: "" }],
+        inclusion: [] as string[],
+        exclusion: [] as string[],
+        start_dates: [] as string[],
+      });
       setSelectedFeatures({});
     } catch (error) {
       console.error("Error updating package:", error);
@@ -988,24 +987,24 @@ export default function SellerDashboard() {
             asChild
             onClick={() => {
               setNewPackage({
-                              id: "",
-                              title: "",
-                              description: "",
-                              destination: "",
-                              price: 0,
-                              duration: 1,
-                              nights: 0,
-                              category: "",
-                              images: ["/placeholder.svg?height=400&width=600"],
-                              max_people: 1,
-                              boarding_point: "",
-                              discount: 0,
-                              cancellation_policy: [] as string[],
-                              itinerary: [{ day: 1, title: "", description: "" }],
-                              inclusion: [] as string[],
-                              exclusion: [] as string[],
-                              start_dates: [] as string[],
-                            });
+                
+                title: "",
+                description: "",
+                destination: "",
+                price: 0,
+                duration: 1,
+                nights: 0,
+                category: "",
+                images: ["/placeholder.svg?height=400&width=600"],
+                max_people: 1,
+                boarding_point: "",
+                discount: 0,
+                cancellation_policy: [] as string[],
+                itinerary: [{ day: 1, title: "", description: "" }],
+                inclusion: [] as string[],
+                exclusion: [] as string[],
+                start_dates: [] as string[],
+              });
               setFormStep(0);
             }}
           >
@@ -1228,18 +1227,21 @@ export default function SellerDashboard() {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Beach Getaways">
-                          Beach Getaways
-                        </SelectItem>
-                        <SelectItem value="Mountain Escapes">
-                          Mountain Escapes
-                        </SelectItem>
-                        <SelectItem value="Cultural Tours">
-                          Cultural Tours
-                        </SelectItem>
-                        <SelectItem value="Adventure">Adventure</SelectItem>
-                        <SelectItem value="Luxury">Luxury</SelectItem>
-                        <SelectItem value="Budget">Budget</SelectItem>
+                        <SelectItem value="Beach Getaways">Beach Getaways</SelectItem>
+                        <SelectItem value="Mountain Escapes">Mountain Escapes</SelectItem>
+                        <SelectItem value="Desert Adventures">Desert Adventures</SelectItem>
+                        <SelectItem value="Forest & Wildlife">Forest & Wildlife</SelectItem>
+                        <SelectItem value="Island Holidays">Island Holidays</SelectItem>
+                        <SelectItem value="Hill Stations">Hill Stations</SelectItem>
+                        <SelectItem value="Adventure & Trekking">Adventure & Trekking</SelectItem>
+                        <SelectItem value="Cultural Tours">Cultural Tours</SelectItem>
+                        <SelectItem value="Pilgrimage & Spiritual">Pilgrimage & Spiritual</SelectItem>
+                        <SelectItem value="Wellness & Yoga Retreats">Wellness & Yoga Retreats</SelectItem>
+                        <SelectItem value="Luxury Escapes">Luxury Escapes</SelectItem>
+                        <SelectItem value="Budget Travel">Budget Travel</SelectItem>
+                        <SelectItem value="Family Friendly">Family Friendly</SelectItem>
+                        <SelectItem value="Solo Travel">Solo Travel</SelectItem>
+                        <SelectItem value="Weekend Getaways">Weekend Getaways</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1771,7 +1773,7 @@ export default function SellerDashboard() {
                             variant="outline"
                             size="sm"
                             className="gap-1"
-                            onClick={() => handlePkgEdit(pkg.id)}
+                            onClick={() => handlePkgEdit(pkg?.id || "")}
                           >
                             <Edit className="h-4 w-4" /> Edit
                           </Button>
@@ -1779,7 +1781,7 @@ export default function SellerDashboard() {
                             variant="destructive"
                             size="sm"
                             className="gap-1"
-                            onClick={() => handlePkgDelete(pkg.id)}
+                            onClick={() => handlePkgDelete(pkg?.id || "")}
                           >
                             <Trash className="h-4 w-4" /> Delete
                           </Button>
