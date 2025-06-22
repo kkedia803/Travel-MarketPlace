@@ -12,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { ImageUpload } from "@/components/ui/image-upload";
+import { useAuth } from "@/app/contexts/auth-context"
+import { Eye, EyeClosed } from "lucide-react";
 
 interface ProfileFormProps {
   initialProfile: any
@@ -21,6 +23,18 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
   const [profile, setProfile] = useState(initialProfile)
   const [isSaving, setIsSaving] = useState(false)
   const [showUploader, setShowUploader] = useState(false);
+  const { reAuthenticate } = useAuth()
+
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isPasswordChanging, setIsPasswordChanging] = useState(false);
+
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   const supabase = createClientComponentClient()
 
@@ -30,6 +44,81 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
       ...prev,
       [name]: value
     }))
+  }
+
+  const handlePasswordChange = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({
+        title: 'Error',
+        description: 'Please fill in all password fields',
+        variant: 'destructive',
+      })
+
+      return;
+    }
+
+    if (newPassword != confirmPassword) {
+      toast({
+        title: 'Error',
+        description: 'New Password and Confirm Password do not match',
+        variant: 'destructive'
+      })
+
+      return;
+    }
+
+    try {
+      const { error: authenticateError } = await reAuthenticate(profile.name, currentPassword);
+
+      //Authenticate current password
+      if (authenticateError) {
+        toast({
+          title: 'Error',
+          description: 'Current Password is wrong!',
+          variant: 'destructive'
+        })
+
+        return;
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Current Password is correct, updating password...',
+        variant: 'success'
+      })
+      setIsPasswordChanging(true)
+
+      // Update password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (updateError) {
+        toast({
+          title: 'Error',
+          description: 'Error changing password, try again later!',
+          variant: 'destructive'
+        })
+        throw updateError;
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Password changed successfully',
+        variant: 'success'
+      })
+      setIsPasswordChanging(false)
+      setNewPassword("");
+      setConfirmPassword("");
+      setCurrentPassword("");
+    }
+    catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Error changing password',
+        variant: 'destructive'
+      })
+    }
   }
 
   const handleSave = async () => {
@@ -186,30 +275,73 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="current_password">Current Password</Label>
-                  <Input
-                    id="current_password"
-                    type="password"
-                  />
+                  <div className='relative max-w-full md:max-w-xs'>
+                    <Input
+                      id="current_password"
+                      type={showCurrentPassword ? 'text' : 'password'}
+                      className=''
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className='absolute top-2.5 right-3 text-muted-foreground'
+                      aria-label="Toggle password visibility"
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    >
+                      {showCurrentPassword ? <EyeClosed className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="new_password">New Password</Label>
-                  <Input
-                    id="new_password"
-                    type="password"
-                  />
+                  <div className='relative max-w-full md:max-w-xs'>
+                    <Input
+                      id="new_password"
+                      type={showNewPassword ? 'text' : 'password'}
+                      className=''
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className='absolute top-2.5 right-3 text-muted-foreground'
+                      aria-label="Toggle password visibility"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                    >
+                      {showNewPassword ? <EyeClosed className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirm_password">Confirm New Password</Label>
-                  <Input
-                    id="confirm_password"
-                    type="password"
-                  />
+                  <div className='relative max-w-full md:max-w-xs'>
+                    <Input
+                      id="confirm_password"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      className=''
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className='absolute top-2.5 right-3 text-muted-foreground'
+                      aria-label="Toggle password visibility"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? <EyeClosed className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
                 </div>
-                <Button>Update Password</Button>
+                <Button onClick={() => handlePasswordChange()}>
+                  {isPasswordChanging ? "Updating" : "Update password"}
+                </Button>
               </div>
             </div>
 
-            <div className="space-y-4 pt-6">
+            {/* <div className="space-y-4 pt-6">
               <div>
                 <h3 className="text-lg font-medium">Two-Factor Authentication</h3>
                 <p className="text-sm text-muted-foreground">
@@ -223,7 +355,7 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
                 </p>
                 <Button variant="outline">Enable 2FA</Button>
               </div>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
       </TabsContent>
