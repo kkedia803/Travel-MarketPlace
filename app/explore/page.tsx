@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Star, Search, Filter, MapPin } from "lucide-react"
+import { Star, Search, Filter, MapPin, TrendingUp, IndianRupee } from "lucide-react"
 import { supabase } from "@/app/lib/supabase"
 
 interface Package {
@@ -24,6 +24,8 @@ interface Package {
   images: string[]
   seller_id: string
   is_approved: boolean
+  avg_rating: number
+  total_bookings_last_month: number
 }
 
 export default function ExplorePage() {
@@ -62,9 +64,10 @@ export default function ExplorePage() {
     const fetchPackages = async () => {
       setLoading(true)
       try {
-        const { data, error } = await supabase.from("packages").select("*").eq("is_approved", true).eq("status", "active")
+        const { data, error } = await supabase.from("packages_with_avg_rating_monthly_booking").select("*").eq("is_approved", true).eq("status", "active")
         if (error) throw error
         setPackages(data || [])
+        console.log("Fetched packages:", data)
       } catch (error) {
         console.error("Error fetching packages:", error)
       } finally {
@@ -295,11 +298,17 @@ export default function ExplorePage() {
                   <div className="p-4">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-xl">{pkg.title}</h3>
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 fill-primary text-primary mr-1" />
-                        <span className="text-sm font-medium">4.8</span>
-                      </div>
+                      {pkg.avg_rating && <div className="flex items-center">
+                        <Star className="h-4 w-4  text-yellow-500 fill-yellow-500 mr-1" />
+                        <span className="text-sm font-bold">{pkg.avg_rating}</span>
+                      </div>}
                     </div>
+                    {!pkg.avg_rating &&
+                      <div className="flex items-center py-2">
+                        <Star className="h-4 w-4  text-yellow-500 fill-yellow-500 mr-1" />
+                        <span className="text-sm font-medium">Be the first to rate this package</span>
+                      </div>
+                    }
                     <div className="flex items-center text-sm text-muted-foreground mt-1">
                       <MapPin className="h-4 w-4 mr-1" />
                       <span>{pkg.destination}</span>
@@ -311,6 +320,12 @@ export default function ExplorePage() {
                         <span className="text-sm font-normal text-muted-foreground"> /person</span>
                       </p>
                       <p className="text-sm text-muted-foreground">{pkg.duration} days</p>
+                    </div>
+                    <div className="mt-4 flex items-center">
+                      {/* <p className="font-semibold"> */}
+                        <TrendingUp className="h-5 w-5 mr-1 text-green-500" />
+                        <span className="text-sm font-normal text-muted-foreground">{pkg.total_bookings_last_month} bookings last month</span>
+                      {/* </p> */}
                     </div>
                   </div>
                 </Link>

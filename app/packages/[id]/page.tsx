@@ -646,7 +646,7 @@ export default function PackageDetailsPage() {
                               {[1, 2, 3, 4, 5].map((star) => (
                                 <Star
                                   key={star}
-                                  className={`h-3 w-3 ${star <= review.rating ? "fill-primary text-primary" : "text-muted"}`}
+                                  className={`h-3  w-3 ${star <= review.rating ? " text-yellow-500 fill-yellow-500" : "text-muted"}`}
                                 />
                               ))}
                             </div>
@@ -680,7 +680,7 @@ export default function PackageDetailsPage() {
                             <Star
                               key={star}
                               onClick={() => setRating(star)}
-                              className={`h-6 w-6 cursor-pointer transition ${star <= rating ? "fill-primary text-primary" : "text-muted-foreground"
+                              className={`h-6 w-6 cursor-pointer transition ${star <= rating ? " text-yellow-500 fill-yellow-500" : "text-muted-foreground"
                                 }`}
                             />
                           ))}
