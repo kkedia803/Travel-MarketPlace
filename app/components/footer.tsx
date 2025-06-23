@@ -73,10 +73,10 @@ export function Footer() {
 
                             <div className="mt-3 grid space-y-3">
                                 <p><a href="tel: +919599791185" target='_blank' className="inline-flex items-center gap-x-2 text-white hover:text-gray-400 focus:outline-hidden focus:text-gray-200">
-                                    <Phone className='size-4' /> +91 9999999999
+                                    <Phone className='size-4' /> +91 87438 09060
                                 </a></p>
                                 <p><a href='mailto: example@gmail.com' target='_blank' className=" inline-flex items-center gap-x-2 text-white hover:text-gray-400 focus:outline-hidden focus:text-gray-200">
-                                    <Mail className='size-4' /> example@gmail.com
+                                    <Mail className='size-4' /> deepaktraco.in@gmail.com
                                 </a></p>
                             </div>
                         </div>
