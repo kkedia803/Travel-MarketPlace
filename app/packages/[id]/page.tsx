@@ -26,6 +26,7 @@ import {
 import { toast } from "@/hooks/use-toast"
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
+import Image from "next/image";
 
 
 const featureIcons: Record<string, JSX.Element> = {
@@ -61,6 +62,7 @@ interface Package {
   profiles?: {
     company_name: string;
     phone_number: string;
+    avatar_url: string;
   }
 }
 
@@ -114,7 +116,7 @@ export default function PackageDetailsPage() {
         const { data: packageData, error: packageError } = await supabase
           .from("packages")
           .select(`*,
-            profiles(phone_number, company_name)`)
+            profiles(phone_number, company_name, avatar_url)`)
           .eq("id", params.id)
           .single();
 
@@ -501,28 +503,17 @@ export default function PackageDetailsPage() {
 
       {/* Package Title and Basic Info */}
       <div className="mb-8">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
           <h1 className="text-3xl font-bold mb-2">{pkg.title}</h1>
+          {/* Seller name and icon */}
           {pkg.profiles?.company_name ? (
-            <Badge className="flex items-center gap-2 flex-col mb-1">
-              <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-white" />
-                <span>
-                  <span className="font-medium text-white text-sm">Sold by:</span>{' '}
-                  <span className="text-lg">{pkg.profiles?.company_name || "Unknown"}</span>
-                </span>
-              </div>
-
-              {/* <div className="flex items-center gap-2 text-md ">
-                <Phone className="w-4 h-4 text-white" />
-                <span>
-                  <span className="font-medium text-white text-sm">Contact:</span>{' '}
-                  <span className="text-lg">{pkg.profiles?.phone_number || "Unknown"}</span>
-                </span>
-              </div> */}
-            </Badge>
+            <div className="flex items-center gap-2 mb-1">
+              <Avatar className="h-14 w-14">
+                <AvatarImage src={pkg.profiles?.avatar_url} alt="company_avatar" />
+              </Avatar>
+              <span className="text-2xl font-medium">{pkg.profiles?.company_name || "Unknown"}</span>
+            </div>
           ) : ''}
-
         </div>
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <div className="flex items-center">
