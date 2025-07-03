@@ -36,7 +36,7 @@ export default function ExplorePage() {
   const [packages, setPackages] = useState<Package[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [priceRange, setPriceRange] = useState([0, 25000])
+  const [priceRange, setPriceRange] = useState([0, 50000])
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategory ? [initialCategory] : [])
   const [selectedDestination, setSelectedDestination] = useState(initialDestination)
   const [filteredPackages, setFilteredPackages] = useState<Package[]>([])
@@ -209,8 +209,8 @@ export default function ExplorePage() {
                       <Label className="text-sm font-medium">Price Range</Label>
                       <div className="pt-4 px-2">
                         <Slider
-                          defaultValue={[0, 25000]}
-                          max={25000}
+                          defaultValue={[0, 50000]}
+                          max={50000}
                           step={100}
                           value={priceRange}
                           onValueChange={setPriceRange}
@@ -247,7 +247,7 @@ export default function ExplorePage() {
                   className="w-full"
                   onClick={() => {
                     setSearchTerm("")
-                    setPriceRange([0, 25000])
+                    setPriceRange([0, 50000])
                     setSelectedCategories([])
                     setSelectedDestination("")
                   }}
