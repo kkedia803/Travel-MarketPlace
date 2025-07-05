@@ -20,14 +20,12 @@ interface Package {
   price: number
   final_price?: number
   duration: number
-  nights: number
   category: string
   images: string[]
   seller_id: string
   is_approved: boolean
   avg_rating: number
   total_bookings_last_month: number
-  seller_logo: string
 }
 
 export default function ExplorePage() {
@@ -66,12 +64,7 @@ export default function ExplorePage() {
     const fetchPackages = async () => {
       setLoading(true)
       try {
-        const { data, error } = await supabase
-          .from("packages_with_avg_rating_monthly_booking")
-          .select("*")
-          .eq("is_approved", true)
-          .eq("status", "active")
-
+        const { data, error } = await supabase.from("packages_with_avg_rating_monthly_booking").select("*").eq("is_approved", true).eq("status", "active")
         if (error) throw error
         setPackages(data || [])
         console.log("Fetched packages:", data)
@@ -293,84 +286,45 @@ export default function ExplorePage() {
                 <Link
                   key={pkg.id}
                   href={`/packages/${pkg.id}`}
-                  className="group relative overflow-hidden rounded-3xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                  className="group overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-md"
                 >
-                  {/* Image Container with Variable Border */}
-                  <div className="relative h-64 overflow-hidden">
-                    <div
-                      className="absolute inset-0 rounded-t-3xl"
-                      style={{
-                        clipPath: 'polygon(0 0, 100% 0, 100% 100%, 85% 100%, 70% 100%, 50% 100%, 35% 85%, 15% 85%, 0 85%)'
-                      }}
-                    >
-                      <img
-                        src={pkg.images[0] || "/placeholder.svg?height=400&width=600"}
-                        alt={pkg.title}
-                        className="h-full w-full object-cover transition-transform duration-500 "
-                      />
-                    </div>
-
-                    {/* Seller Logo positioned at the boundary */}
-                    {pkg.seller_logo && (
-                      <div className="absolute bottom-0 left-6 z-10">
-                        <div className="w-16 h-16 rounded-full border-4 border-white  bg-white overflow-hidden">
-                          <img
-                            src={pkg.seller_logo}
-                            alt="Seller Logo"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </div>
-                    )}
+                  <div className="aspect-video w-full overflow-hidden">
+                    <img
+                      src={pkg.images[0] || "/placeholder.svg?height=400&width=600"}
+                      alt={pkg.title}
+                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    />
                   </div>
-
-                  {/* Content Area */}
-                  <div className="pt-4 pb-4 px-6">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-bold text-xl text-gray-900 line-clamp-1 flex-1 mr-2">
-                        {pkg.title}
-                      </h3>
-                      {pkg.avg_rating && (
-                        <div className="flex items-center bg-yellow-50 px-2 py-1 rounded-full">
-                          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 mr-1" />
-                          <span className="text-sm font-bold text-gray-800">
-                            {pkg.avg_rating.toFixed(1)}
-                          </span>
-                        </div>
-                      )}
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-xl">{pkg.title}</h3>
+                      {pkg.avg_rating && <div className="flex items-center">
+                        <Star className="h-4 w-4  text-yellow-500 fill-yellow-500 mr-1" />
+                        <span className="text-sm font-bold">{pkg.avg_rating}</span>
+                      </div>}
                     </div>
-
-                    <div className="flex items-center text-gray-600 mb-3">
+                    {/* {!pkg.avg_rating &&
+                      <div className="flex items-center py-2">
+                        <Star className="h-4 w-4  text-yellow-500 fill-yellow-500 mr-1" />
+                        <span className="text-sm font-medium">Be the first to rate this package</span>
+                      </div>
+                    } */}
+                    <div className="flex items-center text-sm text-muted-foreground mt-1">
                       <MapPin className="h-4 w-4 mr-1" />
-                      <span className="text-sm font-medium">{pkg.destination}</span>
+                      <span>{pkg.destination}</span>
                     </div>
-
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-                      {pkg.description}
-                    </p>
-
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-baseline">
-                        <span className="text-lg font-bold text-blue-600">
-                          ₹{(pkg.final_price || pkg.price).toLocaleString()}
-                        </span>
-                        <span className="text-sm text-gray-600 ml-1">/person</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-md font-semibold text-blue-600">
-                          {pkg.duration}D/{pkg.nights}N
-                        </span>
-                      </div>
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{pkg.description}</p>
+                    <div className="mt-4 flex items-center justify-between">
+                      <p className="font-semibold">
+                        ₹{pkg.final_price?.toLocaleString() || pkg.price}
+                        <span className="text-sm font-normal text-muted-foreground"> /person</span>
+                      </p>
+                      <p className="text-sm text-muted-foreground">{pkg.duration} days</p>
                     </div>
-
-                    {pkg.total_bookings_last_month > 0 && (
-                      <div className="flex items-center text-sm text-gray-500 bg-green-50 px-3 py-2 rounded-full">
-                        <TrendingUp className="h-4 w-4 mr-2 text-green-600" />
-                        <span className="font-medium">
-                          {pkg.total_bookings_last_month} booked last month
-                        </span>
-                      </div>
-                    )}
+                    {/* <div className="mt-4 flex items-center">
+                        <TrendingUp className="h-5 w-5 mr-1 text-green-500" />
+                        <span className="text-sm font-normal text-muted-foreground">{pkg.total_bookings_last_month} bookings last month</span>
+                    </div> */}
                   </div>
                 </Link>
               ))}
@@ -378,21 +332,6 @@ export default function ExplorePage() {
           )}
         </div>
       </div>
-
-      <style jsx>{`
-        .line-clamp-1 {
-          display: -webkit-box;
-          -webkit-line-clamp: 1;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
     </div>
   )
 }
