@@ -12,7 +12,7 @@ import SupabaseProvider from "./supabase-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "TracoIt",
+  title: "Safar",
   description: "Find and book amazing travel experiences",
 }
 
@@ -23,6 +23,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <link rel="icon" href="/greenfav.png" sizes="any" />
       <body className={inter.className}>
         <SupabaseProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>

@@ -33,7 +33,7 @@ export function Header() {
         setScrolled(false)
       }
     }
-  
+
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
@@ -72,7 +72,7 @@ export function Header() {
   ]
 
   return (
-    <header className={` ${pathname!=='/'?"sticky":"fixed"} top-0 z-50 w-full backdrop-blur-[27px] ${pathname!=='/'?"bg-black/30":""} ${scrolled?"bg-black/30":""}`}>
+    <header className={` ${pathname !== '/' ? "sticky" : "fixed"} top-0 z-50 w-full backdrop-blur-[27px] ${pathname !== '/' ? "bg-black/30" : ""} ${scrolled ? "bg-black/30" : ""}`}>
       <div className=" flex h-16 sm:h-20 items-center justify-between pl-0 pr-5 sm:pl-14 sm:pr-14 ">
         <div className="flex items-center gap-2">
           <Sheet open={open} onOpenChange={setOpen}>
@@ -105,19 +105,21 @@ export function Header() {
             </SheetContent>
           </Sheet>
           <Link href="/" className="flex items-center space-x-2">
-            <Compass className="h-8 w-8 text-primary text-white " />
-            <span className={`font-bold text-2xl sm:text-3xl text-white font-bulgatti`}>TracoIt</span>
+            <img src="logogreen.png" alt="TracoIt Logo" className="h-32 w-32" />
+            {/* <Compass className="h-8 w-8 text-primary text-white " /> */}
+            {/* <span className={`font-bold text-2xl sm:text-3xl text-white font-bulgatti`}>TracoIt</span> */}
+
           </Link>
           <nav className="hidden md:flex gap-6 ml-6">
             {navItems.map((item, index) => (
               <Link
-              key={index}
-              href={item.href}
-              className={`text-base sm:text-xl font-onest font-medium transition-colors hover:text-stone-300 text-white/90`}
-            >
-              {item.name}
-            </Link>
-            
+                key={index}
+                href={item.href}
+                className={`text-base sm:text-xl font-onest font-medium transition-colors hover:text-stone-300 text-white/90`}
+              >
+                {item.name}
+              </Link>
+
             ))}
           </nav>
         </div>
@@ -167,7 +169,7 @@ export function Header() {
                 </Button>
               </Link>
               <Link href="/auth/register">
-                <Button  className="font-onest sm:text-xl bg-stone-800 hover:bg-blue-ice hover:text-black">Sign up</Button>
+                <Button className="font-onest sm:text-xl bg-stone-800 hover:bg-blue-ice hover:text-black">Sign up</Button>
               </Link>
             </div>
           )}
