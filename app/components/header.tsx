@@ -105,9 +105,9 @@ export function Header() {
             </SheetContent>
           </Sheet>
           <Link href="/" className="flex items-center space-x-2">
-            <img src="logogreen.png" alt="TracoIt Logo" className="h-32 w-32" />
+            {/* <img src="logogreen.png" alt="TracoIt Logo" className="h-32 w-32" /> */}
             {/* <Compass className="h-8 w-8 text-primary text-white " /> */}
-            {/* <span className={`font-bold text-2xl sm:text-3xl text-white font-bulgatti`}>TracoIt</span> */}
+            <span className={`font-bold text-2xl sm:text-3xl text-white font-bulgatti`}>TracoIt</span>
 
           </Link>
           <nav className="hidden md:flex gap-6 ml-6">
