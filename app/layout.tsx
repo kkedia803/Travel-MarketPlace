@@ -12,7 +12,7 @@ import SupabaseProvider from "./supabase-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Safar",
+  title: "TracoIt",
   description: "Find and book amazing travel experiences",
 }
 

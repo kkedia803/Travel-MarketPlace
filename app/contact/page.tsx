@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
 export const metadata: Metadata = {
-  title: 'Contact Us | TravelMarketplace',
+  title: 'Contact Us | TracoIt',
   description: 'Get in touch with our team for any questions or support',
 }
 

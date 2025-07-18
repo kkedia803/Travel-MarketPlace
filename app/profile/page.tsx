@@ -4,10 +4,6 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { ProfileForm } from '@/components/profile/profile-form'
 
-export const metadata: Metadata = {
-  title: 'Profile | TravelMarketplace',
-  description: 'Manage your profile and account settings',
-}
 
 export default async function ProfilePage() {
 

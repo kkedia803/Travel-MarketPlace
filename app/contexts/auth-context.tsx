@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
     })
 
-    console.log("Sign Up Data:", data)
+    // console.log("Sign Up Data:", data)
 
     if (!error && data.user) {
       const { error: insertError, data: data2 } = await supabase.from("profiles").upsert({
@@ -98,8 +98,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     toast({
-      title: error ? "Sign Up Failed" : "Sign Up Successful",
-      description: error ? error.message : "Welcome aboard!",
+      title: error ? "Sign Up Failed" : "Successfull! Please Confirm Email",
+      description: error ? error.message : "Please check your Email inbox for confirmation link.",
       variant: error ? "destructive" : "success",
     })
 
