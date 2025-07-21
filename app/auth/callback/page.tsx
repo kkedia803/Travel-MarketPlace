@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Loader from '@/components/loader/loader'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export default function AuthCallback() {
@@ -23,7 +24,7 @@ export default function AuthCallback() {
             if (error) {
                 console.error('Error fetching profile:', error)
                 return
-            }   
+            }
 
             const isIncomplete = !profile?.phone_number || !profile?.role
 
@@ -37,5 +38,9 @@ export default function AuthCallback() {
         checkProfile()
     }, [router, supabase])
 
-    return <p className="text-center mt-10">Signing you in...</p>
+    return (
+        <div className="min-h-screen flex items-center justify-center">
+            <Loader />
+        </div>
+    )
 }

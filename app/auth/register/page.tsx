@@ -75,13 +75,13 @@ export default function RegisterPage() {
     <div className="flex flex-col md:flex-row h-screen justify-center">
       <div className="w-full md:w-1/2 flex items-center justify-center overflow-y-auto">
         <div className="flex w-full max-w-lg flex-col justify-center space-y-6 mb-10">
-          <div className="flex flex-col space-y-2 text-center">
-            {/* <div className="flex justify-center">
-            <Compass className="h-8 w-8 text-primary" />
-          </div> */}
+          {/* <div className="flex flex-col space-y-2 text-center">
+            <div className="flex justify-center">
+              <Compass className="h-8 w-8 text-primary" />
+            </div>
             <h1 className="text-2xl font-semibold tracking-tight">Create an Account!</h1>
             <p className="text-sm text-muted-foreground">Enter your email below to create your account</p>
-          </div>
+          </div> */}
           <Card>
             <form onSubmit={handleSubmit}>
               <CardContent className="pt-6">

@@ -21,6 +21,7 @@ export default function CompleteProfilePage() {
     e.preventDefault()
     setIsLoading(true)
 
+
     const { data: { session } } = await supabase.auth.getSession()
     const user = session?.user
 
@@ -32,14 +33,15 @@ export default function CompleteProfilePage() {
     const { error } = await supabase.from('profiles').upsert({
       id: user.id,
       role,
-      phone_number:phone,
+      phone_number: phone,
       company_name: role === 'seller' ? company : null,
-    //   updated_at: new Date().toISOString(),
+      //   updated_at: new Date().toISOString(),
     })
 
     if (error) {
       alert('Error saving profile: ' + error.message)
     } else {
+      await supabase.auth.refreshSession()
       router.push(role === 'seller' ? '/seller/dashboard' : '/')
     }
 
