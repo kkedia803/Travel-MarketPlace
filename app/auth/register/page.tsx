@@ -13,6 +13,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Compass, Eye, EyeClosed } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { FcGoogle } from "react-icons/fc";
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export default function RegisterPage() {
   const searchParams = useSearchParams()
@@ -28,6 +30,24 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const { signUp } = useAuth()
   const router = useRouter()
+
+  const handleGoogleSignIn = async () => {
+    const supabase = createClientComponentClient()
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${location.origin}/auth/callback`, // dynamically handles localhost or prod
+        },
+      })
+
+      if (error) {
+        console.error("Google sign-in error:", error.message)
+      }
+    } catch (err) {
+      console.error("Unexpected Google sign-in error:", err)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -52,118 +72,134 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <div className="flex flex-col space-y-2 text-center">
-          <div className="flex justify-center">
+    <div className="flex flex-col md:flex-row h-screen justify-center">
+      <div className="w-full md:w-1/2 flex items-center justify-center overflow-y-auto">
+        <div className="flex w-full max-w-lg flex-col justify-center space-y-6 mb-10">
+          <div className="flex flex-col space-y-2 text-center">
+            {/* <div className="flex justify-center">
             <Compass className="h-8 w-8 text-primary" />
+          </div> */}
+            <h1 className="text-2xl font-semibold tracking-tight">Create an Account!</h1>
+            <p className="text-sm text-muted-foreground">Enter your email below to create your account</p>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
-          <p className="text-sm text-muted-foreground">Enter your email below to create your account</p>
-        </div>
-        <Card>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                {role === "seller" && (
+          <Card>
+            <form onSubmit={handleSubmit}>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
                   <div className="space-y-2">
-                    <Label htmlFor="company">Company Name</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
-                      id="company"
-                      placeholder="Your Travel Agency/Company Name"
-                      type="text"
-                      value={company}
-                      onChange={(e) => setCompany(e.target.value)}
+                      id="email"
+                      type="email"
+                      placeholder="name@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required
                     />
                   </div>
-                )}
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
+                  {role === "seller" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="company">Company Name</Label>
+                      <Input
+                        id="company"
+                        placeholder="Your Travel Agency/Company Name"
+                        type="text"
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
+                        required
+                      />
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
                     <Input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      id="phone"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
                       required
                     />
-                    <button
-                      type="button"
-                      className='absolute top-2.5 right-3 text-muted-foreground'
-                      aria-label="Toggle password visibility"
-                      onClick={() => setShowPassword(!showPassword)}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="absolute top-2.5 right-3 text-muted-foreground"
+                        aria-label="Toggle password visibility"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeClosed className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Account Type</Label>
+                    <RadioGroup
+                      defaultValue={role}
+                      onValueChange={setRole}
+                      className="flex flex-col space-y-1"
                     >
-                      {showPassword ? <EyeClosed className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="user" id="user" />
+                        <Label htmlFor="user" className="font-normal">
+                          Traveler - I want to book trips
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="seller" id="seller" />
+                        <Label htmlFor="seller" className="font-normal">
+                          Seller - I want to list travel packages
+                        </Label>
+                      </div>
+                    </RadioGroup>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Account Type</Label>
-                  <RadioGroup defaultValue={role} onValueChange={setRole} className="flex flex-col space-y-1">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="user" id="user" />
-                      <Label htmlFor="user" className="font-normal">
-                        Traveler - I want to book trips
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="seller" id="seller" />
-                      <Label htmlFor="seller" className="font-normal">
-                        Seller - I want to list travel packages
-                      </Label>
-                    </div>
-                    {/* <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="admin" id="admin" />
-                      <Label htmlFor="admin" className="font-normal">
-                        admin - I want to manage trips
-                      </Label>
-                    </div> */}
-                  </RadioGroup>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating account..." : "Create account"}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
-        <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link href="/auth/login" className="text-primary hover:underline">
-            Sign in
-          </Link>
-        </p>
+              </CardContent>
+              <CardFooter>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Creating account..." : "Create account"}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+
+          {/* Google Sign-In */}
+          <div
+            onClick={handleGoogleSignIn}
+            className="flex items-center text-white justify-center gap-3 px-3 py-2 bg-gray-700 rounded-md shadow-md cursor-pointer hover:bg-gray-600 text-md font-medium"
+          >
+            <FcGoogle className="text-2xl" />
+            Continue with Google
+          </div>
+
+          {/* Login Link */}
+          <p className="text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link href="/auth/login" className="text-primary hover:underline">
+              Sign in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
+
   )
 }
 

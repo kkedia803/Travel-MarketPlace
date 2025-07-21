@@ -11,7 +11,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Compass , Eye, EyeClosed} from "lucide-react"
+import { Compass, Eye, EyeClosed } from "lucide-react"
+import { FcGoogle } from "react-icons/fc";
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -21,6 +23,24 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const { signIn } = useAuth()
   const router = useRouter()
+
+    const handleGoogleSignIn = async () => {
+      const supabase = createClientComponentClient()
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: `${location.origin}/auth/callback`, // dynamically handles localhost or prod
+          },
+        })
+  
+        if (error) {
+          console.error("Google sign-in error:", error.message)
+        }
+      } catch (err) {
+        console.error("Unexpected Google sign-in error:", err)
+      }
+    }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,9 +68,9 @@ export default function LoginPage() {
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
         <div className="flex flex-col space-y-2 text-center">
-          <div className="flex justify-center">
+          {/* <div className="flex justify-center">
             <Compass className="h-8 w-8 text-primary" />
-          </div>
+          </div> */}
           <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
           <p className="text-sm text-muted-foreground">Enter your email to sign in to your account</p>
         </div>
@@ -109,6 +129,14 @@ export default function LoginPage() {
             </CardFooter>
           </form>
         </Card>
+        {/* Google Sign-In */}
+        <div
+          onClick={handleGoogleSignIn}
+          className="flex items-center text-white justify-center gap-3 px-3 py-2 bg-gray-700 rounded-md shadow-md cursor-pointer hover:bg-gray-600 text-md font-medium"
+        >
+          <FcGoogle className="text-2xl" />
+          SignIn with Google
+        </div>
         <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link href="/auth/register" className="text-primary hover:underline">
