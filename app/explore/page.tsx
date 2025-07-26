@@ -120,37 +120,37 @@ export default function ExplorePage() {
     )
   }
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("explorePopupDismissed") === "true") {
-      setShowPopup(false)
-      return
-    }
-    const timer = setTimeout(() => setShowPopup(true), 2000)
-    return () => clearTimeout(timer)
-  }, [])
+  // useEffect(() => {
+  //   if (typeof window !== "undefined" && localStorage.getItem("explorePopupDismissed") === "true") {
+  //     setShowPopup(false)
+  //     return
+  //   }
+  //   const timer = setTimeout(() => setShowPopup(true), 2000)
+  //   return () => clearTimeout(timer)
+  // }, [])
 
-  useEffect(() => {
-    if (showPopup) {
-      document.body.classList.add("overflow-hidden")
-    } else {
-      document.body.classList.remove("overflow-hidden")
-    }
-    return () => {
-      document.body.classList.remove("overflow-hidden")
-    }
-  }, [showPopup])
+  // useEffect(() => {
+  //   if (showPopup) {
+  //     document.body.classList.add("overflow-hidden")
+  //   } else {
+  //     document.body.classList.remove("overflow-hidden")
+  //   }
+  //   return () => {
+  //     document.body.classList.remove("overflow-hidden")
+  //   }
+  // }, [showPopup])
 
-  const handleClosePopup = () => {
-    setShowPopup(false)
-    if (typeof window !== "undefined") {
-      localStorage.setItem("explorePopupDismissed", "true")
-    }
-  }
+  // const handleClosePopup = () => {
+  //   setShowPopup(false)
+  //   if (typeof window !== "undefined") {
+  //     localStorage.setItem("explorePopupDismissed", "true")
+  //   }
+  // }
 
   return (
     <div className="container py-8 relative">
       {/* Popup Modal */}
-      {showPopup && (
+      {/* {showPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full relative">
             <button
@@ -172,7 +172,7 @@ export default function ExplorePage() {
             </p>
           </div>
         </div>
-      )}
+      )} */}
 
       <h1 className="text-4xl font-bold mb-4">Explore Travel Packages</h1>
       {selectedDestination && (

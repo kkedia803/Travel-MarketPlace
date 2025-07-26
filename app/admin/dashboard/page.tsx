@@ -69,6 +69,15 @@ interface Seller {
   packages_count: number
 }
 
+interface Travellers {
+  id: string
+  name: string
+  user_name?: string
+  role: string
+  created_at: string
+  phone_number:number
+}
+
 interface Statistics {
   totalUsers: number
   totalSellers: number
@@ -88,6 +97,7 @@ export default function AdminDashboard() {
   // const { toast } = useToast()
   const [pendingPackages, setPendingPackages] = useState<TravelPackage[]>([])
   const [sellers, setSellers] = useState<Seller[]>([])
+  const [travellers, setTravellers] = useState<Travellers[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedPackage, setSelectedPackage] = useState<TravelPackage | null>(null)
@@ -155,6 +165,17 @@ export default function AdminDashboard() {
           .order("created_at", { ascending: false })
 
         if (sellersError) throw new Error(`Error fetching sellers: ${sellersError.message}`)
+
+        //Travellers
+        const { data: travellerData, error: travellerError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("role","user")
+          .order("created_at", {ascending:false})
+
+        if(travellerError) throw new Error(`Error fetching sellers: ${travellerError.message}`)
+        console.log(travellerData)
+        setTravellers(travellerData);
 
         // Count packages for each seller
         const sellersWithCounts = await Promise.all(
@@ -242,9 +263,9 @@ export default function AdminDashboard() {
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
       ];
-  
+
       const currentYear = new Date().getFullYear();
-  
+
       // Fetch confirmed bookings
       const { data: bookingsData, error: revenueError } = await supabase
         .from("bookings")
@@ -252,31 +273,31 @@ export default function AdminDashboard() {
         .eq("status", "confirmed")
         .gte("created_at", `${currentYear}-01-01`) // Filter for the current year
         .lte("created_at", `${currentYear}-12-31`);
-  
+
       if (revenueError) throw new Error(`Error fetching booking revenue data: ${revenueError.message}`);
-  
+
       if (!bookingsData || bookingsData.length === 0) {
         console.log("No revenue data found");
         return;
       }
-  
+
       // Get unique package IDs
       const packageIds = [...new Set(bookingsData.map(booking => booking.package_id))];
-  
+
       // Fetch package prices
       const { data: packagePrices, error: pricesError } = await supabase
         .from("packages")
         .select("id, price")
         .in("id", packageIds);
-  
+
       if (pricesError) throw new Error(`Error fetching package prices: ${pricesError.message}`);
-  
+
       // Create a price map for quick lookup
       const priceMap = new Map(packagePrices.map(pkg => [pkg.id, pkg.price]));
-  
+
       // Initialize an array to store revenue for each month
       const monthlyRevenue = Array(12).fill(0);
-  
+
       // Calculate revenue per month
       bookingsData.forEach(booking => {
         const bookingDate = new Date(booking.created_at);
@@ -284,7 +305,7 @@ export default function AdminDashboard() {
         const price = priceMap.get(booking.package_id) || 0;
         monthlyRevenue[month] += price * booking.travelers;
       });
-  
+
       // Format data for charts
       const revenueChartData = months.map((month, index) => ({
         name: month,
@@ -292,16 +313,16 @@ export default function AdminDashboard() {
       }));
 
       const totalRevenue = monthlyRevenue.reduce((sum, count) => sum + count, 0);
-  
+
       setRevenueData(revenueChartData);
       setTotalRevenue(totalRevenue)
       console.log("Revenue Chart Data:", revenueChartData);
-  
+
     } catch (error) {
       console.error("Error fetching revenue data:", error);
     }
   }
-  
+
 
   async function fetchBookingsData() {
     try {
@@ -468,7 +489,7 @@ export default function AdminDashboard() {
       toast({
         title: "Package rejected",
         description: "The package has been rejected and removed from the system.",
-        variant:"success"
+        variant: "success"
       })
 
       setIsPackageDetailsOpen(false)
@@ -590,9 +611,10 @@ export default function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="pending">
-        <TabsList className="w-full grid grid-cols-3 mb-8">
+        <TabsList className="w-full grid grid-cols-4 mb-8">
           <TabsTrigger value="pending">Pending Approvals</TabsTrigger>
           <TabsTrigger value="sellers">Sellers</TabsTrigger>
+          <TabsTrigger value="travellers">Travellers</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
@@ -739,6 +761,73 @@ export default function AdminDashboard() {
                     <a
                       className="btn btn-secondary btn-sm"
                       href={`mailto:${seller?.email || ''}`}
+                    >
+                      Contact Seller
+                    </a>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="travellers">
+          {loading ? (
+            <div className="grid grid-cols-1 gap-6">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardHeader className="pb-2">
+                    <div className="h-6 bg-muted rounded w-1/3 mb-2" />
+                    <div className="h-4 bg-muted rounded w-1/4" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-4 bg-muted rounded mb-2 w-full" />
+                    <div className="h-4 bg-muted rounded mb-2 w-3/4" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : travellers.length === 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>No travellers registered</CardTitle>
+                <CardDescription>There are no travellers registered on the platform yet.</CardDescription>
+              </CardHeader>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 gap-6">
+              {travellers.map((trav) => (
+                <Card key={trav.id}>
+                  <CardHeader className="pb-2">
+                    <CardTitle>{trav.user_name || trav.name}</CardTitle>
+                    <CardDescription>{trav.name}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm font-medium">Phone Number</p>
+                        <Badge
+                          variant="outline"
+                          className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                        >
+                          {trav.phone_number?trav.phone_number:'Phone No. Not Added'} 
+                        </Badge>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Joined At</p>
+                        <Badge
+                          variant="outline"
+                          className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                        >
+                          {formatDate(trav.created_at)}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-end gap-2">
+                    <a
+                      className="btn btn-secondary btn-sm"
+                      href={`mailto:${trav?.name || ''}`}
                     >
                       Contact Seller
                     </a>
