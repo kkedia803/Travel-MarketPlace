@@ -96,6 +96,7 @@ interface TravelPackage {
   final_price: number;
   start_dates: string[];
   status?:string;
+  room_type?: { [key: string]: number }; // Added property for room_type
 }
 
 
@@ -164,6 +165,7 @@ export default function SellerDashboard() {
     inclusion: [] as string[],
     exclusion: [] as string[],
     start_dates: [] as string[],
+    room_type: { Quad: 0 }, // default Quad included
   });
 
   const [selectedDates, setSelectedDates] = useState<Date[]>(
@@ -186,6 +188,8 @@ export default function SellerDashboard() {
   const [revenueData, setRevenueData] = useState<{ name: string; revenue: number }[]>([]);
   // const [totalUsers, setTotalUsers] = useState(0);
   // const [totalRevenue, setTotalRevenue] = useState(0);
+
+  const [basePrice, setBasePrice] = useState(0);
 
   useEffect(() => {
     if (isAddPackageOpen) {
@@ -388,6 +392,7 @@ export default function SellerDashboard() {
         inclusion: [] as string[],
         exclusion: [] as string[],
         start_dates: [] as string[],
+        room_type: { Quad: 0 }, // default Quad included
       });
     } catch (error) {
       console.error("Error adding package:", error);
@@ -555,6 +560,7 @@ export default function SellerDashboard() {
         inclusion: [] as string[],
         exclusion: [] as string[],
         start_dates: [] as string[],
+        room_type: { Quad: 0 }, // default Quad included
       });
       setSelectedFeatures({});
     } catch (error) {
@@ -974,6 +980,22 @@ export default function SellerDashboard() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // --- Add this useEffect to recalculate package price with room add-ons ---
+  useEffect(() => {
+    let addonTotal = 0;
+    if (newPackage.room_type) {
+      for (const key of ["Single", "Double", "Triple"]) {
+        if (typeof newPackage.room_type[key] === "number") {
+          addonTotal += newPackage.room_type[key];
+        }
+      }
+    }
+    setNewPackage(prev => ({
+      ...prev,
+      price: basePrice + addonTotal
+    }));
+  }, [basePrice, newPackage.room_type]);
+
   return (
     <div className="container py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -1005,7 +1027,9 @@ export default function SellerDashboard() {
                 inclusion: [] as string[],
                 exclusion: [] as string[],
                 start_dates: [] as string[],
+                room_type: { Quad: 0 }, // default Quad included
               });
+              setBasePrice(0);
               setFormStep(0);
             }}
           >
@@ -1186,13 +1210,8 @@ export default function SellerDashboard() {
                     <Input
                       id="price"
                       type="number"
-                      value={newPackage.price || ""}
-                      onChange={(e) =>
-                        setNewPackage({
-                          ...newPackage,
-                          price: Number(e.target.value),
-                        })
-                      }
+                      value={basePrice}
+                      onChange={e => setBasePrice(Number(e.target.value))}
                       placeholder="e.g. 1299"
                       required
                     />
@@ -1266,11 +1285,15 @@ export default function SellerDashboard() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
+                </div>
+
+                <div className="md:flex md:gap-6">
+                  {/* Calendar Section */}
+                  <div className="md:w-1/2 space-y-2">
                     <Label htmlFor="start_dates">
                       Trip Start Dates <span className="text-destructive">*</span>
                     </Label>
-                    <div className="md:w-[23vw] rounded-md border p-4 overflow-auto">
+                    <div className="rounded-md border p-4 overflow-auto">
                       <DayPicker
                         mode="multiple"
                         selected={selectedDates}
@@ -1281,7 +1304,6 @@ export default function SellerDashboard() {
                             start_dates: (dates || []).map(formatDateLocal),
                           });
                         }}
-                        className=""
                       />
                       <p className="text-xs text-muted-foreground">
                         Select one or more dates when this package will start.
@@ -1296,7 +1318,64 @@ export default function SellerDashboard() {
                     )}
                   </div>
 
-
+                  {/* Room Type Section */}
+                  <div className="md:w-1/2 space-y-2">
+                    <Label>
+                      Room Type Prices (INR)
+                    </Label>
+                    {["Single", "Double", "Triple", "Quad"].map((type) => (
+                      <div key={type} className="flex items-center gap-2 mb-2">
+                        <input
+                          type="checkbox"
+                          checked={!!newPackage.room_type?.[type]}
+                          onChange={e => {
+                            setNewPackage(prev => {
+                              const updatedRoomType = { ...prev.room_type };
+                              if (e.target.checked) {
+                                // Set default price for each type
+                                const defaultPrices: { [key: string]: number } = {
+                                  Single: 4000,
+                                  Double: 3000,
+                                  Triple: 2000,
+                                  Quad: 1000,
+                                };
+                                updatedRoomType[type] = defaultPrices[type];
+                              } else {
+                                delete updatedRoomType[type];
+                              }
+                              return {
+                                ...prev,
+                                room_type: { ...updatedRoomType },
+                              };
+                            });
+                          }}
+                        />
+                        <span>{type}</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={newPackage.room_type?.[type] ?? ''}
+                          onChange={e => setNewPackage(prev => ({
+                            ...prev,
+                            room_type: {
+                              ...prev.room_type,
+                              [type]: Number(e.target.value)
+                            }
+                          }))}
+                          className="w-24 px-2 py-1 border rounded"
+                          placeholder="Price"
+                          required={!!newPackage.room_type?.[type]}
+                          disabled={!newPackage.room_type?.[type]}
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          {type === "Quad" ? "(Included in package)" : "(Add-on)"}
+                        </span>
+                      </div>
+                    ))}
+                    <p className="text-xs text-muted-foreground">
+                      Quad is included in the base price. Other room types are add-ons and will increase the package price.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -1603,20 +1682,20 @@ export default function SellerDashboard() {
                       </p>
                       <div className="flex items-center gap-4 mt-2 text-sm">
                         <span className="flex items-center gap-1">
-                          <DollarSign className="h-3 w-3" />{" "}
-                          {newPackage.discount ? (
-                            <span>
-                              <span className="line-through text-muted-foreground">
-                                {newPackage.price}
-                              </span>{" "}
-                              {Math.round(
-                                newPackage.price *
-                                (1 - newPackage.discount / 100)
-                              )}
-                            </span>
-                          ) : (
-                            newPackage.price
-                          )}{" "}
+                          <DollarSign className="h-3 w-3" />
+                          <span>
+                            Base: {basePrice} + Room Add-ons: {(() => {
+                              let addonTotal = 0;
+                              if (newPackage.room_type) {
+                                for (const key of ["Single", "Double", "Triple"]) {
+                                  if (typeof newPackage.room_type[key] === "number") {
+                                    addonTotal += newPackage.room_type[key];
+                                  }
+                                }
+                              }
+                              return addonTotal;
+                            })()} = <b>{newPackage.price}</b>
+                          </span>
                           INR
                         </span>
                         <span className="flex items-center gap-1">
