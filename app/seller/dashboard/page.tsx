@@ -95,7 +95,7 @@ interface TravelPackage {
   exclusion: string[],
   final_price: number;
   start_dates: string[];
-  status?:string;
+  status?: string;
   room_type?: { [key: string]: number }; // Added property for room_type
 }
 
@@ -375,7 +375,7 @@ export default function SellerDashboard() {
       setSelectedDates([]);
       setSelectedFeatures({});
       setNewPackage({
-        
+
         title: "",
         description: "",
         destination: "",
@@ -543,7 +543,7 @@ export default function SellerDashboard() {
       );
       setIsAddPackageOpen(false);
       setNewPackage({
-       
+
         title: "",
         description: "",
         destination: "",
@@ -981,20 +981,20 @@ export default function SellerDashboard() {
   }, []);
 
   // --- Add this useEffect to recalculate package price with room add-ons ---
-  useEffect(() => {
-    let addonTotal = 0;
-    if (newPackage.room_type) {
-      for (const key of ["Single", "Double", "Triple"]) {
-        if (typeof newPackage.room_type[key] === "number") {
-          addonTotal += newPackage.room_type[key];
-        }
-      }
-    }
-    setNewPackage(prev => ({
-      ...prev,
-      price: basePrice + addonTotal
-    }));
-  }, [basePrice, newPackage.room_type]);
+  // useEffect(() => {
+  //   let addonTotal = 0;
+  //   if (newPackage.room_type) {
+  //     for (const key of ["Single", "Double", "Triple"]) {
+  //       if (typeof newPackage.room_type[key] === "number") {
+  //         addonTotal += newPackage.room_type[key];
+  //       }
+  //     }
+  //   }
+  //   setNewPackage(prev => ({
+  //     ...prev,
+  //     price: basePrice + addonTotal
+  //   }));
+  // }, [basePrice, newPackage.room_type]);
 
   return (
     <div className="container py-8">
@@ -1010,7 +1010,7 @@ export default function SellerDashboard() {
             asChild
             onClick={() => {
               setNewPackage({
-                
+
                 title: "",
                 description: "",
                 destination: "",
@@ -1210,8 +1210,13 @@ export default function SellerDashboard() {
                     <Input
                       id="price"
                       type="number"
-                      value={basePrice}
-                      onChange={e => setBasePrice(Number(e.target.value))}
+                      value={newPackage.price || ""}
+                      onChange={(e) =>
+                        setNewPackage({
+                          ...newPackage,
+                          price: Number(e.target.value),
+                        })
+                      }
                       placeholder="e.g. 1299"
                       required
                     />
@@ -1681,10 +1686,26 @@ export default function SellerDashboard() {
                         {newPackage.destination || "Destination"}
                       </p>
                       <div className="flex items-center gap-4 mt-2 text-sm">
-                        <span className="flex items-center gap-1">
-                          <DollarSign className="h-3 w-3" />
+                        <div className="flex flex-col">
+                          <span className="flex items-center gap-1">
+                            Base Price - <DollarSign className="h-3 w-3" />{" "}
+                            {newPackage.discount ? (
+                              <span>
+                                <span className="line-through text-muted-foreground">
+                                  {newPackage.price}
+                                </span>{" "}
+                                {Math.round(
+                                  newPackage.price *
+                                  (1 - newPackage.discount / 100)
+                                )}
+                              </span>
+                            ) : (
+                              newPackage.price
+                            )}{" "}
+                            INR
+                          </span>
                           <span>
-                            Base: {basePrice} + Room Add-ons: {(() => {
+                            Room Add-ons: {(() => {
                               let addonTotal = 0;
                               if (newPackage.room_type) {
                                 for (const key of ["Single", "Double", "Triple"]) {
@@ -1694,10 +1715,9 @@ export default function SellerDashboard() {
                                 }
                               }
                               return addonTotal;
-                            })()} = <b>{newPackage.price}</b>
+                            })()}
                           </span>
-                          INR
-                        </span>
+                        </div>
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" /> {newPackage.duration}{" "}
                           days
