@@ -74,7 +74,7 @@ export default function RegisterPage() {
   return (
     <div className="flex flex-col md:flex-row h-screen justify-center">
       <div className="w-full md:w-1/2 flex items-center justify-center overflow-y-auto">
-        <div className="flex w-full max-w-lg flex-col justify-center space-y-6 mb-10">
+        <div className="flex w-full max-w-lg flex-col justify-center space-y-6 mb-10 ">
           {/* <div className="flex flex-col space-y-2 text-center">
             <div className="flex justify-center">
               <Compass className="h-8 w-8 text-primary" />
@@ -82,6 +82,28 @@ export default function RegisterPage() {
             <h1 className="text-2xl font-semibold tracking-tight">Create an Account!</h1>
             <p className="text-sm text-muted-foreground">Enter your email below to create your account</p>
           </div> */}
+
+          {/* Google Sign-In */}
+          <div className="flex items-center justify-center">
+            <div
+              onClick={handleGoogleSignIn}
+              className="flex items-center max-w-xl text-white justify-center gap-3 px-3 py-2 bg-gray-700 rounded-md shadow-md cursor-pointer hover:bg-gray-600 text-md font-medium"
+            >
+              <FcGoogle className="text-2xl" />
+              Continue with Google
+            </div>
+          </div>
+
+
+          {/* Horizontal Separator with "or" */}
+          <div className="relative flex items-center justify-center">
+            <div className="flex-grow border-t border-muted-foreground/40"></div>
+            <span className="px-4 text-sm bg-background font-medium">
+              OR
+            </span>
+            <div className="flex-grow border-t border-muted-foreground/40"></div>
+          </div>
+
           <Card>
             <form onSubmit={handleSubmit}>
               <CardContent className="pt-6">
@@ -180,15 +202,6 @@ export default function RegisterPage() {
             </form>
           </Card>
 
-          {/* Google Sign-In */}
-          <div
-            onClick={handleGoogleSignIn}
-            className="flex items-center text-white justify-center gap-3 px-3 py-2 bg-gray-700 rounded-md shadow-md cursor-pointer hover:bg-gray-600 text-md font-medium"
-          >
-            <FcGoogle className="text-2xl" />
-            Continue with Google
-          </div>
-
           {/* Login Link */}
           <p className="text-center text-sm text-muted-foreground">
             Already have an account?{" "}
@@ -199,7 +212,5 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
-
   )
 }
-

@@ -24,23 +24,23 @@ export default function LoginPage() {
   const { signIn } = useAuth()
   const router = useRouter()
 
-    const handleGoogleSignIn = async () => {
-      const supabase = createClientComponentClient()
-      try {
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: `${location.origin}/auth/callback`, // dynamically handles localhost or prod
-          },
-        })
-  
-        if (error) {
-          console.error("Google sign-in error:", error.message)
-        }
-      } catch (err) {
-        console.error("Unexpected Google sign-in error:", err)
+  const handleGoogleSignIn = async () => {
+    const supabase = createClientComponentClient()
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${location.origin}/auth/callback`, // dynamically handles localhost or prod
+        },
+      })
+
+      if (error) {
+        console.error("Google sign-in error:", error.message)
       }
+    } catch (err) {
+      console.error("Unexpected Google sign-in error:", err)
     }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,6 +74,28 @@ export default function LoginPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
           <p className="text-sm text-muted-foreground">Enter your email to sign in to your account</p>
         </div>
+        {/* Google Sign-In */}
+        <div className="flex items-center justify-center">
+          <div
+            onClick={handleGoogleSignIn}
+            className="flex items-center w-xl max-w-2xl text-white justify-center gap-3 px-3 py-2 bg-gray-700 rounded-md shadow-md cursor-pointer hover:bg-gray-600 text-md font-medium"
+          >
+            <FcGoogle className="text-2xl" />
+            SignIn with Google
+          </div>
+        </div>
+
+
+        {/* Horizontal Separator with "or" */}
+        <div className="relative flex items-center justify-center">
+          <div className="flex-grow border-t border-muted-foreground/40"></div>
+          <span className="px-4 text-sm bg-background font-medium">
+            OR
+          </span>
+          <div className="flex-grow border-t border-muted-foreground/40"></div>
+        </div>
+
+
         <Card>
           <form onSubmit={handleSubmit}>
             <CardContent className="pt-6">
@@ -129,14 +151,7 @@ export default function LoginPage() {
             </CardFooter>
           </form>
         </Card>
-        {/* Google Sign-In */}
-        <div
-          onClick={handleGoogleSignIn}
-          className="flex items-center text-white justify-center gap-3 px-3 py-2 bg-gray-700 rounded-md shadow-md cursor-pointer hover:bg-gray-600 text-md font-medium"
-        >
-          <FcGoogle className="text-2xl" />
-          SignIn with Google
-        </div>
+
         <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link href="/auth/register" className="text-primary hover:underline">
