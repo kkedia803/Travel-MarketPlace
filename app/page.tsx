@@ -11,6 +11,7 @@ import OurContent from "@/components/OurContent";
 import ComingSoonTravel from "@/components/ComingSoonTravel";
 import ReligiousDestinations from "@/components/ReligiousDestinations";
 import InternationalDestinations from "@/components/InternationalDestinations";
+import HeroSection from "@/components/HeroSection";
 
 interface Package {
   id: string
@@ -62,7 +63,7 @@ export default function Home() {
       {/* <WhyChoose /> */}
 
       {/* Coming Soon Travel Section */}
-      <ComingSoonTravel />
+      {/* <ComingSoonTravel /> */}
 
       {/* Favourite Destinations Section */}
       <FavDestinations />
