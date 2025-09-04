@@ -25,6 +25,25 @@ export function Footer() {
             link: '/auth/register',
         },
     ]
+
+    const policies = [
+        {
+            page: 'Terms & Conditions',
+            link: '/tnc',
+        },
+        {
+            page: 'Privacy Policy',
+            link: '/policy',
+        },
+        {
+            page: 'Cancellation & Refund Policy',
+            link: '/cancellation',
+        },
+        {
+            page: 'Shipping & Delivery Policy',
+            link: '/shipping',
+        },
+    ]
     return (
         <motion.div
             initial={{ y: '20%', opacity: 0 }}
@@ -42,22 +61,13 @@ export function Footer() {
                 <div className="mt-auto w-full max-w-[85rem] py-10 px-4 sm:px-6 lg:px-8 lg:pt-20 mx-auto">
                     {/* Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                        <motion.div
+                        {/* <motion.div
                             initial={{ opacity: 0 }}
                             whileInView={{ opacity: 1 }}
                             transition={{ duration: 1, ease: [0.33, 1, 0.68, 1] }}
                             viewport={{ once: true }}
                             className='md:col-span-1 col-span-2'
-                        >
-                            <Link href='/' className="flex items-center" aria-label="Rapid AI">
-                                {/* <Image
-                                    src='/sitescriptwhitelogo.png'
-                                    width={100}
-                                    height={100}
-                                    alt='SiteScriptLogo'
-                                    className='w-10'
-                                /> */}
-                            </Link>
+                        > */}
                             <motion.span
                                 initial={{ y: 150 }}
                                 whileInView={{ y: -20 }}
@@ -65,21 +75,25 @@ export function Footer() {
                                 viewport={{ once: true }}
                                 className='font-bulgatti absolute z-0 md:text-[15rem] text-[0rem] opacity-20 tracking-wider bg-clip-text text-white bggradient-to-r from-white via-indigo-100 to-indigo-300 font-medium w-fit cursor-default'>
                                 Traco It</motion.span>
-                        </motion.div>
+                        {/* </motion.div> */}
                         {/* End Col */}
 
                         <div className="md:col-span-1 col-span-2 relative z-10">
-                            <h4 className="font-semibold text-gray-100 text-2xl">Contact</h4>
+                            <h4 className="font-semibold text-gray-100 font-onest text-2xl">Policies</h4>
 
                             <div className="mt-3 grid space-y-3">
-                                <p><a href="tel: +919599791185" target='_blank' className="inline-flex items-center gap-x-2 text-white hover:text-gray-400 focus:outline-hidden focus:text-gray-200">
-                                    <Phone className='size-4' /> +91 87438 09060
-                                </a></p>
-                                <p><a href='mailto: example@gmail.com' target='_blank' className=" inline-flex items-center gap-x-2 text-white hover:text-gray-400 focus:outline-hidden focus:text-gray-200">
-                                    <Mail className='size-4' /> deepaktraco.in@gmail.com
-                                </a></p>
+                                {policies.map((item, index) => {
+                                    return (
+                                        <p key={index}>
+                                            <Link href={item.link} className="inline-flex gap-x-2 text-white hover:text-gray-400 focus:outline-hidden focus:text-gray-200">
+                                                {item.page}
+                                            </Link>
+                                        </p>
+                                    )
+                                })}
                             </div>
                         </div>
+
                         {/* End Col */}
 
                         <div className="md:col-span-1 col-span-2 relative z-10">
@@ -98,6 +112,19 @@ export function Footer() {
                             </div>
                         </div>
                         {/* End Col */}
+
+                        <div className="md:col-span-1 col-span-2 relative z-10">
+                            <h4 className="font-semibold text-gray-100 text-2xl">Contact</h4>
+
+                            <div className="mt-3 grid space-y-3">
+                                <p><a href="tel: +918743809060" target='_blank' className="inline-flex items-center gap-x-2 text-white hover:text-gray-400 focus:outline-hidden focus:text-gray-200">
+                                    <Phone className='size-4' /> +91 87438 09060
+                                </a></p>
+                                <p><a href='mailto: deepaktraco.in@gmail.com' target='_blank' className=" inline-flex items-center gap-x-2 text-white hover:text-gray-400 focus:outline-hidden focus:text-gray-200">
+                                    <Mail className='size-4' /> deepaktraco.in@gmail.com
+                                </a></p>
+                            </div>
+                        </div>
 
                         <div className="col-span-2 relative z-10">
                             <h4 className="font-semibold text-gray-100 capitalize text-2xl">Stay up to date</h4>
