@@ -12,6 +12,7 @@ import ComingSoonTravel from "@/components/ComingSoonTravel";
 import ReligiousDestinations from "@/components/ReligiousDestinations";
 import InternationalDestinations from "@/components/InternationalDestinations";
 import HeroSection from "@/components/HeroSection";
+import TopSellers from "@/components/TopSellers";
 
 interface Package {
   id: string
@@ -64,6 +65,9 @@ export default function Home() {
 
       {/* Coming Soon Travel Section */}
       {/* <ComingSoonTravel /> */}
+
+      {/* Top Sellers Section */}
+      <TopSellers/>
 
       {/* Favourite Destinations Section */}
       <FavDestinations />
