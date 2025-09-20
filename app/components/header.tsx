@@ -68,12 +68,12 @@ export function Header() {
     { name: "Home", href: "/" },
     { name: "Explore", href: "/explore" },
     { name: "About", href: "/about" },
-    { name: "Contact", href: "/contact" },
+    { name: "Contact", href: "/contact" }, 
   ]
 
   return (
-    <header className={` ${pathname !== '/' ? "sticky" : "fixed"} top-0 z-50 w-full backdrop-blur-[27px] ${pathname !== '/' ? "bg-black/30" : ""} ${scrolled ? "bg-black/30" : ""}`}>
-      <div className=" flex h-16 sm:h-20 items-center justify-between pl-0 pr-5 sm:pl-14 sm:pr-14 ">
+    <header className={` ${pathname !== '/' ? "sticky" : "fixed"} top-4 z-50 w-[95%] md:w-[80%] left-0 right-0 rounded-full mx-auto backdrop-blur-[27px] ${pathname !== '/' ? "bg-black/30" : ""} ${scrolled ? "bg-black/30" : ""}`}>
+      <div className=" flex h-16 sm:h-20 items-center justify-between pl-0 pr-5 sm:pl-14 sm:pr-14 rounded-full">
         <div className="flex items-center gap-2">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>

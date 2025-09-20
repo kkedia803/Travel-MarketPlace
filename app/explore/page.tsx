@@ -34,11 +34,12 @@ export default function ExplorePage() {
   const searchParams = useSearchParams()
   const initialCategory = searchParams.get("category") || ""
   const initialDestination = searchParams.get("destination") || ""
+  const initialBudget = Number(searchParams.get('budget')) || 50000
 
   const [packages, setPackages] = useState<Package[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [priceRange, setPriceRange] = useState([0, 50000])
+  const [priceRange, setPriceRange] = useState([0, initialBudget])
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategory ? [initialCategory] : [])
   const [selectedDestination, setSelectedDestination] = useState(initialDestination)
   const [filteredPackages, setFilteredPackages] = useState<Package[]>([])

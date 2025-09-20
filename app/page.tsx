@@ -14,51 +14,53 @@ import InternationalDestinations from "@/components/InternationalDestinations";
 import HeroSection from "@/components/HeroSection";
 import TopSellers from "@/components/TopSellers";
 
-interface Package {
-  id: string
-  title: string
-  description: string
-  destination: string
-  price: number
-  duration: number
-  category: string
-  images: string[]
-  seller_id: string
-  is_approved: boolean
-}
+// interface Package {
+//   id: string
+//   title: string
+//   description: string
+//   destination: string
+//   price: number
+//   duration: number
+//   category: string
+//   images: string[]
+//   seller_id: string
+//   is_approved: boolean
+// }
 
 export default function Home() {
-  const [loading, setLoading] = useState(true)
-  const [filteredPackages, setFilteredPackages] = useState<Package[]>([])
-  const [packages, setPackages] = useState<Package[]>([])
+  // const [loading, setLoading] = useState(true)
+  // const [filteredPackages, setFilteredPackages] = useState<Package[]>([])
+  // const [packages, setPackages] = useState<Package[]>([])
 
-  useEffect(() => {
-    const fetchPackages = async () => {
-      setLoading(true)
+  // useEffect(() => {
+  //   const fetchPackages = async () => {
+  //     setLoading(true)
 
-      try {
-        const { data, error } = await supabase.from("packages").select("*").eq("is_approved", true)
+  //     try {
+  //       const { data, error } = await supabase.from("packages").select("*").eq("is_approved", true)
 
-        if (error) throw error
+  //       if (error) throw error
 
-        setPackages(data || [])
-        setFilteredPackages(data || [])
-        console.log(filteredPackages)
-        // console.log('packages set - ',packages)
-      } catch (error) {
-        console.error("Error fetching packages:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
+  //       setPackages(data || [])
+  //       setFilteredPackages(data || [])
+  //       console.log(filteredPackages)
+  //       // console.log('packages set - ',packages)
+  //     } catch (error) {
+  //       console.error("Error fetching packages:", error)
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   }
 
-    fetchPackages()
-  }, [])
+  //   fetchPackages()
+  // }, [])
 
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Slider Section */}
-      <HeroSlider />
+      {/* <HeroSlider /> */}
+
+      <HeroSection/>
 
       {/* Why Choose Us Section */}
       {/* <WhyChoose /> */}
