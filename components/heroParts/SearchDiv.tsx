@@ -39,9 +39,6 @@ const SearchBox = () => {
 
 
     const handleSearch = async () => {
-        console.log(dest)
-        console.log(budget)
-
         router.push(`/explore?destination=${dest}&budget=${budget}`)
     }
 
@@ -90,25 +87,25 @@ const SearchBox = () => {
                                 className="font-sans text-white placeholder:text-white/80 bg-transparent border-none outline-none text-base font-medium w-full"
                             /> */}
                             <input
-                                    autoComplete="off"
-                                    id="destination"
-                                    value={dest}
-                                    onChange={handleDestinationChange}
-                                    onFocus={() => {
-                                        if (dest.length > 0) {
-                                            const filtered = cities.filter(
-                                                ({ city, state }) =>
-                                                    city.toLowerCase().includes(dest.toLowerCase()) ||
-                                                    state.toLowerCase().includes(dest.toLowerCase())
-                                            );
-                                            setFilteredCities(filtered);
-                                            setShowDropdown(true);
-                                        }
-                                    }}
-                                    placeholder="Start typing city or state..."
-                                    required
-                                    className="font-sans text-white placeholder:text-white/80 bg-transparent border-none outline-none text-lg font-medium"
-                                />
+                                autoComplete="off"
+                                id="destination"
+                                value={dest}
+                                onChange={handleDestinationChange}
+                                onFocus={() => {
+                                    if (dest.length > 0) {
+                                        const filtered = cities.filter(
+                                            ({ city, state }) =>
+                                                city.toLowerCase().includes(dest.toLowerCase()) ||
+                                                state.toLowerCase().includes(dest.toLowerCase())
+                                        );
+                                        setFilteredCities(filtered);
+                                        setShowDropdown(true);
+                                    }
+                                }}
+                                placeholder="Where do you want to go?"
+                                required
+                                className="font-sans text-white placeholder:text-white/80 bg-transparent border-none outline-none text-lg font-medium"
+                            />
                         </div>
                     </div>
 
@@ -120,6 +117,7 @@ const SearchBox = () => {
                                 Max Budget
                             </label>
                             <input
+                                onChange={(e) => { setBudget(Number(e.target.value)) }}
                                 type="number"
                                 step={500}
                                 min={0}
@@ -127,24 +125,24 @@ const SearchBox = () => {
                                 className="font-sans text-white placeholder:text-white/80 bg-transparent border-none outline-none text-base font-medium w-full"
                             />
                             {showDropdown && filteredCities.length > 0 && (
-                                    <div className="absolute z-10 w-[80%] top-20 mt-1 bg-white rounded-lg shadow-lg max-h-60 overflow-y-auto ">
-                                        {filteredCities.slice(0, 10).map(({ city, state }, index) => (
-                                            <div
-                                                key={index}
-                                                onClick={() => {setDest(`${city}, ${state}`); setShowDropdown(false)}}
-                                                className="px-4 py-3 hover:bg-rose-500 cursor-pointer flex items-center gap-2"
-                                            >
-                                                <MapPin className="w-4 h-4 text-indigo-500" />
-                                                <span className="text-black">{city}, <span className="text-gray-700">{state}</span></span>
-                                            </div>
-                                        ))}
-                                        {filteredCities.length > 10 && (
-                                            <div className="px-4 py-2 text-sm text-gray-500 bg-gray-50">
-                                                ... and {filteredCities.length - 10} more cities
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
+                                <div className="absolute z-10 w-[80%] top-20 mt-1 bg-white rounded-lg shadow-lg max-h-60 overflow-y-auto ">
+                                    {filteredCities.slice(0, 10).map(({ city, state }, index) => (
+                                        <div
+                                            key={index}
+                                            onClick={() => { setDest(`${city}, ${state}`); setShowDropdown(false) }}
+                                            className="px-4 py-3 hover:bg-rose-500 cursor-pointer flex items-center gap-2"
+                                        >
+                                            <MapPin className="w-4 h-4 text-indigo-500" />
+                                            <span className="text-black">{city}, <span className="text-gray-700">{state}</span></span>
+                                        </div>
+                                    ))}
+                                    {filteredCities.length > 10 && (
+                                        <div className="px-4 py-2 text-sm text-gray-500 bg-gray-50">
+                                            ... and {filteredCities.length - 10} more cities
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -189,7 +187,7 @@ const SearchBox = () => {
                                             setShowDropdown(true);
                                         }
                                     }}
-                                    placeholder="Start typing city or state..."
+                                    placeholder="Where do you want to go?"
                                     required
                                     className="font-sans text-white placeholder:text-white/80 bg-transparent border-none outline-none text-lg font-medium"
                                 />
@@ -198,7 +196,7 @@ const SearchBox = () => {
                                         {filteredCities.slice(0, 10).map(({ city, state }, index) => (
                                             <div
                                                 key={index}
-                                                onClick={() => {setDest(`${city}, ${state}`); setShowDropdown(false)}}
+                                                onClick={() => { setDest(`${city}, ${state}`); setShowDropdown(false) }}
                                                 className="px-4 py-3 hover:bg-rose-500 cursor-pointer flex items-center gap-2"
                                             >
                                                 <MapPin className="w-4 h-4 text-indigo-500" />
