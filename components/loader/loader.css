@@ -1,20 +1,8 @@
-* {
-  /* border: 0;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0; */
-}
 :root {
   --hue: 223;
   --bg: hsl(var(--hue), 90%, 25%);
   --fg: hsl(var(--hue), 10%, 90%);
   --trans-dur: 0.3s;
-}
-body {
-  /* background: var(--bg); */
-  /* background: white; */
-  /* color: var(--fg); */
-  /* font: 1em/1.5 sans-serif; */
 }
 .pl {
   display: block;
