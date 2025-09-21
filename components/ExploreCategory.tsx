@@ -8,91 +8,91 @@ export default function ExploreCategory() {
 const categories = [
   {
     name: "Beach Getaways",
-    blurColor: "from-blue-400/15 to-blue-600/25",
+    blurColor: "from-blue-400/35 to-blue-600/35",
     icon: "🏖️",
     description: "Sun, sand & serenity"
   },
   {
     name: "Mountain Escapes",
-    blurColor: "from-purple-400/15 to-purple-600/25",
+    blurColor: "from-purple-400/25 to-purple-600/35",
     icon: "🏔️",
     description: "Peaks & panoramas"
   },
   {
     name: "Desert Adventures",
-    blurColor: "from-yellow-400/15 to-yellow-700/25",
+    blurColor: "from-yellow-400/25 to-yellow-700/35",
     icon: "🏜️",
     description: "Dunes & discoveries"
   },
   {
     name: "Forest & Wildlife",
-    blurColor: "from-green-400/15 to-green-700/25",
+    blurColor: "from-green-400/25 to-green-700/35",
     icon: "🌲",
     description: "Nature & wildlife"
   },
   {
     name: "Island Holidays",
-    blurColor: "from-cyan-400/15 to-cyan-600/25",
+    blurColor: "from-cyan-400/25 to-cyan-600/35",
     icon: "🏝️",
     description: "Tropical paradise"
   },
   {
     name: "Hill Stations",
-    blurColor: "from-indigo-400/15 to-indigo-600/25",
+    blurColor: "from-indigo-400/25 to-indigo-600/35",
     icon: "⛰️",
     description: "Cool & refreshing"
   },
   {
     name: "Adventure & Trekking",
-    blurColor: "from-green-400/15 to-green-600/25",
+    blurColor: "from-green-400/25 to-green-600/35",
     icon: "🥾",
     description: "Thrills & trails"
   },
   {
     name: "Cultural Tours",
-    blurColor: "from-amber-400/15 to-amber-600/25",
+    blurColor: "from-amber-400/25 to-amber-600/35",
     icon: "🏛️",
     description: "Heritage & history"
   },
   {
     name: "Pilgrimage & Spiritual",
-    blurColor: "from-purple-400/15 to-purple-700/25",
+    blurColor: "from-purple-400/25 to-purple-700/35",
     icon: "🕉️",
     description: "Peace & spirituality"
   },
   {
     name: "Wellness & Yoga Retreats",
-    blurColor: "from-pink-400/15 to-pink-600/25",
+    blurColor: "from-pink-400/25 to-pink-600/35",
     icon: "🧘",
     description: "Mind & body harmony"
   },
   {
     name: "Luxury Escapes",
-    blurColor: "from-rose-400/15 to-rose-700/25",
+    blurColor: "from-rose-400/25 to-rose-700/35",
     icon: "✨",
     description: "Premium experiences"
   },
   {
     name: "Budget Travel",
-    blurColor: "from-slate-400/15 to-slate-600/25",
+    blurColor: "from-slate-400/25 to-slate-600/35",
     icon: "💰",
     description: "Smart & affordable"
   },
   {
     name: "Family Friendly",
-    blurColor: "from-orange-400/15 to-orange-600/25",
+    blurColor: "from-orange-400/25 to-orange-600/35",
     icon: "👨‍👩‍👧‍👦",
     description: "Fun for everyone"
   },
   {
     name: "Solo Travel",
-    blurColor: "from-sky-400/15 to-sky-600/25",
+    blurColor: "from-sky-400/25 to-sky-600/35",
     icon: "🎒",
     description: "Independent journeys"
   },
   {
     name: "Weekend Getaways",
-    blurColor: "from-lime-400/15 to-lime-600/25",
+    blurColor: "from-lime-400/25 to-lime-600/35",
     icon: "🚗",
     description: "Quick escapes"
   }

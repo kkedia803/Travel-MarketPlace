@@ -184,14 +184,14 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
                 </div>
 
                 {/* Rating placeholder */}
-                <div className="flex items-center gap-1 pt-2 border-t border-slate-100">
+                {/* <div className="flex items-center gap-1 pt-2 border-t border-slate-100">
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                     ))}
                   </div>
                   <span className="text-sm text-slate-600 ml-1">4.8 (124 reviews)</span>
-                </div>
+                </div> */}
               </div>
 
               {/* Hover glow effect */}
