@@ -36,7 +36,8 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    if (isThisHovered && destination.images.length > 1) {
+    const isFinePointer = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(pointer: fine)').matches
+    if (isFinePointer && isThisHovered && destination.images.length > 1) {
       intervalRef.current = setInterval(() => {
         setCurrentImageIndex((prev) => (prev + 1) % destination.images.length)
       }, 1200)
@@ -61,7 +62,7 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
       onMouseLeave={() => setHoveredId(null)}
       className={`transform will-change-transform transition-all duration-300 ease-out ${
         isHovered 
-          ? (isThisHovered ? "scale-105 z-20" : "scale-95 opacity-70") 
+          ? (isThisHovered ? "md:scale-105 md:z-20" : "md:scale-95 md:opacity-70") 
           : "scale-100"
       }`}
     >
@@ -70,7 +71,7 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
           <TooltipTrigger asChild>
             <Link
               href={`/packages/${destination.id}`}
-              className="block relative rounded-2xl overflow-hidden bg-white/90 border border-white/40 shadow-lg hover:shadow-2xl group transition-all duration-300"
+              className="block relative rounded-2xl overflow-hidden bg-white/90 border border-white/40 shadow-lg hover:shadow-2xl group transition-all duration-300 h-[450px]"
             >
               {/* Image Section */}
               <div className="relative aspect-[4/3] w-full overflow-hidden">
@@ -78,7 +79,7 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
                   src={destination.images[currentImageIndex] || "/placeholder.svg"}
                   fill
                   alt={destination.title}
-                  className="object-cover transition-all duration-700 group-hover:scale-110"
+                  className="object-cover transition-all duration-700 md:group-hover:scale-110"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
                 />
                 
@@ -137,9 +138,9 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
               {/* Content Section */}
               <div className="p-5 space-y-4">
                 <div>
-                  <h4 className="text-lg font-bold text-slate-800 mb-2 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300">
-                    {destination.title}
-                  </h4>
+                <h4 className="text-lg font-bold text-slate-800 mb-2 line-clamp-2 min-h-[3rem] group-hover:text-blue-700 transition-colors duration-300">
+                  {destination.title}
+                </h4>
                   
                   {/* Category badge */}
                   <div className="mb-3">
@@ -195,7 +196,7 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
               </div>
 
               {/* Hover glow effect */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/0 via-purple-400/0 to-pink-400/0 group-hover:from-blue-400/10 group-hover:via-purple-400/10 group-hover:to-pink-400/10 transition-all duration-500 pointer-events-none" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/0 via-purple-400/0 to-pink-400/0 md:group-hover:from-blue-400/10 md:group-hover:via-purple-400/10 md:group-hover:to-pink-400/10 transition-all duration-500 pointer-events-none" />
             </Link>
           </TooltipTrigger>
           <TooltipContent side="top" className="bg-slate-800 text-white border-slate-700">

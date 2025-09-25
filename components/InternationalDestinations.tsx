@@ -42,7 +42,7 @@ export default function InternationalDestinations() {
     ]
 
     return (
-        <section className="py-20 bg-gradient-to-br from-blue-50 via-cyan-50/50 to-teal-50/30 relative overflow-hidden">
+        <section className="py-14 md:py-20 bg-gradient-to-br from-blue-50 via-cyan-50/50 to-teal-50/30 relative overflow-hidden">
             {/* Background decorative elements */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(59,130,246,0.08),transparent_50%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(6,182,212,0.06),transparent_50%)]" />
@@ -69,17 +69,17 @@ export default function InternationalDestinations() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 lg:gap-8 scroll-px-4 -mx-4 px-4">
                     {categories.map((category, index) => (
                         <Link
                             key={index}
                             href={`/explore?destination=${category.destination}`}
-                            className="group relative overflow-hidden rounded-2xl bg-white/80 border border-white/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 aspect-[3/4] will-change-transform"
+                            className="group relative overflow-hidden rounded-2xl bg-white/80 border border-white/40 shadow-lg md:hover:shadow-2xl transition-all duration-300 md:hover:scale-[1.02] md:hover:-translate-y-1 aspect-[3/4] will-change-transform snap-start flex-shrink-0 w-64 md:w-72 lg:w-80"
                         >
                             {/* Image */}
                             <div className="absolute inset-0">
                                 <Image
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    className="w-full h-full object-cover transition-transform duration-700 md:group-hover:scale-110"
                                     src={category.src}
                                     fill
                                     alt={category.name}
@@ -89,10 +89,10 @@ export default function InternationalDestinations() {
                             </div>
 
                             {/* Gradient overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/60 transition-all duration-300" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent md:group-hover:from-black/60 transition-all duration-300" />
 
                             {/* Travel glow effect */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-transparent opacity-0 md:group-hover:opacity-100 transition-opacity duration-500" />
 
                             {/* Content overlay */}
                             <div className="absolute inset-0 p-6 flex flex-col justify-between">
@@ -129,7 +129,7 @@ export default function InternationalDestinations() {
                             </div>
 
                             {/* Hover glow effect */}
-                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/0 via-cyan-400/0 to-teal-400/0 group-hover:from-blue-400/10 group-hover:via-cyan-400/10 group-hover:to-teal-400/10 transition-all duration-500 pointer-events-none" />
+                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/0 via-cyan-400/0 to-teal-400/0 md:group-hover:from-blue-400/10 md:group-hover:via-cyan-400/10 md:group-hover:to-teal-400/10 transition-all duration-500 pointer-events-none" />
                         </Link>
                     ))}
                 </div>

@@ -99,20 +99,20 @@ const categories = [
 ]
 
   return (
-    <section className="py-16 bg-gradient-to-br from-slate-50 to-blue-50/50 relative">
+    <section className="py-12 md:py-16 bg-gradient-to-br from-slate-50 to-blue-50/50 relative">
       {/* Simplified background - removed heavy gradients */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-purple-50/20" />
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10 md:mb-12">
           <div className="flex items-center justify-center gap-2 mb-3">
             <Sparkles className="w-5 h-5 text-purple-500" />
             <span className="text-purple-600 font-medium text-sm uppercase tracking-wider">Discover</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold font-glitten tracking-wide bg-gradient-to-r from-slate-800 to-purple-800 bg-clip-text text-transparent mb-3">
+          <h2 className="text-3xl md:text-5xl font-bold font-glitten tracking-wide bg-gradient-to-r from-slate-800 to-purple-800 bg-clip-text text-transparent mb-3">
             Explore by Category
           </h2>
-          <p className="text-base text-slate-600 max-w-xl mx-auto">
+          <p className="text-sm md:text-base text-slate-600 max-w-xl mx-auto">
             Find your perfect adventure from our curated collection
           </p>
         </div>
@@ -122,28 +122,28 @@ const categories = [
             <Link
               key={index}
               href={`/explore?category=${encodeURIComponent(category.name)}`}
-              className="group relative overflow-hidden rounded-xl bg-white/60 border border-white/40 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] min-h-[160px] will-change-transform"
+              className="group relative overflow-hidden rounded-xl bg-white/60 border border-white/40 shadow-sm md:hover:shadow-md transition-all duration-200 md:hover:scale-[1.01] min-h-[140px] md:min-h-[160px] will-change-transform"
             >
               {/* Simplified gradient background */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${category.blurColor} opacity-50 group-hover:opacity-70 transition-opacity duration-200`} />
+              <div className={`absolute inset-0 bg-gradient-to-br ${category.blurColor} opacity-50 md:group-hover:opacity-70 transition-opacity duration-200`} />
               
               {/* Content */}
               <div className="relative z-10 p-4 h-full flex flex-col justify-between">
                 <div className="text-center">
-                  <div className="text-3xl mb-2 group-hover:scale-105 transition-transform duration-200">
+                  <div className="text-2xl md:text-3xl mb-2 md:group-hover:scale-105 transition-transform duration-200">
                     {category.icon}
                   </div>
                   <h3 className="text-sm md:text-base font-bold text-slate-800 mb-1 leading-tight">
                     {category.name}
                   </h3>
-                  <p className="text-xs text-slate-600 opacity-75">
+                  <p className="text-[11px] md:text-xs text-slate-600 opacity-75">
                     {category.description}
                   </p>
                 </div>
                 
                 {/* Simplified arrow indicator */}
                 <div className="flex justify-center mt-3">
-                  <div className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center group-hover:bg-white/40 transition-colors duration-200">
+                  <div className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center md:group-hover:bg-white/40 transition-colors duration-200">
                     <ArrowRight className="w-3 h-3 text-slate-700" />
                   </div>
                 </div>

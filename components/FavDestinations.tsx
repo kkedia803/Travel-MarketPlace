@@ -46,13 +46,13 @@ const categories = [
   ]
 
 return(
-    <section className="py-12 bg-gradient-to-br from-green-50/50 via-emerald-50/30 to-teal-50/40 relative overflow-hidden">
+    <section className="py-10 md:py-12 bg-gradient-to-br from-green-50/50 via-emerald-50/30 to-teal-50/40 relative overflow-hidden">
         {/* Subtle background pattern */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(34,197,94,0.05),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(20,184,166,0.04),transparent_50%)]" />
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-10">
+          <div className="text-center mb-8 md:mb-10">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="p-2 rounded-full bg-gradient-to-r from-green-500 to-emerald-500">
                 <TrendingUp className="w-5 h-5 text-white" />
@@ -69,16 +69,16 @@ return(
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 md:gap-5 scroll-px-4 -mx-4 px-4">
             {categories.map((category, index) => (
               <Link
                 key={index}
                 href={`/explore?destination=${category.destination}`}
-                className="group relative overflow-hidden rounded-2xl bg-white/90 border border-white/40 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 aspect-[4/5]"
+                className="group relative overflow-hidden rounded-2xl bg-white/90 border border-white/40 shadow-lg md:hover:shadow-xl transition-all duration-300 md:hover:scale-[1.02] md:hover:-translate-y-1 aspect-[4/5] snap-start flex-shrink-0 w-64 md:w-72 lg:w-80"
               >
                 <div className="absolute inset-0">
                   <Image
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-500 md:group-hover:scale-110"
                     src={category.src}
                     fill
                     alt={category.name}
@@ -88,7 +88,7 @@ return(
                 </div>
 
                 {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/60 transition-all duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent md:group-hover:from-black/60 transition-all duration-300" />
 
                 {/* Top section with type and rating */}
                 <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
@@ -129,7 +129,7 @@ return(
                 </div>
 
                 {/* Hover glow effect */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-green-400/0 via-emerald-400/0 to-teal-400/0 group-hover:from-green-400/10 group-hover:via-emerald-400/10 group-hover:to-teal-400/10 transition-all duration-500 pointer-events-none" />
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-green-400/0 via-emerald-400/0 to-teal-400/0 md:group-hover:from-green-400/10 md:group-hover:via-emerald-400/10 md:group-hover:to-teal-400/10 transition-all duration-500 pointer-events-none" />
               </Link>
             ))}
           </div>

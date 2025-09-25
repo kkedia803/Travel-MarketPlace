@@ -45,10 +45,10 @@ export default function FeaturedPackages() {
 
     if (loading) {
         return (
-            <section className="py-20 bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/50 relative overflow-hidden">
+            <section className="py-14 md:py-20 bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/50 relative overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="animate-pulse">
-                        <div className="flex justify-between items-center mb-16">
+                        <div className="flex justify-between items-center mb-12 md:mb-16">
                             <div className="h-12 bg-slate-200 rounded-lg w-80"></div>
                             <div className="h-10 bg-slate-200 rounded-lg w-32 hidden sm:block"></div>
                         </div>
@@ -64,7 +64,7 @@ export default function FeaturedPackages() {
     }
 
     return (
-        <section className="py-20 bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/50 relative overflow-hidden">
+        <section className="py-14 md:py-20 bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/50 relative overflow-hidden">
             {/* Background decorative elements */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(59,130,246,0.08),transparent_50%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(147,51,234,0.06),transparent_50%)]" />
@@ -74,7 +74,7 @@ export default function FeaturedPackages() {
             <div className="absolute bottom-20 right-10 w-32 h-32 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full blur-xl animate-pulse delay-1000" />
 
             <div className="container mx-auto px-4 relative z-10">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-16 gap-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 md:mb-16 gap-6">
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500">
@@ -95,11 +95,11 @@ export default function FeaturedPackages() {
                     <Link href="/explore" className="group">
                         <Button 
                             variant="ghost" 
-                            className="bg-white/80 border border-white/40 hover:bg-white/90 hover:border-white/60 transition-all duration-300 gap-3 text-lg font-semibold font-glitten px-6 py-3 h-auto rounded-xl shadow-lg hover:shadow-xl group-hover:scale-105"
+                            className="bg-white/80 border border-white/40 hover:bg-white/90 hover:border-white/60 transition-all duration-300 gap-3 text-lg font-semibold font-glitten px-6 py-3 h-auto rounded-xl shadow-lg md:hover:shadow-xl md:group-hover:scale-105"
                         >
                             <TrendingUp className="w-5 h-5" />
                             View All Packages
-                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                            <ArrowRight className="w-5 h-5 md:group-hover:translate-x-1 transition-transform duration-300" />
                         </Button>
                     </Link>
                 </div>
@@ -113,19 +113,20 @@ export default function FeaturedPackages() {
                         <p className="text-slate-500">Check back soon for amazing travel deals!</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 lg:gap-8">
+                    <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 lg:gap-8 scroll-px-4 -mx-4 px-4">
                         {packages.map((destination) => {
                             const isHovered = hoveredId !== null
                             const isThisHovered = hoveredId === destination.id
 
                             return (
-                                <DestinationCard
-                                    key={destination.id}
-                                    destination={destination}
-                                    isHovered={isHovered}
-                                    isThisHovered={isThisHovered}
-                                    setHoveredId={setHoveredId}
-                                />
+                                <div key={destination.id} className="snap-start flex-shrink-0 w-64 md:w-72 lg:w-80">
+                                    <DestinationCard
+                                        destination={destination}
+                                        isHovered={isHovered}
+                                        isThisHovered={isThisHovered}
+                                        setHoveredId={setHoveredId}
+                                    />
+                                </div>
                             )
                         })}
                     </div>
