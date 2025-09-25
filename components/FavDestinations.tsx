@@ -74,7 +74,7 @@ return(
               <Link
                 key={index}
                 href={`/explore?destination=${category.destination}`}
-                className="group relative overflow-hidden rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 aspect-[4/5]"
+                className="group relative overflow-hidden rounded-2xl bg-white/90 border border-white/40 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 aspect-[4/5]"
               >
                 <div className="absolute inset-0">
                   <Image
@@ -92,10 +92,10 @@ return(
 
                 {/* Top section with type and rating */}
                 <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
-                  <span className="bg-gradient-to-r from-green-500/90 to-emerald-500/90 backdrop-blur-sm border border-white/30 rounded-full px-3 py-1 text-white text-xs font-medium">
+                  <span className="bg-gradient-to-r from-green-500/90 to-emerald-500/90 border border-white/30 rounded-full px-3 py-1 text-white text-xs font-medium">
                     {category.type}
                   </span>
-                  <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full px-2 py-1">
+                  <div className="flex items-center gap-1 bg-white/20 border border-white/30 rounded-full px-2 py-1">
                     <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                     <span className="text-white text-xs font-medium">{category.rating}</span>
                   </div>

@@ -70,7 +70,7 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
           <TooltipTrigger asChild>
             <Link
               href={`/packages/${destination.id}`}
-              className="block relative rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm border border-white/40 shadow-lg hover:shadow-2xl group transition-all duration-300"
+              className="block relative rounded-2xl overflow-hidden bg-white/90 border border-white/40 shadow-lg hover:shadow-2xl group transition-all duration-300"
             >
               {/* Image Section */}
               <div className="relative aspect-[4/3] w-full overflow-hidden">
@@ -97,7 +97,7 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
                 {/* Like button */}
                 <button
                   onClick={handleLikeClick}
-                  className="absolute top-3 left-3 z-10 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-white/30 transition-all duration-200"
+                  className="absolute top-3 left-3 z-10 w-8 h-8 rounded-full bg-white/25 border border-white/40 flex items-center justify-center hover:bg-white/30 transition-all duration-200"
                 >
                   <Heart 
                     className={`w-4 h-4 transition-all duration-200 ${

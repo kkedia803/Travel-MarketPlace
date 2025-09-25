@@ -95,7 +95,7 @@ export default function FeaturedPackages() {
                     <Link href="/explore" className="group">
                         <Button 
                             variant="ghost" 
-                            className="bg-white/60 backdrop-blur-sm border border-white/40 hover:bg-white/80 hover:border-white/60 transition-all duration-300 gap-3 text-lg font-semibold font-glitten px-6 py-3 h-auto rounded-xl shadow-lg hover:shadow-xl group-hover:scale-105"
+                            className="bg-white/80 border border-white/40 hover:bg-white/90 hover:border-white/60 transition-all duration-300 gap-3 text-lg font-semibold font-glitten px-6 py-3 h-auto rounded-xl shadow-lg hover:shadow-xl group-hover:scale-105"
                         >
                             <TrendingUp className="w-5 h-5" />
                             View All Packages

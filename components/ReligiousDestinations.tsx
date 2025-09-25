@@ -70,7 +70,7 @@ return(
               <Link
                 key={index}
                 href={`/explore?destination=${category.destination}`}
-                className="group relative overflow-hidden rounded-2xl bg-white/60 backdrop-blur-sm border border-white/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 aspect-[3/4] will-change-transform"
+                className="group relative overflow-hidden rounded-2xl bg-white/80 border border-white/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 aspect-[3/4] will-change-transform"
               >
                 {/* Image */}
                 <div className="absolute inset-0">
@@ -94,13 +94,13 @@ return(
                 <div className="absolute inset-0 p-6 flex flex-col justify-between">
                   {/* Top section with location */}
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 border border-white/30">
+                    <div className="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1 border border-white/30">
                       <MapPin className="w-3 h-3 text-white" />
                       <span className="text-white text-xs font-medium">{category.destination}</span>
                     </div>
                     
                     {/* Sacred symbol */}
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500/30 to-amber-500/30 backdrop-blur-sm border border-white/30 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500/30 to-amber-500/30 border border-white/30 flex items-center justify-center">
                       <span className="text-white text-sm">🕉️</span>
                     </div>
                   </div>
@@ -116,7 +116,7 @@ return(
                     
                     {/* Significance badge */}
                     <div className="inline-block">
-                      <div className="bg-gradient-to-r from-orange-500/20 to-amber-500/20 backdrop-blur-sm border border-orange-300/30 rounded-full px-3 py-1">
+                      <div className="bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-300/30 rounded-full px-3 py-1">
                         <span className="text-orange-100 text-xs font-medium">{category.significance}</span>
                       </div>
                     </div>

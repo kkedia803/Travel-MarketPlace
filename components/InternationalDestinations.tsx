@@ -74,7 +74,7 @@ export default function InternationalDestinations() {
                         <Link
                             key={index}
                             href={`/explore?destination=${category.destination}`}
-                            className="group relative overflow-hidden rounded-2xl bg-white/60 backdrop-blur-sm border border-white/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 aspect-[3/4] will-change-transform"
+                            className="group relative overflow-hidden rounded-2xl bg-white/80 border border-white/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 aspect-[3/4] will-change-transform"
                         >
                             {/* Image */}
                             <div className="absolute inset-0">
@@ -98,13 +98,13 @@ export default function InternationalDestinations() {
                             <div className="absolute inset-0 p-6 flex flex-col justify-between">
                                 {/* Top section with continent */}
                                 <div className="flex items-start justify-between">
-                                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 border border-white/30">
+                                    <div className="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1 border border-white/30">
                                         <Globe className="w-3 h-3 text-white" />
                                         <span className="text-white text-xs font-medium">{category.continent}</span>
                                     </div>
                                     
                                     {/* Rating stars */}
-                                    <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm rounded-full px-2 py-1 border border-white/30">
+                                    <div className="flex items-center gap-1 bg-white/20 rounded-full px-2 py-1 border border-white/30">
                                         <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                                         <span className="text-white text-xs font-medium">4.8</span>
                                     </div>
@@ -121,7 +121,7 @@ export default function InternationalDestinations() {
                                     
                                     {/* Highlight badge */}
                                     <div className="inline-block">
-                                        <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 backdrop-blur-sm border border-blue-300/30 rounded-full px-3 py-1">
+                                        <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-300/30 rounded-full px-3 py-1">
                                             <span className="text-blue-100 text-xs font-medium">{category.highlight}</span>
                                         </div>
                                     </div>

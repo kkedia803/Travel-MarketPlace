@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 import { Gradient } from 'whatamesh'
 
 export default function BGGradient() {
-    const canvasRef = useRef(null);
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;

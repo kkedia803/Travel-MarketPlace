@@ -37,7 +37,7 @@ export default function OurContent() {
               target="_blank"
               key={index}
               href={category.url}
-              className="group relative overflow-hidden rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2"
+              className="group relative overflow-hidden rounded-2xl bg-white/20 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2"
             >
               {/* Content Container */}
               <div className="aspect-[3/4] relative overflow-hidden">
@@ -58,20 +58,20 @@ export default function OurContent() {
                     
                     {/* Play button */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center group-hover:bg-white/30 transition-all duration-300 group-hover:scale-110">
+                      <div className="w-16 h-16 rounded-full bg-white/25 border border-white/30 flex items-center justify-center group-hover:bg-white/30 transition-all duration-300 group-hover:scale-110">
                         <Play className="w-6 h-6 text-white ml-1" fill="white" />
                       </div>
                     </div>
 
                     {/* Views counter */}
-                    <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
+                    <div className="absolute top-4 right-4 bg-black/50 rounded-full px-3 py-1 flex items-center gap-1">
                       <Eye className="w-3 h-3 text-white" />
                       <span className="text-xs text-white font-medium">{category.views}</span>
                     </div>
 
                     {/* Instagram logo */}
                     <div className="absolute bottom-4 left-4">
-                      <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-white/25 border border-white/30 flex items-center justify-center">
                         <Image 
                           src={category.coverImage} 
                           alt="Instagram" 
@@ -90,7 +90,7 @@ export default function OurContent() {
                       
                       <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                         <div className="mb-4">
-                          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-full bg-white/25 border border-white/30 flex items-center justify-center">
                             <Image 
                               src={category.coverImage} 
                               alt="Blog" 
@@ -107,7 +107,7 @@ export default function OurContent() {
 
                       {/* External link icon */}
                       <div className="absolute top-4 right-4">
-                        <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-white/25 border border-white/30 flex items-center justify-center">
                           <ExternalLink className="w-4 h-4 text-white" />
                         </div>
                       </div>
