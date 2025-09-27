@@ -1,6 +1,3 @@
-import SearchBox from "./heroParts/SearchBox";
-import TicketFan from "./heroParts/TicketFan";
-import { CursorTrail } from "./heroParts/CursorTrail";
 import BGGradient from "./BGGradient";
 import SearchDiv from "./heroParts/SearchDiv";
 import { ChevronsDown } from "lucide-react";
