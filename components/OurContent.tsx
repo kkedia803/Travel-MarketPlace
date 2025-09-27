@@ -31,13 +31,13 @@ export default function OurContent() {
           </p>
         </div>
 
-        <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 md:gap-8 scroll-px-4 -mx-4 px-4">
+        <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 md:gap-8 scroll-px-4 -mx-4 px-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 md:overflow-visible md:mx-0 md:px-0">
           {categories.map((category, index) => (
             <Link
               target="_blank"
               key={index}
               href={category.url}
-              className="group relative overflow-hidden rounded-2xl bg-white/20 border border-white/20 shadow-xl md:hover:shadow-2xl transition-all duration-500 md:hover:scale-[1.02] md:hover:-translate-y-2 snap-start flex-shrink-0 w-64 md:w-72 lg:w-80"
+              className="group relative overflow-hidden rounded-2xl bg-white/20 border border-white/20 shadow-xl md:hover:shadow-2xl transition-all duration-500 md:hover:scale-[1.02] md:hover:-translate-y-2 snap-start flex-shrink-0 w-64 md:w-auto"
             >
               {/* Content Container */}
               <div className="aspect-[3/4] relative overflow-hidden">

@@ -69,12 +69,12 @@ export default function InternationalDestinations() {
                     </p>
                 </div>
 
-                <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 lg:gap-8 scroll-px-4 -mx-4 px-4">
+                <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 lg:gap-8 scroll-px-4 -mx-4 px-4 md:grid md:grid-cols-2 lg:grid-cols-4 md:overflow-visible md:mx-0 md:px-0">
                     {categories.map((category, index) => (
                         <Link
                             key={index}
                             href={`/explore?destination=${category.destination}`}
-                            className="group relative overflow-hidden rounded-2xl bg-white/80 border border-white/40 shadow-lg md:hover:shadow-2xl transition-all duration-300 md:hover:scale-[1.02] md:hover:-translate-y-1 aspect-[3/4] will-change-transform snap-start flex-shrink-0 w-64 md:w-72 lg:w-80"
+                            className="group relative overflow-hidden rounded-2xl bg-white/80 border border-white/40 shadow-lg md:hover:shadow-2xl transition-all duration-300 md:hover:scale-[1.02] md:hover:-translate-y-1 aspect-[3/4] will-change-transform snap-start flex-shrink-0 w-64 md:w-auto"
                         >
                             {/* Image */}
                             <div className="absolute inset-0">

@@ -113,13 +113,13 @@ export default function FeaturedPackages() {
                         <p className="text-slate-500">Check back soon for amazing travel deals!</p>
                     </div>
                 ) : (
-                    <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 lg:gap-8 scroll-px-4 -mx-4 px-4">
+                    <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 lg:gap-8 scroll-px-4 -mx-4 px-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 md:overflow-visible md:mx-0 md:px-0">
                         {packages.map((destination) => {
                             const isHovered = hoveredId !== null
                             const isThisHovered = hoveredId === destination.id
 
                             return (
-                                <div key={destination.id} className="snap-start flex-shrink-0 w-64 md:w-72 lg:w-80">
+                                <div key={destination.id} className="snap-start flex-shrink-0 w-64 md:w-auto">
                                     <DestinationCard
                                         destination={destination}
                                         isHovered={isHovered}
