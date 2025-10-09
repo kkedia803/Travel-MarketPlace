@@ -34,7 +34,7 @@ export default function ExplorePage() {
   const searchParams = useSearchParams()
   const initialCategory = searchParams.get("category") || ""
   const initialDestination = searchParams.get("destination") || ""
-  const initialBudget = Number(searchParams.get('budget')) || 50000
+  const initialBudget = Number(searchParams.get('budget')) || 100000
 
   const [packages, setPackages] = useState<Package[]>([])
   const [loading, setLoading] = useState(true)
@@ -72,6 +72,7 @@ export default function ExplorePage() {
           .select("*")
           .eq("is_approved", true)
           .eq("status", "active")
+          .order('updated_at', {ascending:false})
 
         if (error) throw error
         setPackages(data || [])
@@ -217,8 +218,8 @@ export default function ExplorePage() {
                       <Label className="text-sm font-medium">Price Range</Label>
                       <div className="pt-4 px-2">
                         <Slider
-                          defaultValue={[0, 50000]}
-                          max={50000}
+                          defaultValue={[0, 100000]}
+                          max={100000}
                           step={100}
                           value={priceRange}
                           onValueChange={setPriceRange}

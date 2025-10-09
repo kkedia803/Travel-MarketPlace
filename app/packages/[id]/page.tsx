@@ -814,9 +814,13 @@ export default function PackageDetailsPage() {
                 </div>
 
                 {userType !== "seller" && (
-                  <Button className="w-full" size="lg" onClick={handleBookNow}>
-                    Book Now
-                  </Button>)}
+                  <div className="flex flex-col gap-3 items-center">
+                    <Button className="w-full" size="lg" onClick={handleBookNow}>
+                      Book Now
+                    </Button>
+                    <span>Contact <span className="font-bold tracking-tight text-xl">+91 87438 09060</span> for any inquiry.</span>
+                  </div>
+                )}
                 {userType == "seller" && (
                   <div className="w-full" style={{ display: "flex", justifyContent: "center", backgroundColor: "#f8d7da", padding: "10px", borderRadius: "5px" }}>
                     You are a seller. You cannot book packages.
