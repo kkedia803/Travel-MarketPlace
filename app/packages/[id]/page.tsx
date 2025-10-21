@@ -260,7 +260,13 @@ export default function PackageDetailsPage() {
 
       if (error) throw error;
 
-      setReviews(data);
+      // Transform the data: Supabase returns profiles as an array, but we need a single object
+      const transformedData = data?.map((review: any) => ({
+        ...review,
+        profiles: review.profiles?.[0] || null
+      })) || [];
+
+      setReviews(transformedData);
     } catch (error) {
       console.error("Error fetching reviews:", error);
     }
@@ -447,8 +453,8 @@ export default function PackageDetailsPage() {
           </div>
 
         </div>
-        {/* Right: Key Points Section as Grid */}
-        {packageFeatures && (
+        {/* Right: Key Points Section as Grid - COMMENTED OUT */}
+        {false && packageFeatures && (
           <div className="md:col-span-1 px-5 py-5 hidden md:block">
 
             <h2 className="text-2xl font-semibold mb-1 text-gray-800 pt-2">
@@ -474,8 +480,8 @@ export default function PackageDetailsPage() {
         )}
 
 
-        {/* Key Points for mobile */}
-        {packageFeatures && (
+        {/* Key Points for mobile - COMMENTED OUT */}
+        {false && packageFeatures && (
           <div className="block md:hidden mt-4">
             <div className="border rounded-lg p-4">
               <h2 className="text-lg font-semibold mb-2">Key Points</h2>

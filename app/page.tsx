@@ -75,10 +75,10 @@ export default function Home() {
       <FavDestinations />
 
       {/* Religious Destinations Section */}
-      <ReligiousDestinations/>
+      {/* <ReligiousDestinations/> */}
 
       {/* International Destinations Section */}
-      <InternationalDestinations/>
+      {/* <InternationalDestinations/> */}
 
       {/* Featured Packages */}
       <FeaturedPackages />
