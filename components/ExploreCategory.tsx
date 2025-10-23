@@ -30,12 +30,12 @@ const categories = [
     icon: "🌲",
     description: "Nature & wildlife"
   },
-  {
-    name: "Island Holidays",
-    blurColor: "from-cyan-400/25 to-cyan-600/35",
-    icon: "🏝️",
-    description: "Tropical paradise"
-  },
+  // {
+  //   name: "Island Holidays",
+  //   blurColor: "from-cyan-400/25 to-cyan-600/35",
+  //   icon: "🏝️",
+  //   description: "Tropical paradise"
+  // },
   {
     name: "Hill Stations",
     blurColor: "from-indigo-400/25 to-indigo-600/35",
@@ -60,42 +60,42 @@ const categories = [
     icon: "🕉️",
     description: "Peace & spirituality"
   },
-  {
-    name: "Wellness & Yoga Retreats",
-    blurColor: "from-pink-400/25 to-pink-600/35",
-    icon: "🧘",
-    description: "Mind & body harmony"
-  },
+  // {
+  //   name: "Wellness & Yoga Retreats",
+  //   blurColor: "from-pink-400/25 to-pink-600/35",
+  //   icon: "🧘",
+  //   description: "Mind & body harmony"
+  // },
   {
     name: "Luxury Escapes",
     blurColor: "from-rose-400/25 to-rose-700/35",
     icon: "✨",
     description: "Premium experiences"
   },
-  {
-    name: "Budget Travel",
-    blurColor: "from-slate-400/25 to-slate-600/35",
-    icon: "💰",
-    description: "Smart & affordable"
-  },
-  {
-    name: "Family Friendly",
-    blurColor: "from-orange-400/25 to-orange-600/35",
-    icon: "👨‍👩‍👧‍👦",
-    description: "Fun for everyone"
-  },
-  {
-    name: "Solo Travel",
-    blurColor: "from-sky-400/25 to-sky-600/35",
-    icon: "🎒",
-    description: "Independent journeys"
-  },
-  {
-    name: "Weekend Getaways",
-    blurColor: "from-lime-400/25 to-lime-600/35",
-    icon: "🚗",
-    description: "Quick escapes"
-  }
+  // {
+  //   name: "Budget Travel",
+  //   blurColor: "from-slate-400/25 to-slate-600/35",
+  //   icon: "💰",
+  //   description: "Smart & affordable"
+  // },
+  // {
+  //   name: "Family Friendly",
+  //   blurColor: "from-orange-400/25 to-orange-600/35",
+  //   icon: "👨‍👩‍👧‍👦",
+  //   description: "Fun for everyone"
+  // },
+  // {
+  //   name: "Solo Travel",
+  //   blurColor: "from-sky-400/25 to-sky-600/35",
+  //   icon: "🎒",
+  //   description: "Independent journeys"
+  // },
+  // {
+  //   name: "Weekend Getaways",
+  //   blurColor: "from-lime-400/25 to-lime-600/35",
+  //   icon: "🚗",
+  //   description: "Quick escapes"
+  // }
 ]
 
   return (

@@ -31,7 +31,7 @@ export default function FeaturedPackages() {
         const fetchPackages = async () => {
             setLoading(true)
             try {
-                const { data, error } = await supabase.from("packages").select("*").eq("is_approved", true).order('updated_at',{ascending:false}).limit(5)
+                const { data, error } = await supabase.from("packages").select("*").eq("is_approved", true).eq("status", "active").order('updated_at',{ascending:false}).limit(5)
                 if (error) throw error
                 setPackages(data || [])
             } catch (error) {

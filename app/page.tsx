@@ -69,7 +69,7 @@ export default function Home() {
       {/* <ComingSoonTravel /> */}
 
       {/* Top Sellers Section */}
-      <TopSellers/>
+      {/* <TopSellers/> */}
 
       {/* Favourite Destinations Section */}
       <FavDestinations />

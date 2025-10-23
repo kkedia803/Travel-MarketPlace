@@ -16,7 +16,7 @@ const categories = [
     },
     { 
       name: "Vaishno Devi", 
-      destination: "Katra, Jammu & Kashmir", 
+      destination: "Katra, Jammu and Kashmir", 
       src: "https://www.indiantempletour.com/wp-content/uploads/2016/06/Vaishno-Devi-Yatra.webp",
       description: "Sacred pilgrimage site",
       significance: "Divine mother's abode"

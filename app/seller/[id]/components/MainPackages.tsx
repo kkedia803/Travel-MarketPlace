@@ -59,6 +59,7 @@ export default function MainPackages() {
                     .from("packages")
                     .select("*")
                     .eq("seller_id", params.id)
+                    .eq("status", "active")
                     .order("created_at", { ascending: false });
 
                 if (pkgError) throw pkgError;
