@@ -47,7 +47,7 @@ export default function Cancellation() {
                             <div className='text-base mt-3 text-muted-foreground'>
                                 <ul className='list-disc list-inside space-y-2 mt-1'>
                                     <li>
-                                        Approved refunds will be processed within 7-10 business days via the original payment method.
+                                        Approved refunds will be processed and credited within 7-10 business days via the original payment method.
                                     </li>
                                     <li>
                                         Bank/payment gateway delays are outside Tracoit's control, but we will support you in case of issues.

@@ -128,7 +128,17 @@ export default function Cancellation() {
                             <div className='text-base mt-3 text-muted-foreground'>
                                 <ul className='list-disc list-inside space-y-2 mt-1'>
                                     <li>
-                                        These Terms are governed by the laws of India. Any disputes shall be subject to the jurisdiction of courts in [Your City/State]
+                                        These Terms are governed by the laws of India. Any disputes shall be subject to the jurisdiction of courts in Delhi, India.
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li className="text-lg">
+                            <span className='text-xl underline'>Ownership</span>
+                            <div className='text-base mt-3 text-muted-foreground'>
+                                <ul className='list-disc list-inside space-y-2 mt-1'>
+                                    <li>
+                                        This website is owned by Deepak Kumar Yadav.
                                     </li>
                                 </ul>
                             </div>

@@ -248,11 +248,11 @@ const SearchBox = () => {
                         Explore More
                     </Button>
                 </Link>
-                <Link href={'/auth/register?role=seller'} className="flex-1 sm:flex-none">
+                {/* <Link href={'/auth/register?role=seller'} className="flex-1 sm:flex-none">
                     <Button className="w-fit md:w-full hover:bg-black/65 bg-black/65 px-6 py-2">
                         Become a Seller
                     </Button>
-                </Link>
+                </Link> */}
             </div>
         </div>
     );

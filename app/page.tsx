@@ -78,7 +78,7 @@ export default function Home() {
       <ReligiousDestinations/>
 
       {/* International Destinations Section */}
-      <InternationalDestinations/>
+      {/* <InternationalDestinations/> */}
 
       {/* Featured Packages */}
       <FeaturedPackages />

@@ -38,11 +38,7 @@ export function Footer() {
         {
             page: 'Cancellation & Refund Policy',
             link: '/cancellation',
-        },
-        {
-            page: 'Shipping & Delivery Policy',
-            link: '/shipping',
-        },
+        }
     ]
     return (
         <motion.div

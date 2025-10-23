@@ -37,8 +37,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold">Phone</h3>
-                  <p className="text-muted-foreground">+1 (555) 123-4567</p>
-                  <p className="text-sm text-muted-foreground">Available Monday-Friday, 9am-5pm EST</p>
+                  <p className="text-muted-foreground">+91 87438 09060</p>
+                  <p className="text-sm text-muted-foreground">Available Monday-Friday, 9am-5pm IST</p>
                 </div>
               </CardContent>
             </Card>
@@ -50,13 +50,13 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold">Email</h3>
-                  <p className="text-muted-foreground">support@travelmarketplace.com</p>
-                  <p className="text-sm text-muted-foreground">We'll respond within 24 hours</p>
+                  <p className="text-muted-foreground">deepaktraco.in@gmail.com</p>
+                  <p className="text-sm text-muted-foreground">We'll respond within 48 hours</p>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
+            {/* <Card>
               <CardContent className="p-6 flex items-start space-x-4">
                 <div className="bg-primary/10 rounded-full p-3 mt-1">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
@@ -67,7 +67,7 @@ export default function ContactPage() {
                   <p className="text-muted-foreground">San Francisco, CA 94103</p>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </div>
         

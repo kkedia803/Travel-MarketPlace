@@ -9,21 +9,21 @@ export default function ReligiousDestinations() {
 const categories = [
     { 
       name: "Varanasi", 
-      destination: "Varanasi", 
+      destination: "Varanasi, Uttar Pradesh", 
       src: "https://www.visitkashi.in/backend/admin/product_images/172448788939.jpg",
       description: "Ancient spiritual city",
       significance: "Oldest living city"
     },
     { 
       name: "Vaishno Devi", 
-      destination: "Katra", 
+      destination: "Katra, Jammu & Kashmir", 
       src: "https://www.indiantempletour.com/wp-content/uploads/2016/06/Vaishno-Devi-Yatra.webp",
       description: "Sacred pilgrimage site",
       significance: "Divine mother's abode"
     },
     { 
       name: "Vrindavan", 
-      destination: "Vrindavan", 
+      destination: "Vrindavan, Uttar Pradesh", 
       src: "https://experiencemyindia.com/wp-content/uploads/2024/10/iskcon.jpg.webp",
       description: "Krishna's holy land",
       significance: "Land of divine love"
