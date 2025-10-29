@@ -50,17 +50,11 @@ export default function ExplorePage() {
     "Mountain Escapes",
     "Desert Adventures",
     "Forest & Wildlife",
-    "Island Holidays",
     "Hill Stations",
     "Adventure & Trekking",
     "Cultural Tours",
     "Pilgrimage & Spiritual",
-    "Wellness & Yoga Retreats",
     "Luxury Escapes",
-    "Budget Travel",
-    "Family Friendly",
-    "Solo Travel",
-    "Weekend Getaways"
   ]
 
   useEffect(() => {
