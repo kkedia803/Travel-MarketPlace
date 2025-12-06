@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "@/hooks/use-toast"
+import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/app/contexts/auth-context";
 import { supabase } from "@/app/lib/supabase";
 import cities from "@/app/lib/cities";
@@ -51,6 +51,9 @@ import {
   DollarSign,
   MapPin,
   ChevronDown,
+  FileText,
+  Upload,
+  Loader2,
 } from "lucide-react";
 import {
   AreaChart,
@@ -67,7 +70,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { DayPicker } from "react-day-picker";
@@ -83,22 +86,23 @@ interface TravelPackage {
   nights: number;
   category: string;
   images: string[];
+  document?: string; // PDF document URL
+  contact_number?: string; // Seller contact number for this package
   seller_id: string;
   is_approved: boolean;
   created_at: string;
   max_people: number;
   boarding_point: string;
   discount: number;
-  cancellation_policy: string | string[],
-  itinerary: { day: number; title: string; description: string }[],
-  inclusion: string[],
-  exclusion: string[],
+  cancellation_policy: string | string[];
+  itinerary: { day: number; title: string; description: string }[];
+  inclusion: string[];
+  exclusion: string[];
   final_price: number;
   start_dates: string[];
   status?: string;
   room_type?: { [key: string]: number }; // Added property for room_type
 }
-
 
 type FeatureKey =
   | "accommodation"
@@ -110,7 +114,6 @@ type FeatureKey =
   | "entry_tickets"
   | "camping"
   | "trek_lead";
-
 
 interface Booking {
   id: string;
@@ -148,15 +151,22 @@ export default function SellerDashboard() {
   const [loading, setLoading] = useState(true);
   const [isAddPackageOpen, setIsAddPackageOpen] = useState(false);
   const [formStep, setFormStep] = useState(0);
-  const [newPackage, setNewPackage] = useState<Omit<TravelPackage, "final_price" | "seller_id" | "is_approved" | "created_at">>({
+  const [newPackage, setNewPackage] = useState<
+    Omit<
+      TravelPackage,
+      "final_price" | "seller_id" | "is_approved" | "created_at"
+    >
+  >({
     title: "",
     description: "",
     destination: "",
     price: 0,
     duration: 1, // days
-    nights: 0,   // <-- add this line
+    nights: 0, // <-- add this line
     category: "",
     images: [],
+    document: "",
+    contact_number: "",
     max_people: 1,
     boarding_point: "",
     discount: 0,
@@ -169,7 +179,7 @@ export default function SellerDashboard() {
   });
 
   const [selectedDates, setSelectedDates] = useState<Date[]>(
-    (newPackage.start_dates ?? []).map(d => new Date(d))
+    (newPackage.start_dates ?? []).map((d) => new Date(d))
   );
 
   const [selectedFeatures, setSelectedFeatures] = useState<{
@@ -180,30 +190,40 @@ export default function SellerDashboard() {
   // const [filteredDestinations, setFilteredDestinations] = useState<string[]>([]);
   // const dropdownRef = useRef<HTMLDivElement>(null);
 
-
   // const [monthlyData, setMonthlyData] = useState<{ name: string; value: number }[]>([]);
-  const [monthlyBooking, setMonthlyBooking] = useState<{ name: string; bookings: number }[]>([]);
-  const [destinationData, setDestinationData] = useState<{ name: string; value: number }[]>([]);
-  const [userGrowthData, setUserGrowthData] = useState<{ name: string; users: number }[]>([]);
-  const [revenueData, setRevenueData] = useState<{ name: string; revenue: number }[]>([]);
+  const [monthlyBooking, setMonthlyBooking] = useState<
+    { name: string; bookings: number }[]
+  >([]);
+  const [destinationData, setDestinationData] = useState<
+    { name: string; value: number }[]
+  >([]);
+  const [userGrowthData, setUserGrowthData] = useState<
+    { name: string; users: number }[]
+  >([]);
+  const [revenueData, setRevenueData] = useState<
+    { name: string; revenue: number }[]
+  >([]);
   // const [totalUsers, setTotalUsers] = useState(0);
   // const [totalRevenue, setTotalRevenue] = useState(0);
 
   const [basePrice, setBasePrice] = useState(0);
+  const [sellerContactNumber, setSellerContactNumber] = useState("");
+  const [phoneError, setPhoneError] = useState(false);
+  const [isUploadingPDF, setIsUploadingPDF] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAddPackageOpen) {
       // Reset selectedDates when modal opens
       setSelectedDates([]);
       setSelectedFeatures({});
+      setPdfError(null);
     }
   }, [isAddPackageOpen]);
 
   useEffect(() => {
     console.log("Selected Dates Updated:", selectedDates);
   }, [selectedDates]);
-
-
 
   useEffect(() => {
     if (user) {
@@ -217,11 +237,18 @@ export default function SellerDashboard() {
   const handleAddItineraryLine = () => {
     setNewPackage((prev) => ({
       ...prev,
-      itinerary: [...prev.itinerary, { day: prev.itinerary.length + 1, title: "", description: "" }],
+      itinerary: [
+        ...prev.itinerary,
+        { day: prev.itinerary.length + 1, title: "", description: "" },
+      ],
     }));
   };
 
-  const handleItineraryChange = (index: number, field: 'title' | 'description', value: string) => {
+  const handleItineraryChange = (
+    index: number,
+    field: "title" | "description",
+    value: string
+  ) => {
     setNewPackage((prev) => {
       const updatedItinerary = [...prev.itinerary];
       updatedItinerary[index][field] = value;
@@ -262,16 +289,93 @@ export default function SellerDashboard() {
   const handleAddCancellationPolicyItem = () => {
     setNewPackage((prev) => ({
       ...prev,
-      cancellation_policy: [...(Array.isArray(prev.cancellation_policy) ? prev.cancellation_policy : []), ""],
+      cancellation_policy: [
+        ...(Array.isArray(prev.cancellation_policy)
+          ? prev.cancellation_policy
+          : []),
+        "",
+      ],
     }));
   };
 
   const handleCancellationPolicyChange = (index: number, value: string) => {
     setNewPackage((prev) => {
-      const updatedPolicy = [...(Array.isArray(prev.cancellation_policy) ? prev.cancellation_policy : [])];
+      const updatedPolicy = [
+        ...(Array.isArray(prev.cancellation_policy)
+          ? prev.cancellation_policy
+          : []),
+      ];
       updatedPolicy[index] = value;
       return { ...prev, cancellation_policy: updatedPolicy };
     });
+  };
+
+  const handlePDFUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== "application/pdf") {
+      setPdfError("Please upload a PDF file only");
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setPdfError("PDF file size must be less than 10MB");
+      return;
+    }
+
+    setIsUploadingPDF(true);
+    setPdfError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.details || "Failed to upload PDF");
+      }
+
+      setNewPackage((prev) => ({
+        ...prev,
+        document: data.url,
+      }));
+
+      toast({
+        title: "PDF uploaded successfully",
+        description: "Your itinerary document has been uploaded.",
+        variant: "success",
+      });
+    } catch (err) {
+      const errorMessage = (err as Error).message || "Unknown error occurred";
+      console.error("PDF upload error:", errorMessage);
+      setPdfError(errorMessage);
+      toast({
+        title: "Upload failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingPDF(false);
+      // Reset input value to allow re-uploading the same file
+      e.target.value = "";
+    }
+  };
+
+  const handleRemovePDF = () => {
+    setNewPackage((prev) => ({
+      ...prev,
+      document: "",
+    }));
+    setPdfError(null);
   };
 
   useEffect(() => {
@@ -314,7 +418,6 @@ export default function SellerDashboard() {
         setBookings(bookingsData || []);
       } catch (error) {
         console.error("Error fetching data:", error);
-
       } finally {
         setLoading(false);
       }
@@ -363,7 +466,6 @@ export default function SellerDashboard() {
         }
       }
 
-
       toast({
         title: "Package added successfully",
         description: "Your package has been submitted for approval.",
@@ -375,7 +477,6 @@ export default function SellerDashboard() {
       setSelectedDates([]);
       setSelectedFeatures({});
       setNewPackage({
-
         title: "",
         description: "",
         destination: "",
@@ -384,6 +485,7 @@ export default function SellerDashboard() {
         nights: 0,
         category: "",
         images: ["/placeholder.svg?height=400&width=600"],
+        document: "",
         max_people: 1,
         boarding_point: "",
         discount: 0,
@@ -394,13 +496,15 @@ export default function SellerDashboard() {
         start_dates: [] as string[],
         room_type: { Quad: 0 }, // default Quad included
       });
+      setPdfError(null);
     } catch (error) {
       console.error("Error adding package:", error);
       setSelectedDates([]);
       setSelectedFeatures({});
       toast({
         title: "Failed to add package",
-        description: "There was an error adding your package. Please try again.",
+        description:
+          "There was an error adding your package. Please try again.",
         variant: "destructive",
       });
     }
@@ -423,14 +527,17 @@ export default function SellerDashboard() {
 
       setBookings((prev) =>
         prev.map((booking) =>
-          booking.id === bookingId ? { ...booking, status: "confirmed" } : booking
+          booking.id === bookingId
+            ? { ...booking, status: "confirmed" }
+            : booking
         )
       );
     } catch (error) {
       console.error("Error confirming booking:", error);
       toast({
         title: "Failed to Confirm Booking",
-        description: "There was an error confirming the booking. Please try again.",
+        description:
+          "There was an error confirming the booking. Please try again.",
         variant: "destructive",
       });
     }
@@ -440,17 +547,17 @@ export default function SellerDashboard() {
     const pkgToEdit = packages.find((pkg) => pkg.id === pkgId);
     if (pkgToEdit) {
       const { final_price, ...editablePackage } = pkgToEdit;
-      console.log(editablePackage)
+      console.log(editablePackage);
       setNewPackage({
         ...editablePackage,
         id: editablePackage.id || "",
         nights: editablePackage.nights ?? 0,
         itinerary: Array.isArray(editablePackage.itinerary)
           ? editablePackage.itinerary.map((item, index) => ({
-            day: index + 1,
-            title: item.title || "",
-            description: item.description || "",
-          }))
+              day: index + 1,
+              title: item.title || "",
+              description: item.description || "",
+            }))
           : [{ day: 1, title: "", description: "" }],
         cancellation_policy: Array.isArray(editablePackage.cancellation_policy)
           ? editablePackage.cancellation_policy
@@ -458,10 +565,11 @@ export default function SellerDashboard() {
         // start_dates: editablePackage.start_dates || [],
         // start_dates: (editablePackage.start_dates || []).map((d => new Date(d).toISOString().split("T")[0])),
       });
-      setSelectedDates(
+      setSelectedDates((editablePackage.start_dates || []).map(parseLocalDate));
+      console.log(
+        "Selected Dates for Calendar:",
         (editablePackage.start_dates || []).map(parseLocalDate)
       );
-      console.log("Selected Dates for Calendar:", (editablePackage.start_dates || []).map(parseLocalDate));
 
       // console.log("Selected Dates:", selectedDates);
 
@@ -513,24 +621,21 @@ export default function SellerDashboard() {
 
       if (error) throw error;
 
-      await supabase
-        .from("package_features")
-        .upsert(
-          {
-            package_id: newPackage.id,
-            accommodation: selectedFeatures.accommodation || false,
-            meals: selectedFeatures.meals || false,
-            transfers: selectedFeatures.transfers || false,
-            trip_captain: selectedFeatures.trip_captain || false,
-            first_aid: selectedFeatures.first_aid || false,
-            luggage_support: selectedFeatures.luggage_support || false,
-            entry_tickets: selectedFeatures.entry_tickets || false,
-            camping: selectedFeatures.camping || false,
-            trek_lead: selectedFeatures.trek_lead || false,
-          },
-          { onConflict: "package_id" } // ensure it updates if already exists
-        );
-
+      await supabase.from("package_features").upsert(
+        {
+          package_id: newPackage.id,
+          accommodation: selectedFeatures.accommodation || false,
+          meals: selectedFeatures.meals || false,
+          transfers: selectedFeatures.transfers || false,
+          trip_captain: selectedFeatures.trip_captain || false,
+          first_aid: selectedFeatures.first_aid || false,
+          luggage_support: selectedFeatures.luggage_support || false,
+          entry_tickets: selectedFeatures.entry_tickets || false,
+          camping: selectedFeatures.camping || false,
+          trek_lead: selectedFeatures.trek_lead || false,
+        },
+        { onConflict: "package_id" } // ensure it updates if already exists
+      );
 
       toast({
         title: "Package updated successfully",
@@ -543,7 +648,6 @@ export default function SellerDashboard() {
       );
       setIsAddPackageOpen(false);
       setNewPackage({
-
         title: "",
         description: "",
         destination: "",
@@ -552,6 +656,8 @@ export default function SellerDashboard() {
         nights: 0,
         category: "",
         images: ["/placeholder.svg?height=400&width=600"],
+        document: "",
+        contact_number: "",
         max_people: 1,
         boarding_point: "",
         discount: 0,
@@ -563,11 +669,13 @@ export default function SellerDashboard() {
         room_type: { Quad: 0 }, // default Quad included
       });
       setSelectedFeatures({});
+      setPdfError(null);
     } catch (error) {
       console.error("Error updating package:", error);
       toast({
         title: "Failed to update package",
-        description: "There was an error updating your package. Please try again.",
+        description:
+          "There was an error updating your package. Please try again.",
         variant: "destructive",
       });
     }
@@ -580,7 +688,8 @@ export default function SellerDashboard() {
       console.error("Error deleting package:", error);
       toast({
         title: "Failed to Delete Package",
-        description: "There was an error deleting the package. Please try again.",
+        description:
+          "There was an error deleting the package. Please try again.",
         variant: "destructive",
       });
     } else {
@@ -610,14 +719,17 @@ export default function SellerDashboard() {
 
       setBookings((prev) =>
         prev.map((booking) =>
-          booking.id === bookingId ? { ...booking, status: "cancelled" } : booking
+          booking.id === bookingId
+            ? { ...booking, status: "cancelled" }
+            : booking
         )
       );
     } catch (error) {
       console.error("Error confirming booking:", error);
       toast({
         title: "Failed to Cancel Booking",
-        description: "There was an error cancelling the booking. Please try again.",
+        description:
+          "There was an error cancelling the booking. Please try again.",
         variant: "destructive",
       });
     }
@@ -643,8 +755,6 @@ export default function SellerDashboard() {
     const [year, month, day] = dateStr.split("-").map(Number);
     return new Date(year, month - 1, day); // local time
   };
-
-
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -673,13 +783,29 @@ export default function SellerDashboard() {
     setFormStep((prev) => Math.max(prev - 1, 0));
   };
 
-  const formSteps = ["Basic Info", "Details", "Policies", "Key Features", "Review"];
+  const formSteps = [
+    "Basic Info",
+    "Details",
+    "Policies",
+    "Key Features",
+    "Review",
+  ];
 
   async function fetchRevenueData(sellerId: string) {
     try {
       const months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
       ];
 
       const currentYear = new Date().getFullYear();
@@ -689,16 +815,19 @@ export default function SellerDashboard() {
         .select("id")
         .eq("seller_id", sellerId);
 
-      if (packagesError) throw new Error(`Error fetching seller packages: ${packagesError.message}`);
+      if (packagesError)
+        throw new Error(
+          `Error fetching seller packages: ${packagesError.message}`
+        );
 
       if (!sellerPackages || sellerPackages.length === 0) {
         console.log("No packages found for this seller");
-        setRevenueData(months.map(name => ({ name, revenue: 0 })));
+        setRevenueData(months.map((name) => ({ name, revenue: 0 })));
         // setTotalRevenue(0);
         return;
       }
 
-      const packageIds = sellerPackages.map(pkg => pkg.id);
+      const packageIds = sellerPackages.map((pkg) => pkg.id);
 
       const { data: bookingsData, error: revenueError } = await supabase
         .from("bookings")
@@ -708,11 +837,14 @@ export default function SellerDashboard() {
         .gte("created_at", `${currentYear}-01-01`)
         .lte("created_at", `${currentYear}-12-31`);
 
-      if (revenueError) throw new Error(`Error fetching booking revenue data: ${revenueError.message}`);
+      if (revenueError)
+        throw new Error(
+          `Error fetching booking revenue data: ${revenueError.message}`
+        );
 
       if (!bookingsData || bookingsData.length === 0) {
         console.log("No revenue data found for this seller");
-        setRevenueData(months.map(name => ({ name, revenue: 0 })));
+        setRevenueData(months.map((name) => ({ name, revenue: 0 })));
         // setTotalRevenue(0);
         return;
       }
@@ -722,13 +854,16 @@ export default function SellerDashboard() {
         .select("id, price")
         .in("id", packageIds);
 
-      if (pricesError) throw new Error(`Error fetching package prices: ${pricesError.message}`);
+      if (pricesError)
+        throw new Error(
+          `Error fetching package prices: ${pricesError.message}`
+        );
 
-      const priceMap = new Map(packagePrices.map(pkg => [pkg.id, pkg.price]));
+      const priceMap = new Map(packagePrices.map((pkg) => [pkg.id, pkg.price]));
 
       const monthlyRevenue = Array(12).fill(0);
 
-      bookingsData.forEach(booking => {
+      bookingsData.forEach((booking) => {
         const bookingDate = new Date(booking.created_at);
         const month = bookingDate.getMonth();
         const price = priceMap.get(booking.package_id) || 0;
@@ -737,26 +872,37 @@ export default function SellerDashboard() {
 
       const revenueChartData = months.map((month, index) => ({
         name: month,
-        revenue: monthlyRevenue[index]
+        revenue: monthlyRevenue[index],
       }));
 
-      const totalRevenue = monthlyRevenue.reduce((sum, count) => sum + count, 0);
+      const totalRevenue = monthlyRevenue.reduce(
+        (sum, count) => sum + count,
+        0
+      );
 
       setRevenueData(revenueChartData);
       // setTotalRevenue(totalRevenue);
       console.log("Revenue Chart Data for seller:", revenueChartData);
-
     } catch (error) {
       console.error("Error fetching revenue data:", error);
     }
   }
 
-
   async function fetchBookingsData(sellerId: string) {
     try {
       const months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
       ];
 
       const currentYear = new Date().getFullYear();
@@ -766,29 +912,32 @@ export default function SellerDashboard() {
         .select("id")
         .eq("seller_id", sellerId);
 
-      if (packagesError) throw new Error(`Error fetching seller packages: ${packagesError.message}`);
+      if (packagesError)
+        throw new Error(
+          `Error fetching seller packages: ${packagesError.message}`
+        );
 
       if (!sellerPackages || sellerPackages.length === 0) {
         console.log("No packages found for this seller");
-        setMonthlyBooking(months.map(name => ({ name, bookings: 0 })));
+        setMonthlyBooking(months.map((name) => ({ name, bookings: 0 })));
         return;
       }
 
-      const packageIds = sellerPackages.map(pkg => pkg.id);
+      const packageIds = sellerPackages.map((pkg) => pkg.id);
 
       const { data, error } = await supabase
-        .from('bookings')
-        .select('created_at')
-        .in('package_id', packageIds)
-        .gte('created_at', `${currentYear}-01-01`)
-        .lte('created_at', `${currentYear}-12-31`);
+        .from("bookings")
+        .select("created_at")
+        .in("package_id", packageIds)
+        .gte("created_at", `${currentYear}-01-01`)
+        .lte("created_at", `${currentYear}-12-31`);
 
       if (error) throw error;
 
       const monthlyData = Array(12).fill(0);
 
       if (data && data.length > 0) {
-        data.forEach(booking => {
+        data.forEach((booking) => {
           const bookingDate = new Date(booking.created_at);
           const month = bookingDate.getMonth();
           monthlyData[month]++;
@@ -797,13 +946,15 @@ export default function SellerDashboard() {
 
       const bookingGrowth = months.map((month, index) => ({
         name: month,
-        users: monthlyData[index]
+        users: monthlyData[index],
       }));
 
-      setMonthlyBooking(bookingGrowth.map(({ name, users }) => ({ name, bookings: users })));
-      console.log('Booking Growth Data for seller:', bookingGrowth);
+      setMonthlyBooking(
+        bookingGrowth.map(({ name, users }) => ({ name, bookings: users }))
+      );
+      console.log("Booking Growth Data for seller:", bookingGrowth);
     } catch (error) {
-      console.error('Error fetching booking data:', error);
+      console.error("Error fetching booking data:", error);
     }
   }
 
@@ -814,7 +965,10 @@ export default function SellerDashboard() {
         .select("id, destination")
         .eq("seller_id", sellerId);
 
-      if (packagesError) throw new Error(`Error fetching seller packages: ${packagesError.message}`);
+      if (packagesError)
+        throw new Error(
+          `Error fetching seller packages: ${packagesError.message}`
+        );
 
       if (!sellerPackages || sellerPackages.length === 0) {
         console.log("No packages found for this seller");
@@ -822,29 +976,34 @@ export default function SellerDashboard() {
         return;
       }
 
-      const packageIds = sellerPackages.map(pkg => pkg.id);
+      const packageIds = sellerPackages.map((pkg) => pkg.id);
 
-      const destinationMap = new Map(sellerPackages.map(pkg => [pkg.id, pkg.destination]));
+      const destinationMap = new Map(
+        sellerPackages.map((pkg) => [pkg.id, pkg.destination])
+      );
 
       const { data: bookingsData, error } = await supabase
-        .from('bookings')
-        .select('package_id')
-        .in('package_id', packageIds);
+        .from("bookings")
+        .select("package_id")
+        .in("package_id", packageIds);
 
       if (error) throw error;
 
       if (!bookingsData || bookingsData.length === 0) {
-        const destinations = [...new Set(sellerPackages.map(pkg => pkg.destination))];
-        setDestinationData(destinations.map(name => ({ name, value: 1 })));
+        const destinations = [
+          ...new Set(sellerPackages.map((pkg) => pkg.destination)),
+        ];
+        setDestinationData(destinations.map((name) => ({ name, value: 1 })));
         return;
       }
 
       const destinationCount: Record<string, number> = {};
 
-      bookingsData.forEach(booking => {
+      bookingsData.forEach((booking) => {
         const destination = destinationMap.get(booking.package_id);
         if (destination) {
-          destinationCount[destination] = (destinationCount[destination] || 0) + 1;
+          destinationCount[destination] =
+            (destinationCount[destination] || 0) + 1;
         }
       });
 
@@ -852,18 +1011,28 @@ export default function SellerDashboard() {
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value);
 
-      console.log('Popular Destinations for seller:', popularDestinations);
+      console.log("Popular Destinations for seller:", popularDestinations);
       setDestinationData(popularDestinations);
     } catch (error) {
-      console.error('Error fetching popular destination data:', error);
+      console.error("Error fetching popular destination data:", error);
     }
   }
 
   async function fetchUserGrowthData(sellerId: string) {
     try {
       const months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
       ];
 
       const currentYear = new Date().getFullYear();
@@ -873,64 +1042,77 @@ export default function SellerDashboard() {
         .select("id")
         .eq("seller_id", sellerId);
 
-      if (packagesError) throw new Error(`Error fetching seller packages: ${packagesError.message}`);
+      if (packagesError)
+        throw new Error(
+          `Error fetching seller packages: ${packagesError.message}`
+        );
 
       if (!sellerPackages || sellerPackages.length === 0) {
         console.log("No packages found for this seller");
-        setUserGrowthData(months.map(name => ({ name, users: 0 })));
+        setUserGrowthData(months.map((name) => ({ name, users: 0 })));
         // setTotalUsers(0);
         return;
       }
 
-      const packageIds = sellerPackages.map(pkg => pkg.id);
+      const packageIds = sellerPackages.map((pkg) => pkg.id);
 
       const { data: bookingsData, error } = await supabase
-        .from('bookings')
-        .select('user_id, created_at')
-        .in('package_id', packageIds)
-        .gte('created_at', `${currentYear}-01-01`)
-        .lte('created_at', `${currentYear}-12-31`);
+        .from("bookings")
+        .select("user_id, created_at")
+        .in("package_id", packageIds)
+        .gte("created_at", `${currentYear}-01-01`)
+        .lte("created_at", `${currentYear}-12-31`);
 
       if (error) throw error;
 
       if (!bookingsData || bookingsData.length === 0) {
-        setUserGrowthData(months.map(name => ({ name, users: 0 })));
+        setUserGrowthData(months.map((name) => ({ name, users: 0 })));
         // setTotalUsers(0);
         return;
       }
 
       const userFirstBooking: Record<string, Date> = {};
 
-      bookingsData.forEach(booking => {
+      bookingsData.forEach((booking) => {
         const bookingDate = new Date(booking.created_at);
-        if (!userFirstBooking[booking.user_id] || bookingDate < userFirstBooking[booking.user_id]) {
+        if (
+          !userFirstBooking[booking.user_id] ||
+          bookingDate < userFirstBooking[booking.user_id]
+        ) {
           userFirstBooking[booking.user_id] = bookingDate;
         }
       });
 
       const monthlyData = Array(12).fill(0);
 
-      Object.values(userFirstBooking).forEach(date => {
+      Object.values(userFirstBooking).forEach((date) => {
         const month = date.getMonth();
         monthlyData[month]++;
       });
 
       const userGrowth = months.map((month, index) => ({
         name: month,
-        users: monthlyData[index]
+        users: monthlyData[index],
       }));
 
       const totalUsers = Object.keys(userFirstBooking).length;
 
       setUserGrowthData(userGrowth);
       // setTotalUsers(totalUsers);
-      console.log('Customer Growth Data for seller:', userGrowth);
+      console.log("Customer Growth Data for seller:", userGrowth);
     } catch (error) {
-      console.error('Error fetching customer growth data:', error);
+      console.error("Error fetching customer growth data:", error);
     }
   }
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+  const COLORS = [
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#8884d8",
+    "#82ca9d",
+  ];
 
   const ErrorDisplay = ({ message }: { message: string }) => (
     <Card className="border-red-200 bg-red-50 dark:bg-red-900/10">
@@ -950,7 +1132,7 @@ export default function SellerDashboard() {
 
   const handleDestinationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setNewPackage(prev => ({ ...prev, destination: value }));
+    setNewPackage((prev) => ({ ...prev, destination: value }));
 
     if (value.length > 0) {
       const filtered = cities.filter(
@@ -966,18 +1148,21 @@ export default function SellerDashboard() {
   };
 
   const selectDestination = (destination: string) => {
-    setNewPackage(prev => ({ ...prev, destination }));
+    setNewPackage((prev) => ({ ...prev, destination }));
     setShowDropdown(false);
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // --- Add this useEffect to recalculate package price with room add-ons ---
@@ -1010,7 +1195,6 @@ export default function SellerDashboard() {
             asChild
             onClick={() => {
               setNewPackage({
-
                 title: "",
                 description: "",
                 destination: "",
@@ -1019,6 +1203,8 @@ export default function SellerDashboard() {
                 nights: 0,
                 category: "",
                 images: ["/placeholder.svg?height=400&width=600"],
+                document: "",
+                contact_number: "",
                 max_people: 1,
                 boarding_point: "",
                 discount: 0,
@@ -1031,6 +1217,7 @@ export default function SellerDashboard() {
               });
               setBasePrice(0);
               setFormStep(0);
+              setPdfError(null);
             }}
           >
             <Button className="gap-2">
@@ -1052,18 +1239,20 @@ export default function SellerDashboard() {
                   <div key={step} className="flex flex-col items-center">
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 
-                        ${index <= formStep
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
+                        ${
+                          index <= formStep
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground"
                         }`}
                     >
                       {index + 1}
                     </div>
                     <span
-                      className={`text-xs ${index <= formStep
-                        ? "text-primary font-medium"
-                        : "text-muted-foreground"
-                        }`}
+                      className={`text-xs ${
+                        index <= formStep
+                          ? "text-primary font-medium"
+                          : "text-muted-foreground"
+                      }`}
                     >
                       {step}
                     </span>
@@ -1124,8 +1313,16 @@ export default function SellerDashboard() {
                           if (newPackage.destination.length > 0) {
                             const filtered = cities.filter(
                               ({ city, state }) =>
-                                city.toLowerCase().includes(newPackage.destination.toLowerCase()) ||
-                                state.toLowerCase().includes(newPackage.destination.toLowerCase())
+                                city
+                                  .toLowerCase()
+                                  .includes(
+                                    newPackage.destination.toLowerCase()
+                                  ) ||
+                                state
+                                  .toLowerCase()
+                                  .includes(
+                                    newPackage.destination.toLowerCase()
+                                  )
                             );
                             setFilteredCities(filtered);
                             setShowDropdown(true);
@@ -1139,16 +1336,23 @@ export default function SellerDashboard() {
                     </div>
                     {showDropdown && filteredCities.length > 0 && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                        {filteredCities.slice(0, 10).map(({ city, state }, index) => (
-                          <div
-                            key={index}
-                            onClick={() => selectDestination(`${city}, ${state}`)}
-                            className="px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-100 last:border-b-0 flex items-center gap-2"
-                          >
-                            <MapPin className="w-4 h-4 text-indigo-500" />
-                            <span className="text-gray-800">{city}, <span className="text-gray-500">{state}</span></span>
-                          </div>
-                        ))}
+                        {filteredCities
+                          .slice(0, 10)
+                          .map(({ city, state }, index) => (
+                            <div
+                              key={index}
+                              onClick={() =>
+                                selectDestination(`${city}, ${state}`)
+                              }
+                              className="px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-100 last:border-b-0 flex items-center gap-2"
+                            >
+                              <MapPin className="w-4 h-4 text-indigo-500" />
+                              <span className="text-gray-800">
+                                {city},{" "}
+                                <span className="text-gray-500">{state}</span>
+                              </span>
+                            </div>
+                          ))}
                         {filteredCities.length > 10 && (
                           <div className="px-4 py-2 text-sm text-gray-500 bg-gray-50">
                             ... and {filteredCities.length - 10} more cities
@@ -1176,6 +1380,50 @@ export default function SellerDashboard() {
                         <SelectItem value="inactive">Inactive</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="contact">
+                      Phone No. <span className="text-destructive">*</span>
+                    </Label>
+
+                    <div className="flex items-center gap-2 relative">
+                      <div className="px-3 py-2 border rounded bg-muted text-sm text-gray-700">
+                        +91
+                      </div>
+
+                      <Input
+                        id="contact"
+                        type="text"
+                        maxLength={10}
+                        value={sellerContactNumber}
+                        onChange={(e) => {
+                          // if a person tries to enter non-digit characters, they are removed
+                          const digitsOnly = e.target.value.replace(/\D/g, "");
+                          // setSellerContactNumber(digitsOnly);
+                          setNewPackage({
+                            ...newPackage,
+                            contact_number: digitsOnly,
+                          });
+                          setPhoneError(
+                            digitsOnly.length > 0 && digitsOnly.length < 10
+                          );
+                        }}
+                        placeholder="Enter 10-digit mobile number"
+                        required
+                        className={`flex-1 pr-10 ${
+                          phoneError ? "border-red-500" : ""
+                        }`}
+                      />
+
+                      {/* Error icon inside input */}
+                      {phoneError && (
+                        <AlertCircle className="text-red-500 absolute right-3 top-2.5 h-5 w-5" />
+                      )}
+                    </div>
+
+                    <p className="text-xs text-muted-foreground">
+                      Enter only your 10-digit mobile number.
+                    </p>
                   </div>
                 </div>
 
@@ -1223,7 +1471,8 @@ export default function SellerDashboard() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="duration">
-                      Duration (Days){" "}<span className="text-destructive">*</span>
+                      Duration (Days){" "}
+                      <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="duration"
@@ -1241,7 +1490,8 @@ export default function SellerDashboard() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="nights">
-                      Duration (Nights) <span className="text-destructive">*</span>
+                      Duration (Nights){" "}
+                      <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="nights"
@@ -1272,21 +1522,49 @@ export default function SellerDashboard() {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Beach Getaways">Beach Getaways</SelectItem>
-                        <SelectItem value="Mountain Escapes">Mountain Escapes</SelectItem>
-                        <SelectItem value="Desert Adventures">Desert Adventures</SelectItem>
-                        <SelectItem value="Forest & Wildlife">Forest & Wildlife</SelectItem>
-                        <SelectItem value="Island Holidays">Island Holidays</SelectItem>
-                        <SelectItem value="Hill Stations">Hill Stations</SelectItem>
-                        <SelectItem value="Adventure & Trekking">Adventure & Trekking</SelectItem>
-                        <SelectItem value="Cultural Tours">Cultural Tours</SelectItem>
-                        <SelectItem value="Pilgrimage & Spiritual">Pilgrimage & Spiritual</SelectItem>
-                        <SelectItem value="Wellness & Yoga Retreats">Wellness & Yoga Retreats</SelectItem>
-                        <SelectItem value="Luxury Escapes">Luxury Escapes</SelectItem>
-                        <SelectItem value="Budget Travel">Budget Travel</SelectItem>
-                        <SelectItem value="Family Friendly">Family Friendly</SelectItem>
+                        <SelectItem value="Beach Getaways">
+                          Beach Getaways
+                        </SelectItem>
+                        <SelectItem value="Mountain Escapes">
+                          Mountain Escapes
+                        </SelectItem>
+                        <SelectItem value="Desert Adventures">
+                          Desert Adventures
+                        </SelectItem>
+                        <SelectItem value="Forest & Wildlife">
+                          Forest & Wildlife
+                        </SelectItem>
+                        <SelectItem value="Island Holidays">
+                          Island Holidays
+                        </SelectItem>
+                        <SelectItem value="Hill Stations">
+                          Hill Stations
+                        </SelectItem>
+                        <SelectItem value="Adventure & Trekking">
+                          Adventure & Trekking
+                        </SelectItem>
+                        <SelectItem value="Cultural Tours">
+                          Cultural Tours
+                        </SelectItem>
+                        <SelectItem value="Pilgrimage & Spiritual">
+                          Pilgrimage & Spiritual
+                        </SelectItem>
+                        <SelectItem value="Wellness & Yoga Retreats">
+                          Wellness & Yoga Retreats
+                        </SelectItem>
+                        <SelectItem value="Luxury Escapes">
+                          Luxury Escapes
+                        </SelectItem>
+                        <SelectItem value="Budget Travel">
+                          Budget Travel
+                        </SelectItem>
+                        <SelectItem value="Family Friendly">
+                          Family Friendly
+                        </SelectItem>
                         <SelectItem value="Solo Travel">Solo Travel</SelectItem>
-                        <SelectItem value="Weekend Getaways">Weekend Getaways</SelectItem>
+                        <SelectItem value="Weekend Getaways">
+                          Weekend Getaways
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1296,7 +1574,8 @@ export default function SellerDashboard() {
                   {/* Calendar Section */}
                   <div className="md:w-1/2 space-y-2">
                     <Label htmlFor="start_dates">
-                      Trip Start Dates <span className="text-destructive">*</span>
+                      Trip Start Dates{" "}
+                      <span className="text-destructive">*</span>
                     </Label>
                     <div className="rounded-md border p-4 overflow-auto">
                       <DayPicker
@@ -1325,25 +1604,24 @@ export default function SellerDashboard() {
 
                   {/* Room Type Section */}
                   <div className="md:w-1/2 space-y-2">
-                    <Label>
-                      Room Type Prices (INR)
-                    </Label>
+                    <Label>Room Type Prices (INR)</Label>
                     {["Single", "Double", "Triple", "Quad"].map((type) => (
                       <div key={type} className="flex items-center gap-2 mb-2">
                         <input
                           type="checkbox"
                           checked={!!newPackage.room_type?.[type]}
-                          onChange={e => {
-                            setNewPackage(prev => {
+                          onChange={(e) => {
+                            setNewPackage((prev) => {
                               const updatedRoomType = { ...prev.room_type };
                               if (e.target.checked) {
                                 // Set default price for each type
-                                const defaultPrices: { [key: string]: number } = {
-                                  Single: 4000,
-                                  Double: 3000,
-                                  Triple: 2000,
-                                  Quad: 1000,
-                                };
+                                const defaultPrices: { [key: string]: number } =
+                                  {
+                                    Single: 4000,
+                                    Double: 3000,
+                                    Triple: 2000,
+                                    Quad: 1000,
+                                  };
                                 updatedRoomType[type] = defaultPrices[type];
                               } else {
                                 delete updatedRoomType[type];
@@ -1359,26 +1637,31 @@ export default function SellerDashboard() {
                         <input
                           type="number"
                           min={0}
-                          value={newPackage.room_type?.[type] ?? ''}
-                          onChange={e => setNewPackage(prev => ({
-                            ...prev,
-                            room_type: {
-                              ...prev.room_type,
-                              [type]: Number(e.target.value)
-                            }
-                          }))}
+                          value={newPackage.room_type?.[type] ?? ""}
+                          onChange={(e) =>
+                            setNewPackage((prev) => ({
+                              ...prev,
+                              room_type: {
+                                ...prev.room_type,
+                                [type]: Number(e.target.value),
+                              },
+                            }))
+                          }
                           className="w-24 px-2 py-1 border rounded"
                           placeholder="Price"
                           required={!!newPackage.room_type?.[type]}
                           disabled={!newPackage.room_type?.[type]}
                         />
                         <span className="text-xs text-muted-foreground">
-                          {type === "Quad" ? "(Included in package)" : "(Add-on)"}
+                          {type === "Quad"
+                            ? "(Included in package)"
+                            : "(Add-on)"}
                         </span>
                       </div>
                     ))}
                     <p className="text-xs text-muted-foreground">
-                      Quad is included in the base price. Other room types are add-ons and will increase the package price.
+                      Quad is included in the base price. Other room types are
+                      add-ons and will increase the package price.
                     </p>
                   </div>
                 </div>
@@ -1396,17 +1679,100 @@ export default function SellerDashboard() {
                     <ImageUpload
                       currentImages={newPackage.images}
                       onUploadComplete={(urls) => {
-                        setNewPackage(prev => ({
+                        setNewPackage((prev) => ({
                           ...prev,
-                          images: urls
+                          images: urls,
                         }));
                       }}
-                      maxImages={10} />
+                      maxImages={10}
+                    />
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Upload a high-quality image that showcases your destination
-                    (recommended size: 1200×800px).
+                    (recommended size: 1200x800px).
                   </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="document">
+                    Package Document (PDF){" "}
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="space-y-2">
+                    {newPackage.document ? (
+                      <div className="flex items-center gap-4 p-4 border rounded-md bg-muted/50">
+                        <FileText className="h-8 w-8 text-primary" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">
+                            Document uploaded
+                          </p>
+                          <a
+                            href={newPackage.document}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline"
+                          >
+                            View PDF
+                          </a>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleRemovePDF}
+                          disabled={isUploadingPDF}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <input
+                          type="file"
+                          id="pdf-upload"
+                          accept="application/pdf"
+                          className="hidden"
+                          onChange={handlePDFUpload}
+                          disabled={isUploadingPDF}
+                        />
+                        <label htmlFor="pdf-upload">
+                          <Button
+                            variant="outline"
+                            type="button"
+                            className="w-full h-20 cursor-pointer border-dashed"
+                            disabled={isUploadingPDF}
+                            asChild
+                          >
+                            <span className="flex flex-col items-center justify-center gap-2">
+                              {isUploadingPDF ? (
+                                <>
+                                  <Loader2 className="h-5 w-5 animate-spin" />
+                                  <span>Uploading PDF...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Upload className="h-5 w-5" />
+                                  <span>Upload Itinerary PDF</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    Max size: 10MB
+                                  </span>
+                                </>
+                              )}
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                    )}
+                    {pdfError && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {pdfError}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Upload a PDF document containing your detailed itinerary.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
@@ -1456,23 +1822,48 @@ export default function SellerDashboard() {
                 <div className="space-y-2">
                   <Label htmlFor="itinerary">Itinerary</Label>
                   {newPackage.itinerary.map((item, index) => (
-                    <div key={index} className="flex flex-col gap-2 mb-4 p-3 border rounded-md">
+                    <div
+                      key={index}
+                      className="flex flex-col gap-2 mb-4 p-3 border rounded-md"
+                    >
                       <p className="font-medium text-sm">Day {item.day}</p>
                       <div className="space-y-2">
-                        <Label htmlFor={`itinerary-title-${index}`} className="text-sm">Title</Label>
+                        <Label
+                          htmlFor={`itinerary-title-${index}`}
+                          className="text-sm"
+                        >
+                          Title
+                        </Label>
                         <Input
                           id={`itinerary-title-${index}`}
                           value={item.title}
-                          onChange={(e) => handleItineraryChange(index, 'title', e.target.value)}
+                          onChange={(e) =>
+                            handleItineraryChange(
+                              index,
+                              "title",
+                              e.target.value
+                            )
+                          }
                           placeholder={`Day ${item.day}: Activity title`}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`itinerary-desc-${index}`} className="text-sm">Description</Label>
+                        <Label
+                          htmlFor={`itinerary-desc-${index}`}
+                          className="text-sm"
+                        >
+                          Description
+                        </Label>
                         <Textarea
                           id={`itinerary-desc-${index}`}
                           value={item.description}
-                          onChange={(e) => handleItineraryChange(index, 'description', e.target.value)}
+                          onChange={(e) =>
+                            handleItineraryChange(
+                              index,
+                              "description",
+                              e.target.value
+                            )
+                          }
                           placeholder="Describe the activities and experiences for this day"
                           rows={2}
                         />
@@ -1488,7 +1879,8 @@ export default function SellerDashboard() {
                     Add Itinerary Day
                   </Button>
                   <p className="text-xs text-muted-foreground">
-                    Provide a day-by-day breakdown of activities and experiences included in your package.
+                    Provide a day-by-day breakdown of activities and experiences
+                    included in your package.
                   </p>
                 </div>
 
@@ -1499,7 +1891,9 @@ export default function SellerDashboard() {
                       <Input
                         id={`inclusion-${index}`}
                         value={item}
-                        onChange={(e) => handleInclusionChange(index, e.target.value)}
+                        onChange={(e) =>
+                          handleInclusionChange(index, e.target.value)
+                        }
                         placeholder={`Inclusion item ${index + 1}`}
                       />
                     </div>
@@ -1513,7 +1907,8 @@ export default function SellerDashboard() {
                     Add Inclusion Item
                   </Button>
                   <p className="text-xs text-muted-foreground">
-                    List all services and amenities included in the package price.
+                    List all services and amenities included in the package
+                    price.
                   </p>
                 </div>
 
@@ -1524,7 +1919,9 @@ export default function SellerDashboard() {
                       <Input
                         id={`exclusion-${index}`}
                         value={item}
-                        onChange={(e) => handleExclusionChange(index, e.target.value)}
+                        onChange={(e) =>
+                          handleExclusionChange(index, e.target.value)
+                        }
                         placeholder={`Exclusion item ${index + 1}`}
                       />
                     </div>
@@ -1582,8 +1979,8 @@ export default function SellerDashboard() {
                       value={
                         newPackage.discount
                           ? Math.round(
-                            newPackage.price * (1 - newPackage.discount / 100)
-                          )
+                              newPackage.price * (1 - newPackage.discount / 100)
+                            )
                           : newPackage.price
                       }
                       disabled
@@ -1596,14 +1993,21 @@ export default function SellerDashboard() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="cancellation_policy">Cancellation Policy</Label>
+                  <Label htmlFor="cancellation_policy">
+                    Cancellation Policy
+                  </Label>
                   {Array.isArray(newPackage.cancellation_policy) &&
                     newPackage.cancellation_policy.map((item, index) => (
                       <div key={index} className="flex items-center gap-4 mb-2">
                         <Input
                           id={`cancellation-policy-${index}`}
                           value={item}
-                          onChange={(e) => handleCancellationPolicyChange(index, e.target.value)}
+                          onChange={(e) =>
+                            handleCancellationPolicyChange(
+                              index,
+                              e.target.value
+                            )
+                          }
                           placeholder={`Policy item ${index + 1}`}
                         />
                       </div>
@@ -1626,12 +2030,14 @@ export default function SellerDashboard() {
             {formStep === 3 && (
               <div className="space-y-6">
                 <div className="space-y-1">
-                  <h3 className="text-lg font-medium">Select Available Key Features</h3>
+                  <h3 className="text-lg font-medium">
+                    Select Available Key Features
+                  </h3>
                   <p className="text-sm text-muted-foreground">
-                    Choose the features that are included in this travel package.
+                    Choose the features that are included in this travel
+                    package.
                   </p>
                 </div>
-
 
                 <div className="pt-4 border-t">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
@@ -1648,13 +2054,13 @@ export default function SellerDashboard() {
                             }))
                           }
                         />
-                        {feature.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                        {feature
+                          .replace(/_/g, " ")
+                          .replace(/\b\w/g, (l) => l.toUpperCase())}
                       </label>
                     ))}
-
                   </div>
                 </div>
-
               </div>
             )}
 
@@ -1696,7 +2102,7 @@ export default function SellerDashboard() {
                                 </span>{" "}
                                 {Math.round(
                                   newPackage.price *
-                                  (1 - newPackage.discount / 100)
+                                    (1 - newPackage.discount / 100)
                                 )}
                               </span>
                             ) : (
@@ -1705,11 +2111,19 @@ export default function SellerDashboard() {
                             INR
                           </span>
                           <span>
-                            Room Add-ons: {(() => {
+                            Room Add-ons:{" "}
+                            {(() => {
                               let addonTotal = 0;
                               if (newPackage.room_type) {
-                                for (const key of ["Single", "Double", "Triple"]) {
-                                  if (typeof newPackage.room_type[key] === "number") {
+                                for (const key of [
+                                  "Single",
+                                  "Double",
+                                  "Triple",
+                                ]) {
+                                  if (
+                                    typeof newPackage.room_type[key] ===
+                                    "number"
+                                  ) {
                                     addonTotal += newPackage.room_type[key];
                                   }
                                 }
@@ -1875,7 +2289,10 @@ export default function SellerDashboard() {
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
                           <span>
-                            Duration: {pkg.duration} days{typeof pkg.nights === "number" && pkg.nights > 0 ? ` ${pkg.nights} nights` : ""}
+                            Duration: {pkg.duration} days
+                            {typeof pkg.nights === "number" && pkg.nights > 0
+                              ? ` ${pkg.nights} nights`
+                              : ""}
                           </span>
                         </div>
                         <div className="flex items-center">
@@ -1963,8 +2380,7 @@ export default function SellerDashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <p className="text-sm font-medium">Customer</p>
-                        <p className="text-sm">
-                        </p>
+                        <p className="text-sm"></p>
                       </div>
                       <div>
                         <p className="text-sm font-medium">Travelers</p>
@@ -2012,7 +2428,9 @@ export default function SellerDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Your Monthly Bookings</CardTitle>
-                <CardDescription>Booking trends for your packages over the past year</CardDescription>
+                <CardDescription>
+                  Booking trends for your packages over the past year
+                </CardDescription>
               </CardHeader>
               <CardContent className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
@@ -2029,11 +2447,16 @@ export default function SellerDashboard() {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip
-                      formatter={(value) => [`${value} bookings`, 'Bookings']}
+                      formatter={(value) => [`${value} bookings`, "Bookings"]}
                       labelFormatter={(label) => `Month: ${label}`}
                     />
                     <Legend />
-                    <Bar dataKey="bookings" fill="#8884d8" name="Bookings" radius={[4, 4, 0, 0]} />
+                    <Bar
+                      dataKey="bookings"
+                      fill="#8884d8"
+                      name="Bookings"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -2042,7 +2465,9 @@ export default function SellerDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Your Popular Destinations</CardTitle>
-                <CardDescription>Most booked destinations from your packages</CardDescription>
+                <CardDescription>
+                  Most booked destinations from your packages
+                </CardDescription>
               </CardHeader>
               <CardContent className="h-80">
                 {destinationData.length > 0 ? (
@@ -2057,21 +2482,32 @@ export default function SellerDashboard() {
                         fill="#8884d8"
                         dataKey="value"
                         nameKey="name"
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }) =>
+                          `${name}: ${(percent * 100).toFixed(0)}%`
+                        }
                       >
                         {destinationData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
                         ))}
                       </Pie>
                       <Tooltip
-                        formatter={(value) => [`${value} bookings`, 'Bookings']}
+                        formatter={(value) => [`${value} bookings`, "Bookings"]}
                       />
-                      <Legend layout="vertical" verticalAlign="middle" align="right" />
+                      <Legend
+                        layout="vertical"
+                        verticalAlign="middle"
+                        align="right"
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex items-center justify-center h-full">
-                    <p className="text-muted-foreground">No destination data available</p>
+                    <p className="text-muted-foreground">
+                      No destination data available
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -2080,7 +2516,9 @@ export default function SellerDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Your Revenue Overview</CardTitle>
-                <CardDescription>Monthly revenue from your packages</CardDescription>
+                <CardDescription>
+                  Monthly revenue from your packages
+                </CardDescription>
               </CardHeader>
               <CardContent className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
@@ -2097,7 +2535,10 @@ export default function SellerDashboard() {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip
-                      formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']}
+                      formatter={(value) => [
+                        `₹${value.toLocaleString()}`,
+                        "Revenue",
+                      ]}
                       labelFormatter={(label) => `Month: ${label}`}
                     />
                     <Legend />
@@ -2117,7 +2558,9 @@ export default function SellerDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Your Customer Growth</CardTitle>
-                <CardDescription>New customers booking your packages over time</CardDescription>
+                <CardDescription>
+                  New customers booking your packages over time
+                </CardDescription>
               </CardHeader>
               <CardContent className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
@@ -2134,7 +2577,10 @@ export default function SellerDashboard() {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip
-                      formatter={(value) => [`${value} customers`, 'New Customers']}
+                      formatter={(value) => [
+                        `${value} customers`,
+                        "New Customers",
+                      ]}
                       labelFormatter={(label) => `Month: ${label}`}
                     />
                     <Legend />
