@@ -4,9 +4,11 @@ import { NextResponse } from 'next/server'
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = createRouteHandlerClient({ cookies })
+  const cookieStore = await cookies()
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+  const { id } = await params
   
   const { data: { session } } = await supabase.auth.getSession()
   
@@ -29,7 +31,7 @@ export async function PUT(
   const { data: packageData } = await supabase
     .from('packages')
     .select('seller_id, is_approved')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
   
   if (!packageData || packageData.seller_id !== session.user.id) {
@@ -72,7 +74,7 @@ export async function PUT(
     const { data, error } = await supabase
       .from('packages')
       .update(updatedData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
     
     if (error) {
@@ -87,9 +89,11 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = createRouteHandlerClient({ cookies })
+  const cookieStore = await cookies()
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+  const { id } = await params
   
   const { data: { session } } = await supabase.auth.getSession()
   
@@ -112,7 +116,7 @@ export async function DELETE(
   const { data: packageData } = await supabase
     .from('packages')
     .select('seller_id')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
   
   if (!packageData || packageData.seller_id !== session.user.id) {
@@ -123,7 +127,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('packages')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
     
     if (error) {
       throw error
