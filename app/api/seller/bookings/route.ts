@@ -5,7 +5,8 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  const supabase = createRouteHandlerClient<Database>({ cookies }) // Use Database type
+  const cookieStore = await cookies()
+  const supabase = createRouteHandlerClient<Database>({ cookies: () => cookieStore }) // Use Database type
   
   const { data: { session } } = await supabase.auth.getSession()
   
