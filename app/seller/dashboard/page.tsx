@@ -207,7 +207,6 @@ export default function SellerDashboard() {
   // const [totalRevenue, setTotalRevenue] = useState(0);
 
   const [basePrice, setBasePrice] = useState(0);
-  const [sellerContactNumber, setSellerContactNumber] = useState("");
   const [phoneError, setPhoneError] = useState(false);
   const [isUploadingPDF, setIsUploadingPDF] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
@@ -1395,11 +1394,10 @@ export default function SellerDashboard() {
                         id="contact"
                         type="text"
                         maxLength={10}
-                        value={sellerContactNumber}
+                        value={newPackage.contact_number}
                         onChange={(e) => {
                           // if a person tries to enter non-digit characters, they are removed
                           const digitsOnly = e.target.value.replace(/\D/g, "");
-                          // setSellerContactNumber(digitsOnly);
                           setNewPackage({
                             ...newPackage,
                             contact_number: digitsOnly,
