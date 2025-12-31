@@ -337,6 +337,16 @@ export default function SellerDashboard() {
         body: formData,
       });
 
+      // Check if response is JSON before parsing
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const textResponse = await response.text();
+        console.error("Non-JSON response received:", textResponse);
+        throw new Error(
+          "Server returned an invalid response. Please check your environment configuration (Cloudinary credentials)."
+        );
+      }
+
       const data = await response.json();
 
       if (!response.ok) {

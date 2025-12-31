@@ -54,6 +54,7 @@ interface Package {
   seller_id: string;
   is_approved: boolean;
   discount?: number;
+  contact_number?: string;
   itinerary?: Array<{ day: number; title: string, description: string; activity: string }>;
   inclusion?: string[];
   exclusion?: string[];
@@ -74,7 +75,10 @@ interface Review {
   profiles?: {
     avatar_url: string;
     user_name: string;
-  };
+  } | {
+    avatar_url: string;
+    user_name: string;
+  }[];
 };
 
 interface PackageDialogProps {
@@ -82,6 +86,92 @@ interface PackageDialogProps {
   onOpenChange: (open: boolean) => void;
   packageData: Package | null;
   onSave: () => void;
+}
+
+// Contact Number Component
+function ContactNumber({ number }: { number: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleCall = () => {
+    window.location.href = `tel:${number}`;
+    setIsOpen(false);
+  };
+
+  const handleWhatsApp = () => {
+    // WhatsApp URL format: https://wa.me/<number>
+    // Remove any spaces, dashes, or special characters from the number
+    const cleanNumber = number.replace(/[\s\-\(\)]/g, '');
+    window.open(`https://wa.me/${cleanNumber}`, '_blank');
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 transition-all duration-200 border border-primary/20 hover:border-primary/30 shadow-sm hover:shadow"
+        title="Click to view contact options"
+      >
+        <Phone className="h-4 w-4 text-primary" />
+        <span className="text-sm font-semibold text-primary">{number}</span>
+        <svg 
+          className={`h-3 w-3 text-primary transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => setIsOpen(false)}
+          />
+          
+          {/* Dropdown Menu */}
+          <div className="absolute left-1/2 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0 mt-2 w-52 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            <button
+              onClick={handleCall}
+              className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors group"
+            >
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 group-hover:bg-blue-200 dark:group-hover:bg-blue-900 transition-colors">
+                <Phone className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Call</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Open dialer</span>
+              </div>
+            </button>
+            
+            <div className="border-t border-gray-200 dark:border-gray-700" />
+            
+            <button
+              onClick={handleWhatsApp}
+              className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-green-50 dark:hover:bg-green-950/30 transition-colors group"
+            >
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50 group-hover:bg-green-200 dark:group-hover:bg-green-900 transition-colors">
+                <svg
+                  className="h-4 w-4 text-green-600 dark:text-green-400"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">WhatsApp</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Start chat</span>
+              </div>
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 export default function PackageDetailsPage() {
@@ -507,11 +597,17 @@ export default function PackageDetailsPage() {
           <h1 className="text-3xl font-bold mb-2">{pkg.title}</h1>
           {/* Seller name and icon */}
           {pkg.profiles?.company_name ? (
-            <div className="flex items-center gap-2 mb-1">
-              <Avatar className="h-14 w-14">
-                <AvatarImage src={pkg.profiles?.avatar_url} alt="company_avatar" />
-              </Avatar>
-              <span className="text-2xl font-medium">{pkg.profiles?.company_name || "Unknown"}</span>
+            <div className="flex flex-col items-start md:items-end gap-2">
+              <div className="flex items-center gap-2">
+                <Avatar className="h-14 w-14">
+                  <AvatarImage src={pkg.profiles?.avatar_url} alt="company_avatar" />
+                </Avatar>
+                <span className="text-2xl font-medium">{pkg.profiles?.company_name || "Unknown"}</span>
+              </div>
+              {/* Contact Number */}
+              {(pkg.contact_number || pkg.profiles?.phone_number) && (
+                <ContactNumber number={pkg.contact_number || pkg.profiles?.phone_number || ''} />
+              )}
             </div>
           ) : ''}
         </div>
@@ -625,13 +721,13 @@ export default function PackageDetailsPage() {
                     <div key={index} className="mb-4">
                       <div className="flex items-center gap-2 mb-2">
                         <Avatar className="w-8 h-8">
-                          <AvatarImage src={review.profiles?.avatar_url || ''} />
+                          <AvatarImage src={(Array.isArray(review.profiles) ? review.profiles[0]?.avatar_url : review.profiles?.avatar_url) || ''} />
                           <AvatarFallback>
                             {review.profile_id.charAt(0).toUpperCase() || "U"}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium">{review.profiles?.user_name || review.profile_id}</p>
+                          <p className="font-medium">{(Array.isArray(review.profiles) ? review.profiles[0]?.user_name : review.profiles?.user_name) || review.profile_id}</p>
                           <div className="flex items-center">
                             <div className="flex">
                               {[1, 2, 3, 4, 5].map((star) => (
@@ -642,8 +738,7 @@ export default function PackageDetailsPage() {
                               ))}
                             </div>
                             <span className="text-xs text-muted-foreground ml-2">
-                              {/* Replace this with your date formatting logic */}
-                              {new Date(review.created_at).toLocaleDateString()}
+                              {new Date(review.created_at).toISOString().split('T')[0].split('-').reverse().join('/')}
                             </span>
                           </div>
                         </div>

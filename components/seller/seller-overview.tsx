@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Package, Users, DollarSign, Calendar } from 'lucide-react'
+import { Package, Users, IndianRupee, Calendar } from 'lucide-react'
 import { RecentBookingsTable } from './recent-bookings-table'
 
 interface SellerOverviewProps {
@@ -28,9 +28,9 @@ export function SellerOverview({ metrics, isLoading }: SellerOverviewProps) {
         />
         <MetricCard
           title="Total Revenue"
-          value={`$${metrics?.totalRevenue?.toLocaleString() || 0}`}
+          value={`₹${metrics?.totalRevenue?.toLocaleString() || 0}`}
           description="Lifetime earnings"
-          icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
+          icon={<IndianRupee className="h-5 w-5 text-muted-foreground" />}
           isLoading={isLoading}
         />
         <MetricCard
