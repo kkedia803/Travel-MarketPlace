@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <link rel="icon" href="/greenfav.png" sizes="any" />
       <body className={inter.className}>
         <SupabaseProvider>

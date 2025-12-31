@@ -9,6 +9,21 @@ cloudinary.config({
 
 export async function POST(request: Request) {
   console.log("Upload route called");
+
+  // Validate Cloudinary configuration
+  if (!process.env.CLOUDINARY_CLOUD_NAME ||
+    !process.env.CLOUDINARY_API_KEY ||
+    !process.env.CLOUDINARY_API_SECRET) {
+    console.error("Cloudinary credentials are missing");
+    return NextResponse.json(
+      {
+        error: "Server configuration error",
+        details: "Cloudinary credentials are not configured. Please check your environment variables."
+      },
+      { status: 500 }
+    );
+  }
+
   try {
     console.log("About to parse formData");
     const formData = await request.formData();
