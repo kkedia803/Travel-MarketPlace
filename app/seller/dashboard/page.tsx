@@ -340,9 +340,9 @@ export default function SellerDashboard() {
       return;
     }
 
-    // Validate file size (max 5MB to account for base64 encoding overhead)
-    if (file.size > 5 * 1024 * 1024) {
-      setPdfError("PDF file size must be less than 5MB");
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setPdfError("PDF file size must be less than 10MB");
       return;
     }
 
@@ -350,33 +350,57 @@ export default function SellerDashboard() {
     setPdfError(null);
 
     try {
+      // 1. Get Signature from API
+      const timestamp = Math.round(new Date().getTime() / 1000);
+      const paramsToSign = {
+        timestamp: timestamp,
+        folder: "travel-packages/documents",
+      };
+
+      const signRes = await fetch("/api/sign-cloudinary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paramsToSign }),
+      });
+
+      if (!signRes.ok) {
+        throw new Error("Failed to get upload signature");
+      }
+
+      const signData = await signRes.json();
+
+      // 2. Direct Upload to Cloudinary
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("api_key", signData.api_key);
+      formData.append("timestamp", signData.timestamp.toString());
+      formData.append("signature", signData.signature);
+      formData.append("folder", "travel-packages/documents");
 
-      const response = await fetch("/api/upload", {
+      // Use 'raw' resource type for PDFs
+      const uploadUrl = `https://api.cloudinary.com/v1_1/${signData.cloud_name}/raw/upload`;
+
+      const uploadRes = await fetch(uploadUrl, {
         method: "POST",
         body: formData,
       });
 
-      // Check if response is JSON before parsing
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const textResponse = await response.text();
-        console.error("Non-JSON response received:", textResponse);
-        throw new Error(
-          "Server returned an invalid response. Please check your environment configuration (Cloudinary credentials)."
-        );
+      if (!uploadRes.ok) {
+        const errorData = await uploadRes.text();
+        console.error("Cloudinary Upload Error:", errorData);
+        try {
+           const jsonError = JSON.parse(errorData);
+           throw new Error(jsonError.error?.message || "Cloudinary upload failed");
+        } catch (e) {
+           throw new Error("Failed to upload to Cloudinary");
+        }
       }
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || data.details || "Failed to upload PDF");
-      }
+      const data = await uploadRes.json();
 
       setNewPackage((prev) => ({
         ...prev,
-        document: data.url,
+        document: data.secure_url,
       }));
 
       toast({
