@@ -211,14 +211,35 @@ export default function SellerDashboard() {
   const [isUploadingPDF, setIsUploadingPDF] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isAddPackageOpen) {
-      // Reset selectedDates when modal opens
-      setSelectedDates([]);
-      setSelectedFeatures({});
-      setPdfError(null);
-    }
-  }, [isAddPackageOpen]);
+  const handleAddNewPackage = () => {
+    setNewPackage({
+      title: "",
+      description: "",
+      destination: "",
+      price: 0,
+      duration: 1,
+      nights: 0,
+      category: "",
+      images: [],
+      document: "",
+      contact_number: "",
+      max_people: 1,
+      boarding_point: "",
+      discount: 0,
+      cancellation_policy: [],
+      itinerary: [{ day: 1, title: "", description: "" }],
+      inclusion: [],
+      exclusion: [],
+      start_dates: [],
+      room_type: { Quad: 0 },
+      id: "", // Add id as it might be required by the type
+    });
+    setSelectedDates([]);
+    setSelectedFeatures({});
+    setPdfError(null);
+    setFormStep(0);
+    setIsAddPackageOpen(true);
+  };
 
   useEffect(() => {
     console.log("Selected Dates Updated:", selectedDates);
@@ -319,9 +340,9 @@ export default function SellerDashboard() {
       return;
     }
 
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setPdfError("PDF file size must be less than 10MB");
+    // Validate file size (max 5MB to account for base64 encoding overhead)
+    if (file.size > 5 * 1024 * 1024) {
+      setPdfError("PDF file size must be less than 5MB");
       return;
     }
 
@@ -556,7 +577,9 @@ export default function SellerDashboard() {
     const pkgToEdit = packages.find((pkg) => pkg.id === pkgId);
     if (pkgToEdit) {
       const { final_price, ...editablePackage } = pkgToEdit;
-      console.log(editablePackage);
+      
+      const parsedDates = (editablePackage.start_dates || []).map(parseLocalDate);
+
       setNewPackage({
         ...editablePackage,
         id: editablePackage.id || "",
@@ -571,16 +594,10 @@ export default function SellerDashboard() {
         cancellation_policy: Array.isArray(editablePackage.cancellation_policy)
           ? editablePackage.cancellation_policy
           : [editablePackage.cancellation_policy || ""],
-        // start_dates: editablePackage.start_dates || [],
-        // start_dates: (editablePackage.start_dates || []).map((d => new Date(d).toISOString().split("T")[0])),
+        start_dates: editablePackage.start_dates || [],
       });
-      setSelectedDates((editablePackage.start_dates || []).map(parseLocalDate));
-      console.log(
-        "Selected Dates for Calendar:",
-        (editablePackage.start_dates || []).map(parseLocalDate)
-      );
-
-      // console.log("Selected Dates:", selectedDates);
+      
+      setSelectedDates(parsedDates);
 
       // ✅ Step 2: Fetch features from Supabase
       const { data: featureData, error } = await supabase
@@ -677,6 +694,7 @@ export default function SellerDashboard() {
         start_dates: [] as string[],
         room_type: { Quad: 0 }, // default Quad included
       });
+      setSelectedDates([]);
       setSelectedFeatures({});
       setPdfError(null);
     } catch (error) {
@@ -1296,7 +1314,7 @@ export default function SellerDashboard() {
                     </Label>
                     <Input
                       id="title"
-                      value={newPackage.title}
+                      value={newPackage.title || ""}
                       onChange={(e) =>
                         setNewPackage({ ...newPackage, title: e.target.value })
                       }
@@ -1316,7 +1334,7 @@ export default function SellerDashboard() {
                     <div className="relative">
                       <Input
                         id="destination"
-                        value={newPackage.destination}
+                        value={newPackage.destination || ""}
                         onChange={handleDestinationChange}
                         onFocus={() => {
                           if (newPackage.destination.length > 0) {
@@ -1404,7 +1422,7 @@ export default function SellerDashboard() {
                         id="contact"
                         type="text"
                         maxLength={10}
-                        value={newPackage.contact_number}
+                        value={newPackage.contact_number || ""}
                         onChange={(e) => {
                           // if a person tries to enter non-digit characters, they are removed
                           const digitsOnly = e.target.value.replace(/\D/g, "");
@@ -1441,7 +1459,7 @@ export default function SellerDashboard() {
                   </Label>
                   <Textarea
                     id="description"
-                    value={newPackage.description}
+                    value={newPackage.description || ""}
                     onChange={(e) =>
                       setNewPackage({
                         ...newPackage,
@@ -1520,7 +1538,7 @@ export default function SellerDashboard() {
                       Category <span className="text-destructive">*</span>
                     </Label>
                     <Select
-                      value={newPackage.category}
+                      value={newPackage.category || ""}
                       onValueChange={(value) =>
                         setNewPackage({ ...newPackage, category: value })
                       }
@@ -1815,7 +1833,7 @@ export default function SellerDashboard() {
                     <Label htmlFor="boarding_point">Boarding Point</Label>
                     <Input
                       id="boarding_point"
-                      value={newPackage.boarding_point}
+                      value={newPackage.boarding_point || ""}
                       onChange={(e) =>
                         setNewPackage({
                           ...newPackage,
@@ -2249,7 +2267,7 @@ export default function SellerDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardFooter>
-                <Button onClick={() => setIsAddPackageOpen(true)}>
+                <Button onClick={handleAddNewPackage}>
                   <Plus className="mr-2 h-4 w-4" /> Add New Package
                 </Button>
               </CardFooter>
