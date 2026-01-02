@@ -21,6 +21,12 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  // Increase API route body size limit for file uploads
+  api: {
+    bodyParser: {
+      sizeLimit: '15mb',
+    },
+  },
 }
 
 mergeConfig(nextConfig, userConfig)
