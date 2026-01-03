@@ -355,6 +355,8 @@ export default function SellerDashboard() {
       const paramsToSign = {
         timestamp: timestamp,
         folder: "travel-packages/documents",
+        type: "upload",
+        access_mode: "public",
       };
 
       const signRes = await fetch("/api/sign-cloudinary", {
@@ -370,14 +372,22 @@ export default function SellerDashboard() {
       const signData = await signRes.json();
 
       // 2. Direct Upload to Cloudinary
+      console.log("File details before upload:", {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      });
+      
       const formData = new FormData();
-      formData.append("file", file);
       formData.append("api_key", signData.api_key);
       formData.append("timestamp", signData.timestamp.toString());
       formData.append("signature", signData.signature);
       formData.append("folder", "travel-packages/documents");
+      formData.append("type", "upload");
+      formData.append("access_mode", "public");
+      formData.append("file", file);
 
-      // Use 'raw' resource type for PDFs
+      // Use 'raw' resource type for PDFs - no processing, stores as-is
       const uploadUrl = `https://api.cloudinary.com/v1_1/${signData.cloud_name}/raw/upload`;
 
       const uploadRes = await fetch(uploadUrl, {
@@ -1783,7 +1793,6 @@ export default function SellerDashboard() {
                           accept="application/pdf"
                           className="hidden"
                           onChange={handlePDFUpload}
-                          disabled={isUploadingPDF}
                         />
                         <label htmlFor="pdf-upload">
                           <Button
