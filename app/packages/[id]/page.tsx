@@ -21,7 +21,8 @@ import {
   TentTree,
   MountainSnow,
   Building2,
-  Phone
+  Phone,
+  FileText
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast"
 import { DayPicker } from "react-day-picker";
@@ -58,6 +59,7 @@ interface Package {
   itinerary?: Array<{ day: number; title: string, description: string; activity: string }>;
   inclusion?: string[];
   exclusion?: string[];
+  document?: string;
   cancellation_policy?: string[];
   start_dates?: string[];
   profiles?: {
@@ -96,13 +98,25 @@ function ContactNumber({ number }: { number: string }) {
 
   const handleWhatsApp = () => {
     // WhatsApp URL format: https://wa.me/<number>
-    // Remove any spaces, dashes, or special characters from the number
-    let cleanNumber = number.replace(/[\s\-\(\)]/g, '');
+    // Convert to string and remove ALL non-numeric characters
+    let cleanNumber = String(number).replace(/\D/g, '');
     
-    // If number is 10 digits (typical Indian mobile), add 91 country code
-    if (cleanNumber.length === 10) {
+    // Remove leading zeros
+    cleanNumber = cleanNumber.replace(/^0+/, '');
+    
+    // If it's exactly 10 digits (typical Indian mobile), add 91 country code
+    if (cleanNumber.length === 10 && /^[6-9]/.test(cleanNumber)) {
       cleanNumber = `91${cleanNumber}`;
     }
+    // If it doesn't have country code but is valid mobile length, add 91
+    else if (cleanNumber.length === 10) {
+      cleanNumber = `91${cleanNumber}`;
+    }
+    // If already has country code (starts with 91 and has 12 digits), use as-is
+    else if (cleanNumber.length === 12 && cleanNumber.startsWith('91')) {
+      // Already formatted correctly
+    }
+    // For any other length, try to use as-is (might be international)
     
     window.open(`https://wa.me/${cleanNumber}`, '_blank');
   };
@@ -601,6 +615,17 @@ export default function PackageDetailsPage() {
               <TabsTrigger value="inclusions">Policies</TabsTrigger>
               <TabsTrigger value="reviews">Reviews</TabsTrigger>
             </TabsList>
+            
+            {pkg.document && (
+                <div className="mt-4">
+                  <Button variant="outline" className="w-full sm:w-auto" asChild>
+                    <a href={pkg.document} download target="_blank" rel="noopener noreferrer">
+                      <FileText className="mr-2 h-4 w-4" />
+                      Download PDF Itinerary
+                    </a>
+                  </Button>
+                </div>
+            )}
 
             <TabsContent value="itinerary" className="pt-4">
               <div className="space-y-6">
