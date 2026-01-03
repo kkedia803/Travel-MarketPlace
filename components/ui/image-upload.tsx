@@ -47,21 +47,46 @@ export function ImageUpload({
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
+        
+        // 1. Get Signature
+        const timestamp = Math.round(new Date().getTime() / 1000);
+        const paramsToSign = {
+          timestamp,
+          folder: 'travel-packages',
+        };
+
+        const signRes = await fetch('/api/sign-cloudinary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paramsToSign }),
+        });
+
+        if (!signRes.ok) throw new Error('Failed to get upload signature');
+
+        const signData = await signRes.json();
+
+        // 2. Upload to Cloudinary
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('api_key', signData.api_key);
+        formData.append('timestamp', signData.timestamp.toString());
+        formData.append('signature', signData.signature);
+        formData.append('folder', 'travel-packages');
 
-        const response = await fetch('/api/upload', {
+        const uploadUrl = `https://api.cloudinary.com/v1_1/${signData.cloud_name}/image/upload`;
+
+        const response = await fetch(uploadUrl, {
           method: 'POST',
           body: formData,
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-          throw new Error(data.error || data.details || 'Failed to upload image');
+           const errorData = await response.json();
+           throw new Error(errorData.error?.message || 'Failed to upload image');
         }
 
-        uploadedUrls.push(data.url);
+        const data = await response.json();
+        uploadedUrls.push(data.secure_url);
       }
 
       const newImages = [...validImages, ...uploadedUrls].slice(0, maxImages);
@@ -72,6 +97,8 @@ export function ImageUpload({
       setError(errorMessage);
     } finally {
       setIsUploading(false);
+      // Reset input
+      e.target.value = "";
     }
   };
 
