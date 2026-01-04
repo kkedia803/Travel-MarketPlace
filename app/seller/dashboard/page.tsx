@@ -340,9 +340,9 @@ export default function SellerDashboard() {
       return;
     }
 
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setPdfError("PDF file size must be less than 10MB");
+    // Validate file size (max 25MB)
+    if (file.size > 25 * 1024 * 1024) {
+      setPdfError("PDF file size must be less than 25MB");
       return;
     }
 
@@ -1813,7 +1813,7 @@ export default function SellerDashboard() {
                                   <Upload className="h-5 w-5" />
                                   <span>Upload Itinerary PDF</span>
                                   <span className="text-xs text-muted-foreground">
-                                    Max size: 10MB
+                                    Max size: 25MB
                                   </span>
                                 </>
                               )}

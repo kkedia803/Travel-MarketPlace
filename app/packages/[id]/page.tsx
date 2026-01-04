@@ -570,7 +570,7 @@ export default function PackageDetailsPage() {
       {/* Package Title and Basic Info */}
       <div className="mb-8">
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
-          <h1 className="text-3xl font-bold mb-2">{pkg.title}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">{pkg.title}</h1>
           {/* Seller name and icon */}
           {pkg.profiles?.company_name ? (
             <div className="flex flex-col items-start md:items-end gap-2">
@@ -578,7 +578,7 @@ export default function PackageDetailsPage() {
                 <Avatar className="h-14 w-14">
                   <AvatarImage src={pkg.profiles?.avatar_url} alt="company_avatar" />
                 </Avatar>
-                <span className="text-2xl font-medium">{pkg.profiles?.company_name || "Unknown"}</span>
+                <span className="text-xl md:text-2xl font-medium">{pkg.profiles?.company_name || "Unknown"}</span>
               </div>
               {/* Contact Number */}
               {(pkg.contact_number || pkg.profiles?.phone_number) && (
@@ -617,13 +617,25 @@ export default function PackageDetailsPage() {
             </TabsList>
             
             {pkg.document && (
-                <div className="mt-4">
-                  <Button variant="outline" className="w-full sm:w-auto" asChild>
-                    <a href={pkg.document} download target="_blank" rel="noopener noreferrer">
-                      <FileText className="mr-2 h-4 w-4" />
-                      Download PDF Itinerary
-                    </a>
-                  </Button>
+                <div className="mt-6 mb-4">
+                  <a 
+                    href={pkg.document} 
+                    download 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 w-full sm:w-auto text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span>Download PDF Itinerary</span>
+                    <svg 
+                      className="h-4 w-4" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </a>
                 </div>
             )}
 
@@ -780,7 +792,7 @@ export default function PackageDetailsPage() {
             <CardContent className="p-6">
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold">₹{pkg.price}</span>
+                  <span className="text-xl md:text-2xl font-bold">₹{pkg.price}</span>
                   <span className="text-muted-foreground">per person</span>
                 </div>
 
@@ -805,9 +817,10 @@ export default function PackageDetailsPage() {
                     Check the available package dates
                   </label>
 
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                     <Button
                       variant="outline"
+                      className="w-full sm:w-auto"
                       onClick={() => setCalendarOpen(!calendarOpen)}
                     >
                       {selectedDate
@@ -823,7 +836,7 @@ export default function PackageDetailsPage() {
                   </div>
 
                   {calendarOpen && (
-                    <div className="mt-4 border rounded-md p-4 w-fit shadow">
+                    <div className="mt-4 border rounded-md p-2 sm:p-4 w-full sm:w-fit shadow overflow-x-auto">
                       <DayPicker
                         mode="single"
                         selected={selectedDate}
@@ -900,7 +913,7 @@ export default function PackageDetailsPage() {
                     <Button className="w-full" size="lg" onClick={handleBookNow}>
                       Book Now
                     </Button>
-                    <span>Contact <span className="font-bold tracking-tight text-xl">+91 87438 09060</span> for any inquiry.</span>
+                    <span className="text-center text-sm sm:text-base">Contact <span className="font-bold tracking-tight text-base sm:text-xl whitespace-nowrap">+91 87438 09060</span> for any inquiry.</span>
                   </div>
                 )}
                 {userType == "seller" && (
