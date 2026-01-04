@@ -66,10 +66,10 @@ export default function Home() {
       {/* <WhyChoose /> */}
 
       {/* Coming Soon Travel Section */}
-      {/* <ComingSoonTravel /> */}
+      <ComingSoonTravel />
 
       {/* Top Sellers Section */}
-      {/* <TopSellers/> */}
+      <TopSellers/>
 
       {/* Favourite Destinations Section */}
       <FavDestinations />
@@ -78,7 +78,7 @@ export default function Home() {
       <ReligiousDestinations/>
 
       {/* International Destinations Section */}
-      {/* <InternationalDestinations/> */}
+      <InternationalDestinations/>
 
       {/* Featured Packages */}
       <FeaturedPackages />

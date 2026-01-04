@@ -46,7 +46,7 @@ const categories = [
   ]
 
 return(
-    <section className="py-10 md:py-12 bg-gradient-to-br from-green-50/50 via-emerald-50/30 to-teal-50/40 relative overflow-hidden">
+    <section className="py-14 md:py-20 bg-gradient-to-br from-green-50/50 via-emerald-50/30 to-teal-50/40 relative overflow-hidden">
         {/* Subtle background pattern */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(34,197,94,0.05),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(20,184,166,0.04),transparent_50%)]" />
