@@ -57,7 +57,7 @@ return(
                 Sacred Journeys
               </span>
             </div>
-            <h2 className="text-4xl md:text-6xl font-bold font-glitten tracking-wide bg-gradient-to-r from-orange-800 via-amber-800 to-yellow-800 bg-clip-text text-transparent mb-4">
+            <h2 className="text-5xl md:text-6xl font-bold font-glitten tracking-wide bg-gradient-to-r from-orange-800 via-amber-800 to-yellow-800 bg-clip-text text-transparent mb-4">
               Religious Destinations
             </h2>
             <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
