@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <link rel="icon" href="/greenfav.png" sizes="any" />
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <SupabaseProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
             <AuthProvider>

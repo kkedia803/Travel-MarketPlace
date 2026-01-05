@@ -32,6 +32,10 @@ export function Footer() {
             link: '/tnc',
         },
         {
+            page: 'Seller Terms',
+            link: '/tnc/seller',
+        },
+        {
             page: 'Privacy Policy',
             link: '/policy',
         },
