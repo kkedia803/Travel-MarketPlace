@@ -340,9 +340,9 @@ export default function SellerDashboard() {
       return;
     }
 
-    // Validate file size (max 25MB)
-    if (file.size > 25 * 1024 * 1024) {
-      setPdfError("PDF file size must be less than 25MB");
+    // Validate file size (max 10MB for Cloudinary free tier)
+    if (file.size > 10 * 1024 * 1024) {
+      setPdfError("PDF file size must be less than 10MB");
       return;
     }
 

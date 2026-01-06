@@ -13,6 +13,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Compass, Eye, EyeClosed } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Checkbox } from "@/components/ui/checkbox"
 import { FcGoogle } from "react-icons/fc";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
@@ -28,6 +29,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const { signUp } = useAuth()
   const router = useRouter()
 
@@ -53,6 +55,13 @@ export default function RegisterPage() {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
+
+    // Validate seller terms acceptance
+    if (role === "seller" && !acceptedTerms) {
+      setError("You must accept the Travel Partner Terms of Service to register as a seller")
+      setIsLoading(false)
+      return
+    }
 
     try {
       const result = await signUp(email, password, role, company, phone)
@@ -192,10 +201,37 @@ export default function RegisterPage() {
                       </div>
                     </RadioGroup>
                   </div>
+                  {role === "seller" && (
+                    <div className="flex items-start space-x-3 pt-2">
+                      <Checkbox 
+                        id="terms" 
+                        checked={acceptedTerms}
+                        onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
+                      />
+                      <Label 
+                        htmlFor="terms" 
+                        className="font-normal text-sm leading-relaxed cursor-pointer"
+                      >
+                        I accept the{" "}
+                        <Link 
+                          href="/tnc/seller" 
+                          target="_blank"
+                          className="text-primary hover:underline font-medium"
+                        >
+                          Travel Partner Terms of Service
+                        </Link>
+                        {" "}and understand that I am fully responsible for trip safety, itinerary fulfillment, and customer satisfaction.
+                      </Label>
+                    </div>
+                  )}
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading || (role === "seller" && !acceptedTerms)}
+                >
                   {isLoading ? "Creating account..." : "Create account"}
                 </Button>
               </CardFooter>
