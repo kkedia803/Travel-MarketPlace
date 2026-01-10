@@ -1,98 +1,59 @@
 "use client";
 
-import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
-import React, { useRef } from 'react';
-import Image from 'next/image';
+import { ShieldCheck, CalendarClock, Globe, Headphones } from 'lucide-react';
 
 export default function WhyChoose() {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start start", "end end"],
-    });
+    const features = [
+        {
+            icon: <ShieldCheck className="w-8 h-8 text-blue-600" />,
+            title: "Ultimate Flexibility",
+            description: "You're in control, with free cancellation and payment options to satisfy any plan or budget."
+        },
+        {
+            icon: <Globe className="w-8 h-8 text-blue-600" />,
+            title: "Memorable Experiences",
+            description: "Browse and book tours and activities so incredible, you'll want to tell your friends."
+        },
+        {
+            icon: <CalendarClock className="w-8 h-8 text-amber-600" />,
+            title: "Quality at Our Core",
+            description: "High quality standards. Millions of reviews. A trip company you can trust."
+        },
+        {
+            icon: <Headphones className="w-8 h-8 text-purple-600" />,
+            title: "Award-Winning Support",
+            description: "New price? New plan? No problem. We're here to help, 24/7."
+        }
+    ];
 
     return (
-        <div ref={containerRef} className="relative h-[600vh] bg-white">
-            <motion.div className="sticky top-0 h-screen overflow-hidden pointer-events-none">
-                <div className="h-full w-full relative">
-                    <Section1 scrollYProgress={scrollYProgress} />
-                    <Section2 scrollYProgress={scrollYProgress} />
-                    <Section3 scrollYProgress={scrollYProgress} />
+        <section className="py-20 bg-white">
+            <div className="container mx-auto px-4">
+                <div className="text-center mb-14">
+                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight">
+                        Why plan with TracoIt?
+                    </h2>
+                    <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+                        We make it easy to find and book unforgettable travel experiences.
+                    </p>
                 </div>
-            </motion.div>
-        </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+                    {features.map((feature, index) => (
+                        <div key={index} className="flex flex-col items-center text-center">
+                            <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-6">
+                                {feature.icon}
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">
+                                {feature.title}
+                            </h3>
+                            <p className="text-gray-500 leading-relaxed">
+                                {feature.description}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
     );
 }
-
-type SectionProps = {
-    scrollYProgress: MotionValue<number>;
-};
-
-// Section 1
-const Section1: React.FC<SectionProps> = ({ scrollYProgress }) => {
-    const visible = useTransform(scrollYProgress, [0, 0.32, 0.33], [1, 1, 0]);
-    const translateY = useTransform(scrollYProgress, [0, 0.33], [0, -100]);
-
-    return (
-        <motion.div
-            style={{ opacity: visible, translateY }}
-            className="absolute top-0 left-0 h-full w-full flex items-center justify-center bg-white"
-        >
-            <div className="flex gap-4 items-center">
-                <div className="relative md:w-[25vw] md:h-[25vw]">
-                    <Image src='/aboutus.jpg' alt="img" fill className="object-cover rounded-md" />
-                </div>
-                <motion.p className='gap-3 flex flex-col'>
-                    <div className='text-6xl md:text-8xl font-bold text-blue-700'>Explore.</div>
-                    <div className='max-w-xs sm:max-w-xl font-onest text-stone-600'>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quibusdam quos maxime nesciunt nisi sint repellendus! Aspernatur blanditiis sequi assumenda cum dolorum at inventore, cumque eos quasi adipisci ad natus? Aliquam?</div>
-                </motion.p>
-            </div>
-        </motion.div>
-    );
-};
-
-// Section 2
-const Section2: React.FC<SectionProps> = ({ scrollYProgress }) => {
-    const visible = useTransform(scrollYProgress, [0.32, 0.49, 0.66], [0, 1, 0]);
-    const translateY = useTransform(scrollYProgress, [0.33, 0.66], [100, 0]);
-
-    return (
-        <motion.div
-            style={{ opacity: visible, translateY }}
-            className="absolute top-0 left-0 h-full w-full flex items-center justify-center bg-white"
-        >
-            <div className="flex gap-4 items-center">
-                <motion.p className='gap-3 flex flex-col'>
-                    <div className='text-6xl md:text-8xl font-bold text-blue-700'>Dream.</div>
-                    <div className='max-w-xs sm:max-w-xl font-onest text-stone-600'>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quibusdam quos maxime nesciunt nisi sint repellendus! Aspernatur blanditiis sequi assumenda cum dolorum at inventore, cumque eos quasi adipisci ad natus? Aliquam?</div>
-                </motion.p>
-                <div className="relative md:w-[25vw] md:h-[25vw]">
-                    <Image src='/bali1.jpg' alt="img" fill className="object-cover rounded-md" />
-                </div>
-            </div>
-        </motion.div>
-    );
-};
-
-// Section 3
-const Section3: React.FC<SectionProps> = ({ scrollYProgress }) => {
-    const visible = useTransform(scrollYProgress, [0.66, 0.85, 1], [0, 1, 1]);
-    const translateY = useTransform(scrollYProgress, [0.66, 1], [100, 0]);
-
-    return (
-        <motion.div
-            style={{ opacity: visible, translateY }}
-            className="absolute top-0 left-0 h-full w-full flex items-center justify-center bg-white"
-        >
-            <div className="flex gap-4 items-center">
-                <div className="relative md:w-[25vw] md:h-[25vw]">
-                    <Image src='/bali2.jpg' alt="img" fill className="object-cover rounded-md" />
-                </div>
-                <motion.p className='gap-3 flex flex-col'>
-                    <div className='text-6xl md:text-8xl font-bold text-blue-700'>Discover.</div>
-                    <div className='max-w-xs sm:max-w-xl font-onest text-stone-600'>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quibusdam quos maxime nesciunt nisi sint repellendus! Aspernatur blanditiis sequi assumenda cum dolorum at inventore, cumque eos quasi adipisci ad natus? Aliquam?</div>
-                </motion.p>
-            </div>
-        </motion.div>
-    );
-};

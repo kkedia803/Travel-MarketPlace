@@ -11,7 +11,7 @@ import OurContent from "@/components/OurContent";
 import ComingSoonTravel from "@/components/ComingSoonTravel";
 import ReligiousDestinations from "@/components/ReligiousDestinations";
 import InternationalDestinations from "@/components/InternationalDestinations";
-import HeroSection from "@/components/HeroSection";
+import SearchHero from "@/components/SearchHero";
 import TopSellers from "@/components/TopSellers";
 
 // interface Package {
@@ -60,7 +60,7 @@ export default function Home() {
       {/* Hero Slider Section */}
       {/* <HeroSlider /> */}
 
-      <HeroSection/>
+      <SearchHero />
 
       {/* Why Choose Us Section */}
       {/* <WhyChoose /> */}

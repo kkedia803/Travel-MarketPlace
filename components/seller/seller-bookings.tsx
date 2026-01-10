@@ -245,7 +245,7 @@ export function SellerBookings({ sellerId }: SellerBookingsProps) {
 function StatusBadge({ status }: { status: string }) {
   const variants: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100',
-    confirmed: 'bg-green-100 text-green-800 hover:bg-green-100',
+    confirmed: 'bg-blue-100 text-blue-800 hover:bg-blue-100',
     cancelled: 'bg-red-100 text-red-800 hover:bg-red-100',
   }
   
