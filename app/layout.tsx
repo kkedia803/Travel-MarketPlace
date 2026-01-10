@@ -28,7 +28,7 @@ export default function RootLayout({
         <SupabaseProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
             <AuthProvider>
-              <div className="flex min-h-screen flex-col poppins-black-italic">
+              <div className="flex min-h-screen flex-col font-sans">
                 <Header />
                 <main className="flex-1">{children}</main>
                 <Toaster />

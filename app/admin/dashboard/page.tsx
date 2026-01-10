@@ -743,7 +743,7 @@ export default function AdminDashboard() {
                         <p className="text-sm font-medium">Status</p>
                         <Badge
                           variant="outline"
-                          className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                          className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
                         >
                           Active
                         </Badge>
@@ -808,7 +808,7 @@ export default function AdminDashboard() {
                         <p className="text-sm font-medium">Phone Number</p>
                         <Badge
                           variant="outline"
-                          className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                          className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
                         >
                           {trav.phone_number?trav.phone_number:'Phone No. Not Added'} 
                         </Badge>
@@ -817,7 +817,7 @@ export default function AdminDashboard() {
                         <p className="text-sm font-medium">Joined At</p>
                         <Badge
                           variant="outline"
-                          className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                          className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
                         >
                           {formatDate(trav.created_at)}
                         </Badge>

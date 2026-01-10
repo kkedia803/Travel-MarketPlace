@@ -4,8 +4,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { Clock, IndianRupeeIcon, MapPin, Calendar, Star, Heart } from "lucide-react"
+import { Heart, Star } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 interface Package {
@@ -42,11 +41,11 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
         setCurrentImageIndex((prev) => (prev + 1) % destination.images.length)
       }, 1200)
     } else {
-      clearInterval(intervalRef.current as NodeJS.Timeout)
+        if(intervalRef.current) clearInterval(intervalRef.current)
     }
 
     return () => {
-      clearInterval(intervalRef.current as NodeJS.Timeout)
+        if(intervalRef.current) clearInterval(intervalRef.current)
     }
   }, [isThisHovered, destination.images.length])
 
@@ -60,151 +59,101 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
     <div
       onMouseEnter={() => setHoveredId(destination.id)}
       onMouseLeave={() => setHoveredId(null)}
-      className={`transform will-change-transform transition-all duration-300 ease-out ${
-        isHovered 
-          ? (isThisHovered ? "md:scale-105 md:z-20" : "md:scale-95 md:opacity-70") 
-          : "scale-100"
-      }`}
+      className="group relative flex flex-col h-full bg-transparent"
     >
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link
-              href={`/packages/${destination.id}`}
-              className="block relative rounded-2xl overflow-hidden bg-white/90 border border-white/40 shadow-lg hover:shadow-2xl group transition-all duration-300 h-[450px]"
-            >
-              {/* Image Section */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden">
-                <Image
-                  src={destination.images[currentImageIndex] || "/placeholder.svg"}
-                  fill
-                  alt={destination.title}
-                  className="object-cover transition-all duration-700 md:group-hover:scale-110"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+      <Link href={`/packages/${destination.id}`} className="block h-full">
+        {/* Image Container */}
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-100 mb-3">
+          <Image
+            src={destination.images[currentImageIndex] || "/placeholder.svg"}
+            fill
+            alt={destination.title}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+          />
+          
+          {/* Heart Icon (Top Right) */}
+          <button
+            onClick={handleLikeClick}
+            className="absolute top-3 right-3 z-10 p-2 rounded-full hover:bg-white/10 transition-colors"
+          >
+            <Heart 
+              className={`w-6 h-6 transition-colors ${
+                isLiked ? 'text-red-500 fill-red-500' : 'text-white stroke-[2px]'
+              }`} 
+            />
+          </button>
+
+          {/* Discount Badge (Top Left) */}
+          {destination.discount > 0 && (
+            <div className="absolute top-3 left-3 z-10">
+              <Badge className="bg-white text-black font-bold px-2 py-0.5 text-xs rounded-md shadow-sm hover:bg-white">
+                Save {destination.discount}%
+              </Badge>
+            </div>
+          )}
+
+          {/* Carousel Dots (Bottom Center) - Only show on hover */}
+          {destination.images.length > 1 && isThisHovered && (
+            <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1.5">
+              {destination.images.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-1.5 h-1.5 rounded-full shadow-sm transition-all ${
+                    index === currentImageIndex ? 'bg-white scale-125' : 'bg-white/60'
+                  }`}
                 />
-                
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-                
-                {/* Discount badge */}
-                {destination.discount > 0 && (
-                  <div className="absolute top-3 right-3 z-10">
-                    <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold px-3 py-1 text-xs shadow-lg border-0 rounded-full">
-                      {destination.discount}% OFF
-                    </Badge>
-                  </div>
-                )}
+              ))}
+            </div>
+          )}
+        </div>
 
-                {/* Like button */}
-                <button
-                  onClick={handleLikeClick}
-                  className="absolute top-3 left-3 z-10 w-8 h-8 rounded-full bg-white/25 border border-white/40 flex items-center justify-center hover:bg-white/30 transition-all duration-200"
-                >
-                  <Heart 
-                    className={`w-4 h-4 transition-all duration-200 ${
-                      isLiked ? 'text-red-500 fill-red-500' : 'text-white'
-                    }`} 
-                  />
-                </button>
+        {/* Content */}
+        <div className="flex flex-col gap-1">
+          {/* Destination & Duration */}
+          <div className="flex items-center text-xs text-gray-500 font-medium uppercase tracking-wide">
+            <span>{destination.destination.split(",")[0]}</span>
+            <span className="mx-1">•</span>
+            <span>{destination.duration} days</span>
+          </div>
 
-                {/* Image indicators */}
-                {destination.images.length > 1 && (
-                  <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1">
-                    {destination.images.map((_, index) => (
-                      <div
-                        key={index}
-                        className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                          index === currentImageIndex ? 'bg-white' : 'bg-white/50'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
+          {/* Title */}
+          <h3 className="font-bold text-gray-900 leading-snug line-clamp-2 md:text-lg group-hover:underline decoration-1 underline-offset-2">
+            {destination.title}
+          </h3>
 
-                {/* Destination overlay */}
-                <div className="absolute bottom-0 left-0 p-4 w-full">
-                  <div className="flex items-center gap-2 mb-1">
-                    <MapPin className="w-4 h-4 text-white/80" />
-                    <span className="text-white/80 text-sm font-medium">
-                      {destination.destination.split(",")[1]?.trim() || "India"}
-                    </span>
-                  </div>
-                  <h3 className="text-2xl font-bold font-calsans text-white leading-tight">
-                    {destination.destination.split(",")[0]}
-                  </h3>
-                </div>
-              </div>
+          {/* Rating (Dummy for now as it's not in props) */}
+          <div className="flex items-center gap-1 mt-0.5">
+            <div className="flex text-yellow-400">
+                <Star className="w-3.5 h-3.5 fill-current" />
+                <Star className="w-3.5 h-3.5 fill-current" />
+                <Star className="w-3.5 h-3.5 fill-current" />
+                <Star className="w-3.5 h-3.5 fill-current" />
+                <Star className="w-3.5 h-3.5 fill-current" />
+            </div>
+            <span className="text-xs text-gray-500 font-medium">124</span>
+          </div>
 
-              {/* Content Section */}
-              <div className="p-5 space-y-4">
-                <div>
-                <h4 className="text-lg font-bold text-slate-800 mb-2 line-clamp-2 min-h-[3rem] group-hover:text-blue-700 transition-colors duration-300">
-                  {destination.title}
-                </h4>
-                  
-                  {/* Category badge */}
-                  <div className="mb-3">
-                    <span className="inline-block px-3 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-100">
-                      {destination.category}
-                    </span>
-                  </div>
-                </div>
+          {/* Price */}
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-xs text-gray-500">from</span>
+            <span className="text-lg font-bold text-gray-900">
+                ₹{destination.final_price.toLocaleString()}
+            </span>
+            {destination.discount > 0 && (
+                <span className="text-xs text-gray-400 line-through">
+                    ₹{destination.price.toLocaleString()}
+                </span>
+            )}
+            <span className="text-xs text-gray-500">per adult</span>
+          </div>
 
-                {/* Details */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-                        <IndianRupeeIcon className="w-4 h-4 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-slate-500">Starting from</p>
-                        <div className="flex items-center gap-2">
-                          {destination.discount > 0 && (
-                            <span className="text-sm text-slate-400 line-through">
-                              ₹{destination.price.toLocaleString()}
-                            </span>
-                          )}
-                          <span className="text-lg font-bold text-slate-800">
-                            ₹{destination.final_price.toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center">
-                      <Calendar className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-500">Duration</p>
-                      <p className="font-semibold text-slate-700">{destination.duration} days</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Rating placeholder */}
-                {/* <div className="flex items-center gap-1 pt-2 border-t border-slate-100">
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                    ))}
-                  </div>
-                  <span className="text-sm text-slate-600 ml-1">4.8 (124 reviews)</span>
-                </div> */}
-              </div>
-
-              {/* Hover glow effect */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/0 via-purple-400/0 to-pink-400/0 md:group-hover:from-blue-400/10 md:group-hover:via-purple-400/10 md:group-hover:to-pink-400/10 transition-all duration-500 pointer-events-none" />
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent side="top" className="bg-slate-800 text-white border-slate-700">
-            <p className="font-medium">{destination.title}</p>
-            <p className="text-sm text-slate-300">Click to view details</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+          {/* Free Cancellation Badge text */}
+          <div className="mt-1">
+             <span className="text-xs font-medium text-blue-700">Free Cancellation</span>
+          </div>
+        </div>
+      </Link>
     </div>
   )
 }

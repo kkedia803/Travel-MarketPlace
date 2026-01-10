@@ -134,7 +134,7 @@ function ContactNumber({ number }: { number: string }) {
 
       <button
         onClick={handleWhatsApp}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 dark:bg-green-900/30 dark:hover:bg-green-900/50 dark:text-green-400 transition-colors border border-green-200 dark:border-green-800"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-400 transition-colors border border-blue-200 dark:border-blue-800"
         title="Chat on WhatsApp"
       >
         <svg
@@ -171,6 +171,23 @@ export default function PackageDetailsPage() {
 
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
+
+  // Read query parameters on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      const guestsParam = searchParams.get('guests');
+      const fromDateParam = searchParams.get('fromDate');
+      
+      if (guestsParam) {
+        setTravelers(parseInt(guestsParam));
+      }
+      
+      if (fromDateParam) {
+        setSelectedDate(new Date(fromDateParam));
+      }
+    }
+  }, []);
 
 
 
@@ -659,12 +676,12 @@ export default function PackageDetailsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <h3 className="font-semibold text-lg mb-4 flex items-center">
-                    <Check className="mr-2 h-5 w-5 text-green-500" /> Inclusions
+                    <Check className="mr-2 h-5 w-5 text-blue-500" /> Inclusions
                   </h3>
                   <ul className="space-y-2">
                     {inclusions?.map((item, index) => (
                       <li key={index} className="flex items-start">
-                        <Check className="mr-2 h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
+                    <Check className="mr-2 h-4 w-4 text-blue-500 mt-1 flex-shrink-0" />
                         <span>{item}</span>
                       </li>
                     ))}
@@ -848,7 +865,7 @@ export default function PackageDetailsPage() {
                           available: availableDates,
                         }}
                         modifiersClassNames={{
-                          available: "bg-green-100 text-green-800 font-medium",
+                          available: "bg-blue-100 text-blue-800 font-medium",
                         }}
                         disabled={(date) =>
                           !availableDates.some(
@@ -871,7 +888,7 @@ export default function PackageDetailsPage() {
                       <span className="line-through text-muted-foreground mr-2">
                         ₹{pkg.price} x {travelers}
                       </span>
-                      <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
+                      <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200">
                         {pkg.discount}% OFF
                       </Badge>
                     </div>
@@ -894,7 +911,7 @@ export default function PackageDetailsPage() {
                       <span className="line-through text-sm text-muted-foreground">
                         ₹{pkg.price * travelers}
                       </span>
-                      <span className="text-green-600">
+                      <span className="text-blue-600">
                         ₹{Math.round(pkg.price * (1 - (pkg.discount ?? 0) / 100) * travelers)}
                       </span>
                     </div>
@@ -902,7 +919,7 @@ export default function PackageDetailsPage() {
 
                   {/* Savings */}
                   <div className="flex justify-end mt-1">
-                    <span className="text-xs text-green-600">
+                    <span className="text-xs text-blue-600">
                       You save: ₹{Math.round(pkg.price * travelers) - Math.round(pkg.price * (1 - (pkg.discount ?? 0) / 100) * travelers)}
                     </span>
                   </div>
