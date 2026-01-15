@@ -102,6 +102,8 @@ interface TravelPackage {
   start_dates: string[];
   status?: string;
   room_type?: { [key: string]: number }; // Added property for room_type
+  company_name?: string;
+  company_logo?: string;
 }
 
 type FeatureKey =
@@ -176,6 +178,8 @@ export default function SellerDashboard() {
     exclusion: [] as string[],
     start_dates: [] as string[],
     room_type: { Quad: 0 }, // default Quad included
+    company_name: "",
+    company_logo: "",
   });
 
   const [selectedDates, setSelectedDates] = useState<Date[]>(
@@ -211,7 +215,89 @@ export default function SellerDashboard() {
   const [isUploadingPDF, setIsUploadingPDF] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
 
+  
+  // Removed separate companyData state, now part of newPackage
+
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setLogoError("Please upload an image file");
+      return;
+    }
+
+    // Validate size (< 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setLogoError("Image size must be less than 5MB");
+      return;
+    }
+
+    setIsUploadingLogo(true);
+    setLogoError(null);
+
+    try {
+      const timestamp = Math.round(new Date().getTime() / 1000);
+      const paramsToSign = {
+        timestamp,
+        folder: "company-logos",
+      };
+
+      const signRes = await fetch("/api/sign-cloudinary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paramsToSign }),
+      });
+
+      if (!signRes.ok) throw new Error("Failed to get upload signature");
+
+      const signData = await signRes.json();
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("api_key", signData.api_key);
+      formData.append("timestamp", signData.timestamp.toString());
+      formData.append("signature", signData.signature);
+      formData.append("folder", "company-logos");
+
+      const uploadUrl = `https://api.cloudinary.com/v1_1/${signData.cloud_name}/image/upload`;
+
+      const uploadRes = await fetch(uploadUrl, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) throw new Error("Failed to upload image");
+
+      const data = await uploadRes.json();
+      
+      setNewPackage(prev => ({ ...prev, company_logo: data.secure_url }));
+      toast({ title: "Logo uploaded", variant: "success" });
+    } catch (error) {
+      console.error("Logo upload error:", error);
+      setLogoError("Failed to upload logo");
+    } finally {
+      setIsUploadingLogo(false);
+      e.target.value = ""; // Reset input
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    setNewPackage(prev => ({ ...prev, company_logo: "" }));
+  };
+
   const handleAddNewPackage = () => {
+    // Determine default company details from profile if available, otherwise empty
+    // We'll trust the useEffect below to populate defaults if this is fresh open
+    // BUT we need to reset to profile defaults every time we open 'Add New'
+    // So let's fetch profile data again or store it in a ref? 
+    // Actually we can just wait for user interaction or fetch once.
+    // Simpler: Just rely on the useEffect logic by resetting specific fields.
+    
     setNewPackage({
       title: "",
       description: "",
@@ -232,8 +318,14 @@ export default function SellerDashboard() {
       exclusion: [],
       start_dates: [],
       room_type: { Quad: 0 },
-      id: "", // Add id as it might be required by the type
+      id: "", 
+      company_name: "", // Will be filled by useEffect if profile has it
+      company_logo: "", // Will be filled by useEffect if profile has it
     });
+    // Trigger profile fetch again implicitly or just manually set if we had it stored? 
+    // Let's manually trigger the profile fetch logic again by just setting state.
+    // Or better, let's store profileDefaults in a state and use that.
+    
     setSelectedDates([]);
     setSelectedFeatures({});
     setPdfError(null);
@@ -251,8 +343,31 @@ export default function SellerDashboard() {
       fetchPopularDestinationData(user.id);
       fetchBookingsData(user.id);
       fetchRevenueData(user.id);
+      
+      const fetchProfile = async () => {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('company_name, avatar_url')
+          .eq('id', user.id)
+          .single();
+        
+        // Only set these defaults if we are ADDING a NEW package (no ID yet)
+        // If editing, we want to keep the package's existing specific company details
+        if (data && !newPackage.id) {
+            setNewPackage(prev => ({
+                ...prev,
+                company_name: data.company_name || '',
+                company_logo: data.avatar_url || ''
+            }));
+        }
+      };
+      
+      // We only fetch profile defaults if the dialog is open and it's a new package
+      if (isAddPackageOpen && !newPackage.id) {
+          fetchProfile();
+      }
     }
-  }, [user]);
+  }, [user, isAddPackageOpen]); // Added isAddPackageOpen dependency
 
   const handleAddItineraryLine = () => {
     setNewPackage((prev) => ({
@@ -492,11 +607,25 @@ export default function SellerDashboard() {
 
   const handleAddPackage = async () => {
     try {
-      console.log("Submitting package:", newPackage);
+      // No longer updating profile here. Company details are now per-package.
+
+      // Sanitize payload: remove 'profiles' and ensure 'id' is undefined if empty string for insert
+      // Actually for insert we should NOT include 'id' if we want DB to auto-gen it, 
+      // or include it if we want to set it. newPackage has initialized 'id' as "".
+      
+      const { 
+          profiles, 
+          id, // exclude id for insert to let DB auto-gen UUID
+          created_at, // exclude created_at
+          is_approved, // exclude is_approved (we set it manually)
+          seller_id, // exclude seller_id (we set it manually)
+           ...packagePayload 
+      } = newPackage as TravelPackage & { profiles?: any };
+
       const { data, error } = await supabase
         .from("packages")
         .insert({
-          ...newPackage,
+          ...packagePayload,
           seller_id: user?.id,
           is_approved: false,
         })
@@ -613,10 +742,16 @@ export default function SellerDashboard() {
       const { final_price, ...editablePackage } = pkgToEdit;
       
       const parsedDates = (editablePackage.start_dates || []).map(parseLocalDate);
-
+      
+      // Ensure company details are populated from the package data
+      // If the package didn't have specific details saved (legacy), we might want to fetch profile?
+      // But for now, let's assume if they edit, they see what's on the package.
+      
       setNewPackage({
         ...editablePackage,
         id: editablePackage.id || "",
+        company_name: editablePackage.company_name || "", 
+        company_logo: editablePackage.company_logo || "", 
         nights: editablePackage.nights ?? 0,
         itinerary: Array.isArray(editablePackage.itinerary)
           ? editablePackage.itinerary.map((item, index) => ({
@@ -667,14 +802,25 @@ export default function SellerDashboard() {
 
   const handleUpdatePackage = async () => {
     try {
+      // No longer updating profile here.
+      
       const formattedDates = selectedDates.map((d) => formatDateLocal(d));
+
+      const { 
+          profiles, 
+          created_at, 
+          seller_id, 
+          is_approved, // usually we don't want to inadvertently flip approval status on edit unless logic dictates
+          final_price, // exclude derived fields
+          ...updatePayload 
+      } = newPackage as TravelPackage & { profiles?: any };
 
       const { data, error } = await supabase
         .from("packages")
         .update({
-          ...newPackage,
+          ...updatePayload,
           start_dates: formattedDates,
-          seller_id: user?.id,
+          seller_id: user?.id, // Ensure seller_id stays correct
         })
         .eq("id", newPackage.id)
         .select();
@@ -732,7 +878,7 @@ export default function SellerDashboard() {
       setSelectedFeatures({});
       setPdfError(null);
     } catch (error) {
-      console.error("Error updating package:", error);
+      console.error("Error updating package:", JSON.stringify(error, null, 2));
       toast({
         title: "Failed to update package",
         description:
@@ -1341,7 +1487,66 @@ export default function SellerDashboard() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Company Details Section */}
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                   <h3 className="font-semibold text-sm mb-3">Company Identity (Applies to THIS package)</h3>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="company_name">Company Name</Label>
+                        <Input
+                          id="company_name"
+                          value={newPackage.company_name}
+                          onChange={(e) => setNewPackage({...newPackage, company_name: e.target.value})}
+                          placeholder="e.g. Dream Travels"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="company_logo">Company Logo</Label>
+                        
+                        {newPackage.company_logo ? (
+                            <div className="relative w-24 h-24 border rounded-md overflow-hidden group">
+                                <img 
+                                    src={newPackage.company_logo} 
+                                    alt="Company Logo" 
+                                    className="w-full h-full object-cover"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleRemoveLogo}
+                                    className="absolute inset-0 bg-black/40 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    id="company_logo"
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleLogoUpload}
+                                    disabled={isUploadingLogo}
+                                />
+                                <Label 
+                                    htmlFor="company_logo" 
+                                    className={`flex items-center justify-center gap-2 h-10 px-4 py-2 border rounded-md cursor-pointer hover:bg-accent ${isUploadingLogo ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    {isUploadingLogo ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <Upload className="w-4 h-4" />
+                                    )}
+                                    <span>{isUploadingLogo ? "Uploading..." : "Upload Logo"}</span>
+                                </Label>
+                            </div>
+                        )}
+                        {logoError && <p className="text-sm text-red-500">{logoError}</p>}
+                      </div>
+                   </div>
+                </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="title">
                       Package Title <span className="text-destructive">*</span>

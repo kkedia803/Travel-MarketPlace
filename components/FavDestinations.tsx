@@ -10,7 +10,7 @@ const categories = [
     {
       name: "Ladakh Expedition",
       destination: "Leh, Ladakh",
-      src: "https://imgs.search.brave.com/fuuqt8gGGj-CTBGENYyjxvhTJ2Gthzfh3cyYP8maWOM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy8y/LzJmL0xlaXN1cmVf/TGVoX0xhZGFraC5q/cGc",
+      src: "/ladakh-expedition.png",
       type: "Adventure",
       duration: "7 Days",
       groupSize: "12-15",
@@ -28,7 +28,7 @@ const categories = [
     {
       name: "Hampta Pass Trek",
       destination: "Hampta Pass",
-      src: "https://imgs.search.brave.com/wAUdxlha9RFkMBSFP7AY3bbZysu0z2-JRVLi_OkDOms/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9yZXMu/Y2xvdWRpbmFyeS5j/b20vZHlpZmZya3po/L2ltYWdlL3VwbG9h/ZC9jX2ZpbGwsZl9h/dXRvLGZsX3Byb2dy/ZXNzaXZlLnN0cmlw/X3Byb2ZpbGUsZ19j/ZW50ZXIsaF81MTgs/cV9hdXRvLHdfNjYw/L3YxNzAyNzA5MTk5/L2Jiai9kdnhxbTV0/cncweDRiZXZubnpq/ai5qcGc",
+      src: "/hampta-pass.png",
       type: "Trekking",
       duration: "4 Days",
       groupSize: "6-10",
