@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/components/ui/use-toast'
+import { supabase } from '@/app/lib/supabase'
 
 interface Package {
   id: string
@@ -30,6 +31,7 @@ interface PackageDialogProps {
 export function PackageDialog({ open, onOpenChange, packageData, onSave }: PackageDialogProps) {
   const isEditing = !!packageData
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
   const { toast } = useToast()
   
   const [formData, setFormData] = useState<Partial<Package>>(
@@ -43,6 +45,35 @@ export function PackageDialog({ open, onOpenChange, packageData, onSave }: Packa
       images: ['']
     }
   )
+
+  const [companyData, setCompanyData] = useState({
+    company_name: '',
+    avatar_url: ''
+  })
+
+  useEffect(() => {
+    if (open) {
+      const fetchProfile = async () => {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          setUserId(user.id)
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('company_name, avatar_url')
+            .eq('id', user.id)
+            .single()
+          
+          if (data) {
+            setCompanyData({
+              company_name: data.company_name || '',
+              avatar_url: data.avatar_url || ''
+            })
+          }
+        }
+      }
+      fetchProfile()
+    }
+  }, [open])
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -54,6 +85,14 @@ export function PackageDialog({ open, onOpenChange, packageData, onSave }: Packa
   
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleCompanyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setCompanyData(prev => ({
       ...prev,
       [name]: value
     }))
@@ -89,6 +128,23 @@ export function PackageDialog({ open, onOpenChange, packageData, onSave }: Packa
     
     try {
       setIsSubmitting(true)
+
+      // Update profile with company details first
+      if (userId) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            company_name: companyData.company_name,
+            avatar_url: companyData.avatar_url
+          })
+          .eq('id', userId)
+        
+        if (profileError) {
+          console.error('Error updating profile:', profileError)
+          // We continue to save package even if profile update fails? 
+          // Best to warn but maybe not block. For now, let's log.
+        }
+      }
       
       const url = isEditing 
         ? `/api/seller/packages/${packageData.id}` 
@@ -130,11 +186,38 @@ export function PackageDialog({ open, onOpenChange, packageData, onSave }: Packa
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Package' : 'Add New Package'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Company Details Section */}
+          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+             <h3 className="font-semibold text-sm mb-3">Company Identity (Applies to all your packages)</h3>
+             <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="company_name">Company Name</Label>
+                  <Input
+                    id="company_name"
+                    name="company_name"
+                    value={companyData.company_name}
+                    onChange={handleCompanyChange}
+                    placeholder="e.g. Dream Travels"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="avatar_url">Logo URL</Label>
+                  <Input
+                    id="avatar_url"
+                    name="avatar_url"
+                    value={companyData.avatar_url}
+                    onChange={handleCompanyChange}
+                    placeholder="https://..."
+                  />
+                </div>
+             </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>

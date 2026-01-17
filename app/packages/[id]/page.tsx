@@ -28,6 +28,7 @@ import { toast } from "@/hooks/use-toast"
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import Image from "next/image";
+import RecommendedPackages from "@/components/RecommendedPackages";
 
 
 const featureIcons: Record<string, JSX.Element> = {
@@ -62,6 +63,8 @@ interface Package {
   document?: string;
   cancellation_policy?: string[];
   start_dates?: string[];
+  company_name?: string;
+  company_logo?: string;
   profiles?: {
     company_name: string;
     phone_number: string;
@@ -589,13 +592,21 @@ export default function PackageDetailsPage() {
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
           <h1 className="text-2xl md:text-3xl font-bold mb-2">{pkg.title}</h1>
           {/* Seller name and icon */}
-          {pkg.profiles?.company_name ? (
+          {/* Seller name and icon */}
+          {/* Prioritize package-specific details, fallback to profile details */}
+          {(pkg.company_name || pkg.profiles?.company_name) ? (
             <div className="flex flex-col items-start md:items-end gap-2">
               <div className="flex items-center gap-2">
                 <Avatar className="h-14 w-14">
-                  <AvatarImage src={pkg.profiles?.avatar_url} alt="company_avatar" />
+                  <AvatarImage 
+                    src={pkg.company_logo || pkg.profiles?.avatar_url} 
+                    alt="company_avatar" 
+                  />
+                  <AvatarFallback>{(pkg.company_name || pkg.profiles?.company_name || "C").charAt(0)}</AvatarFallback>
                 </Avatar>
-                <span className="text-xl md:text-2xl font-medium">{pkg.profiles?.company_name || "Unknown"}</span>
+                <span className="text-xl md:text-2xl font-medium">
+                  {pkg.company_name || pkg.profiles?.company_name || "Unknown"}
+                </span>
               </div>
               {/* Contact Number */}
               {(pkg.contact_number || pkg.profiles?.phone_number) && (
@@ -947,6 +958,15 @@ export default function PackageDetailsPage() {
             </CardContent>
           </Card>
         </div>
+      </div>
+      
+      {/* Recommended Packages Section */}
+      <div className="mt-8">
+        <RecommendedPackages 
+          currentPackageId={pkg!.id} 
+          currentPrice={pkg!.price} 
+          currentCategory={pkg!.category} 
+        />
       </div>
     </div>
   );
