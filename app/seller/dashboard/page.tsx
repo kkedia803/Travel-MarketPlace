@@ -487,12 +487,6 @@ export default function SellerDashboard() {
       const signData = await signRes.json();
 
       // 2. Direct Upload to Cloudinary
-      console.log("File details before upload:", {
-        name: file.name,
-        size: file.size,
-        type: file.type
-      });
-      
       const formData = new FormData();
       formData.append("api_key", signData.api_key);
       formData.append("timestamp", signData.timestamp.toString());
@@ -622,26 +616,12 @@ export default function SellerDashboard() {
            ...packagePayload 
       } = newPackage as TravelPackage & { profiles?: any };
 
-      const { data, error } = await supabase
-        .from("packages")
-        .insert({
+      const response = await fetch("/api/seller/packages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           ...packagePayload,
-          seller_id: user?.id,
-          is_approved: false,
-        })
-        .select();
-
-      console.log("Supabase response:", { data, error });
-
-      if (error) throw error;
-
-      const insertedPackage = data;
-
-      if (data[0]?.id) {
-        const { error: featuresError } = await supabase
-          .from("package_features")
-          .insert({
-            package_id: data[0]?.id,
+          package_features: {
             accommodation: selectedFeatures.accommodation || false,
             meals: selectedFeatures.meals || false,
             transfers: selectedFeatures.transfers || false,
@@ -651,13 +631,16 @@ export default function SellerDashboard() {
             entry_tickets: selectedFeatures.entry_tickets || false,
             camping: selectedFeatures.camping || false,
             trek_lead: selectedFeatures.trek_lead || false,
-          });
+          },
+        }),
+      });
 
-        if (featuresError) {
-          console.error("Error inserting package features:", featuresError);
-          throw featuresError;
-        }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || "Failed to add package");
       }
+
+      const data = await response.json();
 
       toast({
         title: "Package added successfully",
@@ -665,7 +648,7 @@ export default function SellerDashboard() {
         variant: "success",
       });
 
-      setPackages((prev) => [data[0], ...prev]);
+      setPackages((prev) => [data, ...prev]);
       setIsAddPackageOpen(false);
       setSelectedDates([]);
       setSelectedFeatures({});
@@ -705,12 +688,16 @@ export default function SellerDashboard() {
 
   const handleBookingConfirm = async (bookingId: string) => {
     try {
-      const { data, error } = await supabase
-        .from("bookings")
-        .update({ status: "confirmed" })
-        .eq("id", bookingId);
+      const response = await fetch(`/api/bookings/${bookingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "confirmed" }),
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || "Failed to confirm booking");
+      }
 
       toast({
         title: "Booking Confirmed",
@@ -815,33 +802,32 @@ export default function SellerDashboard() {
           ...updatePayload 
       } = newPackage as TravelPackage & { profiles?: any };
 
-      const { data, error } = await supabase
-        .from("packages")
-        .update({
+      const response = await fetch(`/api/seller/packages/${newPackage.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           ...updatePayload,
           start_dates: formattedDates,
-          seller_id: user?.id, // Ensure seller_id stays correct
-        })
-        .eq("id", newPackage.id)
-        .select();
+          package_features: {
+            accommodation: selectedFeatures.accommodation || false,
+            meals: selectedFeatures.meals || false,
+            transfers: selectedFeatures.transfers || false,
+            trip_captain: selectedFeatures.trip_captain || false,
+            first_aid: selectedFeatures.first_aid || false,
+            luggage_support: selectedFeatures.luggage_support || false,
+            entry_tickets: selectedFeatures.entry_tickets || false,
+            camping: selectedFeatures.camping || false,
+            trek_lead: selectedFeatures.trek_lead || false,
+          },
+        }),
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || "Failed to update package");
+      }
 
-      await supabase.from("package_features").upsert(
-        {
-          package_id: newPackage.id,
-          accommodation: selectedFeatures.accommodation || false,
-          meals: selectedFeatures.meals || false,
-          transfers: selectedFeatures.transfers || false,
-          trip_captain: selectedFeatures.trip_captain || false,
-          first_aid: selectedFeatures.first_aid || false,
-          luggage_support: selectedFeatures.luggage_support || false,
-          entry_tickets: selectedFeatures.entry_tickets || false,
-          camping: selectedFeatures.camping || false,
-          trek_lead: selectedFeatures.trek_lead || false,
-        },
-        { onConflict: "package_id" } // ensure it updates if already exists
-      );
+      const data = await response.json();
 
       toast({
         title: "Package updated successfully",
@@ -850,7 +836,7 @@ export default function SellerDashboard() {
       });
 
       setPackages((prev) =>
-        prev.map((pkg) => (pkg.id === newPackage.id ? data[0] : pkg))
+        prev.map((pkg) => (pkg.id === newPackage.id ? data : pkg))
       );
       setIsAddPackageOpen(false);
       setNewPackage({
@@ -889,10 +875,13 @@ export default function SellerDashboard() {
   };
 
   const handlePkgDelete = async (pkgId: string) => {
-    const { error } = await supabase.from("packages").delete().eq("id", pkgId);
+    const response = await fetch(`/api/seller/packages/${pkgId}`, {
+      method: "DELETE",
+    });
 
-    if (error) {
-      console.error("Error deleting package:", error);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      console.error("Error deleting package:", errorData?.error);
       toast({
         title: "Failed to Delete Package",
         description:
@@ -911,12 +900,16 @@ export default function SellerDashboard() {
 
   const handleBookingCancelled = async (bookingId: string) => {
     try {
-      const { data, error } = await supabase
-        .from("bookings")
-        .update({ status: "cancelled" })
-        .eq("id", bookingId);
+      const response = await fetch(`/api/bookings/${bookingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "cancelled" }),
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || "Failed to cancel booking");
+      }
 
       toast({
         title: "Booking Cancelled",

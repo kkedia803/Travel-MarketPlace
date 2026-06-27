@@ -60,43 +60,7 @@ export default function UserDashboard() {
         setBookings(data || [])
       } catch (error) {
         console.error("Error fetching bookings:", error)
-        // For demo purposes, let's add mock data
-        const mockBookings = [
-          {
-            id: "1",
-            package_id: "1",
-            user_id: user.id,
-            travelers: 2,
-            status: "confirmed",
-            created_at: "2023-05-15T10:30:00Z",
-            package: {
-              id: "1",
-              title: "Bali Paradise",
-              destination: "Bali, Indonesia",
-              price: 1299,
-              duration: 7,
-              images: ["/placeholder.svg?height=400&width=600"],
-            },
-          },
-          {
-            id: "2",
-            package_id: "2",
-            user_id: user.id,
-            travelers: 1,
-            status: "pending",
-            created_at: "2023-06-20T14:45:00Z",
-            package: {
-              id: "2",
-              title: "Swiss Alps Adventure",
-              destination: "Switzerland",
-              price: 1899,
-              duration: 10,
-              images: ["/placeholder.svg?height=400&width=600"],
-            },
-          },
-        ] as Booking[]
-
-        setBookings(mockBookings)
+        setBookings([])
       } finally {
         setLoading(false)
       }
@@ -130,12 +94,16 @@ export default function UserDashboard() {
   const handleCancelBooking = async (bookingId: string) => {
 
     try {
-      const { error } = await supabase
-        .from("bookings")
-        .update({ status: "cancelled" })
-        .eq("id", bookingId)
+      const response = await fetch(`/api/bookings/${bookingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "cancelled" }),
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        throw new Error(errorData?.error || "Failed to cancel booking")
+      }
 
       setBookings((prev) => prev.map((b) => (b.id === bookingId ? { ...b, status: "cancelled" } : b)))
       toast({ title: "Booking cancelled successfully", variant: "success" })
@@ -307,4 +275,3 @@ export default function UserDashboard() {
     </div>
   )
 }
-

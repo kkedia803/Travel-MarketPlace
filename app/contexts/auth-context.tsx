@@ -70,32 +70,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, role: string, company_name: string, phone_number: string) => {
-    const { error, data } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { role, company_name, phone_number },
-      },
-    })
-
-    // console.log("Sign Up Data:", data)
-
-    if (!error && data.user) {
-      const { error: insertError, data: data2 } = await supabase.from("profiles").upsert({
-        id: data.user.id,
-        role: role,
-        user_name: email.split("@")[0],
-        name: email,
+    const requestedRole = role === "seller" ? "seller" : "user"
+    const response = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        password,
+        role: requestedRole,
         company_name,
-        phone_number
-      }, {
-        onConflict: 'id' // ensures it updates by id
-      })
-      if (insertError) {
-        console.error("Profile insert error:", insertError)
-      }
-      console.log("Profile Insert Data:", data2)
-    }
+        phone_number,
+      }),
+    })
+    const result = await response.json().catch(() => null)
+    const error = response.ok ? null : { message: result?.error || "Sign up failed" }
 
     toast({
       title: error ? "Sign Up Failed" : "Successfull! Please Confirm Email",

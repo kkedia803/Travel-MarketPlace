@@ -1,17 +1,24 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/app/lib/supabase"
+import { createSupabaseRouteClient, jsonError } from "@/app/api/_utils/auth"
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const { data, error } = await supabase.from("packages").select("*").eq("id", id).single()
+    const supabase = await createSupabaseRouteClient()
+    const { data, error } = await supabase
+      .from("packages")
+      .select("*")
+      .eq("id", id)
+      .eq("is_approved", true)
+      .eq("status", "active")
+      .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      return jsonError(error.message, 400)
     }
 
     if (!data) {
-      return NextResponse.json({ error: "Package not found" }, { status: 404 })
+      return jsonError("Package not found", 404)
     }
 
     return NextResponse.json(data)
@@ -20,4 +27,3 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
-

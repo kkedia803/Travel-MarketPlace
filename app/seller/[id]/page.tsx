@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { TopBanner } from "./components/TopBanner";
+import { SellerBanner, TopBanner } from "./components/TopBanner";
 import { supabase } from "@/app/lib/supabase";
 import { useParams } from "next/navigation";
 import MainPackages from "./components/MainPackages";
@@ -11,7 +11,7 @@ export default function sellerPage() {
 
     const params = useParams();
     const [loading, setLoading] = useState(false);
-    const [seller, setSeller] = useState([]);
+    const [seller, setSeller] = useState<SellerBanner | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -32,8 +32,6 @@ export default function sellerPage() {
                     .eq("seller_id", params.id);
 
                 if (pkgcountError) throw pkgcountError;
-                console.log(pkgcount);
-
                 const sellerWithCount = {
                     ...sellerData[0],
                     package_count: pkgcount.length ?? 0,
@@ -56,7 +54,7 @@ export default function sellerPage() {
         <div className="container py-8">
             {!loading &&
                 <>
-                    <TopBanner seller={seller} />
+                    {seller && <TopBanner seller={seller} />}
                     <MainPackages />
                 </>
             }

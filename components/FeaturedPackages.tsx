@@ -33,7 +33,11 @@ export default function FeaturedPackages() {
             try {
                 const { data, error } = await supabase.from("packages").select("*").eq("is_approved", true).eq("status", "active").order('updated_at',{ascending:false}).limit(4)
                 if (error) throw error
-                setPackages(data || [])
+                setPackages((data || []).map((pkg) => ({
+                    ...pkg,
+                    discount: pkg.discount || 0,
+                    final_price: pkg.final_price ?? Math.round(pkg.price * (1 - (pkg.discount || 0) / 100)),
+                })))
             } catch (error) {
                 console.error("Error fetching packages:", error)
             } finally {

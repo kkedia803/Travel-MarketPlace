@@ -1,16 +1,22 @@
 "use client"
 
 import React, { useState } from "react";
-import Image from 'next/Image'
 
-export const TopBanner = ({ seller }) => {
+export interface SellerBanner {
+    avatar_url?: string;
+    company_name?: string;
+    bio?: string;
+    created_at?: string;
+    package_count?: number;
+}
+
+export const TopBanner = ({ seller }: { seller: SellerBanner }) => {
 
     const [activeImage, setActiveImage] = useState(0);
-    console.log(seller);
 
-    const date = new Date(seller.created_at);
+    const date = seller.created_at ? new Date(seller.created_at) : null;
     const options: Intl.DateTimeFormatOptions = { month: "short", year: "numeric" };
-    const trimmedDate = date.toLocaleDateString("en-US", options);
+    const trimmedDate = date ? date.toLocaleDateString("en-US", options) : "recently";
 
     return (
         <div className="relative w-full h-80 rounded-[3rem] overflow-hidden">

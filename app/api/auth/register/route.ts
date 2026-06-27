@@ -1,35 +1,45 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/app/lib/supabase"
+import { createSupabaseRouteClient, jsonError } from "@/app/api/_utils/auth"
+
+const allowedPublicRoles = new Set(["user", "seller"])
 
 export async function POST(request: Request) {
   try {
-    const { email, password, role } = await request.json()
+    const { email, password, role, company_name, phone_number } = await request.json()
+    const requestedRole = allowedPublicRoles.has(role) ? role : "user"
 
-    // Sign up the user and include the role in the metadata
+    if (!email || !password) {
+      return jsonError("Email and password are required", 400)
+    }
+
+    const supabase = await createSupabaseRouteClient()
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          role: role || "user", // Store the role in user metadata
+          role: requestedRole,
         },
       },
     })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      return jsonError(error.message, 400)
     }
 
     if (data.user) {
-      // Create profile with role
       const { error: profileError } = await supabase.from("profiles").insert({
         id: data.user.id,
-        role: role || "user",
-        name: email.split("@")[0],
+        role: requestedRole,
+        user_name: email.split("@")[0],
+        name: email,
+        company_name: requestedRole === "seller" ? company_name : null,
+        phone_number,
       })
 
       if (profileError) {
-        return NextResponse.json({ error: profileError.message }, { status: 400 })
+        return jsonError(profileError.message, 400)
       }
     }
 

@@ -1,32 +1,37 @@
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
+
+const contactSchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  email: z.string().trim().email().max(254),
+  subject: z.string().trim().min(1).max(160),
+  message: z.string().trim().min(10).max(5000),
+})
 
 export async function POST(request: Request) {
-  const cookieStore = await cookies()
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+  const supabase = createRouteHandlerClient({ cookies })
   
   try {
-    const { name, email, subject, message } = await request.json()
-    
-    // Validate required fields
-    if (!name || !email || !subject || !message) {
+    const parsed = contactSchema.safeParse(await request.json())
+
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: 'Please provide a valid name, email, subject, and message' },
         { status: 400 }
       )
     }
+
+    const { name, email, subject, message } = parsed.data
     
-    // Store the contact message in the database
-    // Note: You would need to create a 'contact_messages' table
     const { data, error } = await supabase
-      .from('contact_messages')
+      .from('contact_submissions')
       .insert({
         name,
         email,
         subject,
         message,
-        status: 'new'
       })
       .select()
     

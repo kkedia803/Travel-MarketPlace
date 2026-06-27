@@ -204,6 +204,8 @@ export default function PackageDetailsPage() {
           .select(`*,
             profiles(phone_number, company_name, avatar_url)`)
           .eq("id", params.id)
+          .eq("is_approved", true)
+          .eq("status", "active")
           .single();
 
         if (packageError) throw packageError;
@@ -225,51 +227,7 @@ export default function PackageDetailsPage() {
         }
       } catch (error) {
         console.error("Error fetching package:", error);
-        // For demo purposes, let's add mock data that includes the package id.
-        const packagesData: { [key: string]: Omit<Package, "id"> } = {
-          "1": {
-            title: "Bali Paradise Retreat",
-            description:
-              "Experience the beauty of Bali with this all-inclusive package. Enjoy pristine beaches, lush rice terraces, and ancient temples. Our package includes luxury accommodations, daily breakfast, airport transfers, and guided tours to Bali's most iconic attractions.",
-            destination: "Bali, Indonesia",
-            price: 22999,
-            duration: 7,
-            category: "Beach Getaways",
-            images: ["/balicover.webp", "/bali4.webp", "/bali3.jpg"],
-            seller_id: "seller1",
-            is_approved: true,
-          },
-          "2": {
-            title: "Manali Adventure Escape",
-            description:
-              "Discover the breathtaking landscapes of Manali with this adventure-packed package. Trek through snow-capped mountains, experience river rafting, and relax in cozy hilltop resorts. Includes accommodation, meals, and guided activities.",
-            destination: "Manali, India",
-            price: 5899,
-            duration: 5,
-            category: "Mountain Adventures",
-            images: ["/manali1.jpg", "/manali2.jpg", "/manali3.jpg"],
-            seller_id: "seller2",
-            is_approved: true,
-          },
-          "3": {
-            title: "Udaipur Royal Heritage Tour",
-            description:
-              "Explore the royal charm of Udaipur with a luxurious stay at heritage hotels. Visit grand palaces, cruise on Lake Pichola, and experience authentic Rajasthani culture. Includes guided tours, cultural performances, and exquisite dining experiences.",
-            destination: "Udaipur, India",
-            price: 9599,
-            duration: 6,
-            category: "Cultural Experiences",
-            images: ["/udaipur1.jpg", "/udaipur2.jpg", "/udaipur3.jpg"],
-            seller_id: "seller3",
-            is_approved: true,
-          },
-        };
-
-        // Normalize params.id to a string.
-        const packageId = Array.isArray(params.id) ? params.id[0] : params.id;
-        const mockPackage =
-          packageId !== undefined ? { id: packageId, ...packagesData[packageId] } : null;
-        setPkg(mockPackage);
+        setPkg(null);
       } finally {
         setLoading(false);
       }
@@ -291,7 +249,6 @@ export default function PackageDetailsPage() {
           // "Authorization": `Bearer ${session?.access_token}`,
         },
         body: JSON.stringify({
-          profile_id: session?.user.email,
           rating,
           review_text: reviewText,
           package_id: pkg?.id || "",
@@ -407,16 +364,20 @@ export default function PackageDetailsPage() {
     }
 
     try {
-      const { error } = await supabase.from("bookings").insert({
-        destination: pkg?.destination,
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
         package_id: pkg?.id,
-        user_id: user.id,
         travelers: travelers,
         selected_date: selectedDate?.toISOString() || null,
-        status: "pending",
+        }),
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || "There was an error processing your booking.");
+      }
 
       toast({
         title: "Booking successful!",
@@ -463,9 +424,9 @@ export default function PackageDetailsPage() {
   if (!pkg) {
     return (
       <div className="container py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">Finding your package...</h1>
+        <h1 className="text-2xl font-bold mb-4">Package unavailable</h1>
         <p className="text-muted-foreground mb-8">
-          Asking database people nicely. They said they’ll get back to us.
+          This package may have been removed, paused, or is still awaiting approval.
         </p>
         <Button onClick={() => router.push("/explore")}>Browse Packages</Button>
       </div>

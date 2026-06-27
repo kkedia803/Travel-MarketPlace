@@ -181,7 +181,6 @@ export function SellerBookings({ sellerId }: SellerBookingsProps) {
                   mode="single"
                   selected={dateFilter}
                   onSelect={setDateFilter}
-                  initialFocus
                 />
               </PopoverContent>
             </Popover>

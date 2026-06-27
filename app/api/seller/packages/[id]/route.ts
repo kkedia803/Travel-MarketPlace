@@ -1,31 +1,51 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { jsonError, requireRole } from '@/app/api/_utils/auth'
+
+const allowedRoomTypes = ['Single', 'Double', 'Triple', 'Quad']
+
+function validateRoomType(roomType: unknown) {
+  if (!roomType) return null
+  if (typeof roomType !== 'object' || Array.isArray(roomType)) {
+    return 'room_type must be an object'
+  }
+
+  const value = roomType as Record<string, unknown>
+  if (!('Quad' in value)) {
+    return 'room_type must include Quad'
+  }
+
+  for (const key of Object.keys(value)) {
+    if (!allowedRoomTypes.includes(key)) return `Invalid room type: ${key}`
+    if (typeof value[key] !== 'number' || value[key] < 0) {
+      return 'room_type prices must be non-negative numbers'
+    }
+  }
+
+  return null
+}
+
+function sanitizePackagePayload(input: any) {
+  const {
+    id,
+    created_at,
+    updated_at,
+    seller_id,
+    profiles,
+    package_features,
+    final_price,
+    ...payload
+  } = input
+
+  return { payload, packageFeatures: package_features }
+}
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const cookieStore = await cookies()
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
   const { id } = await params
-  
-  const { data: { session } } = await supabase.auth.getSession()
-  
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  
-  // Check if user is a seller
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', session.user.id)
-    .single()
-  
-  if (!profile || profile.role !== 'seller') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const { supabase, user, response } = await requireRole(['seller'])
+  if (response || !user) return response
   
   // Check if package belongs to this seller
   const { data: packageData } = await supabase
@@ -34,33 +54,16 @@ export async function PUT(
     .eq('id', id)
     .single()
   
-  if (!packageData || packageData.seller_id !== session.user.id) {
+  if (!packageData || packageData.seller_id !== user.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   
   try {
-    const updatedData = await request.json()
+    const body = await request.json()
+    const { payload: updatedData, packageFeatures } = sanitizePackagePayload(body)
 
-    // Validate room_type field if present
-    if (updatedData.room_type) {
-      const allowedTypes = ['Single', 'Double', 'Triple', 'Quad'];
-      if (typeof updatedData.room_type !== 'object' || Array.isArray(updatedData.room_type)) {
-        return NextResponse.json({ error: 'room_type must be an object' }, { status: 400 });
-      }
-      // Ensure Quad is always present
-      if (!('Quad' in updatedData.room_type)) {
-        return NextResponse.json({ error: 'room_type must include Quad' }, { status: 400 });
-      }
-      // Only allow allowedTypes as keys
-      for (const key of Object.keys(updatedData.room_type)) {
-        if (!allowedTypes.includes(key)) {
-          return NextResponse.json({ error: `Invalid room type: ${key}` }, { status: 400 });
-        }
-        if (typeof updatedData.room_type[key] !== 'number' || updatedData.room_type[key] < 0) {
-          return NextResponse.json({ error: `room_type prices must be non-negative numbers` }, { status: 400 });
-        }
-      }
-    }
+    const roomTypeError = validateRoomType(updatedData.room_type)
+    if (roomTypeError) return jsonError(roomTypeError, 400)
     
     // Don't allow changing seller_id
     delete updatedData.seller_id
@@ -80,6 +83,14 @@ export async function PUT(
     if (error) {
       throw error
     }
+
+    if (packageFeatures) {
+      const { error: featuresError } = await supabase
+        .from('package_features')
+        .upsert({ package_id: id, ...packageFeatures }, { onConflict: 'package_id' })
+
+      if (featuresError) throw featuresError
+    }
     
     return NextResponse.json(data[0])
   } catch (error: any) {
@@ -91,26 +102,9 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const cookieStore = await cookies()
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
   const { id } = await params
-  
-  const { data: { session } } = await supabase.auth.getSession()
-  
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  
-  // Check if user is a seller
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', session.user.id)
-    .single()
-  
-  if (!profile || profile.role !== 'seller') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const { supabase, user, response } = await requireRole(['seller'])
+  if (response || !user) return response
   
   // Check if package belongs to this seller
   const { data: packageData } = await supabase
@@ -119,7 +113,7 @@ export async function DELETE(
     .eq('id', id)
     .single()
   
-  if (!packageData || packageData.seller_id !== session.user.id) {
+  if (!packageData || packageData.seller_id !== user.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   

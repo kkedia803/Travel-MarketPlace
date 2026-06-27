@@ -14,7 +14,7 @@ interface Package {
   destination: string
   discount: number
   price: number
-  final_price: number
+  final_price?: number
   duration: number
   category: string
   images: string[]
@@ -33,6 +33,7 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isLiked, setIsLiked] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const displayPrice = destination.final_price ?? Math.round(destination.price * (1 - (destination.discount || 0) / 100))
 
   useEffect(() => {
     const isFinePointer = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(pointer: fine)').matches
@@ -138,7 +139,7 @@ export default function DestinationCard({ destination, isHovered, isThisHovered,
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-xs text-gray-500">from</span>
             <span className="text-lg font-bold text-gray-900">
-                ₹{destination.final_price.toLocaleString()}
+                ₹{displayPrice.toLocaleString()}
             </span>
             {destination.discount > 0 && (
                 <span className="text-xs text-gray-400 line-through">

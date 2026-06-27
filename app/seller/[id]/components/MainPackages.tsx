@@ -106,12 +106,12 @@ export default function MainPackages() {
                                                         alt={packages.title}
                                                         className="object-cover transition-transform duration-500"
                                                     />
-                                                    {packages.discount > 0 && (
+                                                    {(packages.discount || 0) > 0 && (
                                                         <div className="absolute top-2 right-2 z-10">
                                                             <Badge
                                                                 className="bg-teal text-white font-onest font-medium px-3 py-1 text-xs shadow-md"
                                                             >
-                                                                {packages.discount}% OFF
+                                                                {packages.discount || 0}% OFF
                                                             </Badge>
                                                         </div>
                                                     )}

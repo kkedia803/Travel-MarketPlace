@@ -1,33 +1,54 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { jsonError, requireRole } from '@/app/api/_utils/auth'
+
+const allowedRoomTypes = ['Single', 'Double', 'Triple', 'Quad']
+
+function validateRoomType(roomType: unknown) {
+  if (!roomType) return null
+  if (typeof roomType !== 'object' || Array.isArray(roomType)) {
+    return 'room_type must be an object'
+  }
+
+  const value = roomType as Record<string, unknown>
+  if (!('Quad' in value)) {
+    return 'room_type must include Quad'
+  }
+
+  for (const key of Object.keys(value)) {
+    if (!allowedRoomTypes.includes(key)) return `Invalid room type: ${key}`
+    if (typeof value[key] !== 'number' || value[key] < 0) {
+      return 'room_type prices must be non-negative numbers'
+    }
+  }
+
+  return null
+}
+
+function sanitizePackagePayload(input: any) {
+  const {
+    id,
+    created_at,
+    updated_at,
+    seller_id,
+    is_approved,
+    profiles,
+    package_features,
+    final_price,
+    ...payload
+  } = input
+
+  return { payload, packageFeatures: package_features }
+}
 
 export async function GET(request: Request) {
-  const cookieStore = await cookies()
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
-  
-  const { data: { session } } = await supabase.auth.getSession()
-  
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  
-  // Check if user is a seller
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', session.user.id)
-    .single()
-  
-  if (!profile || profile.role !== 'seller') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const { supabase, user, response } = await requireRole(['seller'])
+  if (response || !user) return response
   
   // Get all packages for this seller
   const { data: packages, error } = await supabase
     .from('packages')
     .select('*')
-    .eq('seller_id', session.user.id)
+    .eq('seller_id', user.id)
     .order('created_at', { ascending: false })
   
   if (error) {
@@ -38,52 +59,32 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const cookieStore = await cookies()
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
-  
-  const { data: { session } } = await supabase.auth.getSession()
-  
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  
-  // Check if user is a seller
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', session.user.id)
-    .single()
-  
-  if (!profile || profile.role !== 'seller') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  
   try {
-    const packageData = await request.json()
+    const { supabase, user, response } = await requireRole(['seller'])
+    if (response || !user) return response
 
-    // Validate room_type field if present
-    if (packageData.room_type) {
-      const allowedTypes = ['Single', 'Double', 'Triple', 'Quad'];
-      if (typeof packageData.room_type !== 'object' || Array.isArray(packageData.room_type)) {
-        return NextResponse.json({ error: 'room_type must be an object' }, { status: 400 });
-      }
-      // Ensure Quad is always present
-      if (!('Quad' in packageData.room_type)) {
-        return NextResponse.json({ error: 'room_type must include Quad' }, { status: 400 });
-      }
-      // Only allow allowedTypes as keys
-      for (const key of Object.keys(packageData.room_type)) {
-        if (!allowedTypes.includes(key)) {
-          return NextResponse.json({ error: `Invalid room type: ${key}` }, { status: 400 });
-        }
-        if (typeof packageData.room_type[key] !== 'number' || packageData.room_type[key] < 0) {
-          return NextResponse.json({ error: `room_type prices must be non-negative numbers` }, { status: 400 });
-        }
-      }
+    const body = await request.json()
+    const { payload: packageData, packageFeatures } = sanitizePackagePayload(body)
+
+    if (!packageData.title || !packageData.description || !packageData.destination || !packageData.category) {
+      return jsonError('title, description, destination, and category are required', 400)
     }
 
+    if (!Number.isFinite(packageData.price) || packageData.price < 0) {
+      return jsonError('price must be a non-negative number', 400)
+    }
+
+    if (!Number.isInteger(packageData.duration) || packageData.duration < 1) {
+      return jsonError('duration must be a positive integer', 400)
+    }
+
+    if (!Array.isArray(packageData.images)) packageData.images = []
+
+    const roomTypeError = validateRoomType(packageData.room_type)
+    if (roomTypeError) return jsonError(roomTypeError, 400)
+
     // Add seller_id to the package data
-    packageData.seller_id = session.user.id
+    packageData.seller_id = user.id
     // Set is_approved to false for new packages
     packageData.is_approved = false
 
@@ -110,6 +111,14 @@ export async function POST(request: Request) {
     
     if (error) {
       throw error
+    }
+
+    if (data[0]?.id && packageFeatures) {
+      const { error: featuresError } = await supabase
+        .from('package_features')
+        .upsert({ package_id: data[0].id, ...packageFeatures }, { onConflict: 'package_id' })
+
+      if (featuresError) throw featuresError
     }
     
     return NextResponse.json(data[0])

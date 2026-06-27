@@ -1,40 +1,22 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { requireRole } from '@/app/api/_utils/auth'
 
 export async function GET(request: Request) {
-  const cookieStore = await cookies()
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
-  
-  const { data: { session } } = await supabase.auth.getSession()
-  
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  
-  // Check if user is a seller
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', session.user.id)
-    .single()
-  
-  if (!profile || profile.role !== 'seller') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const { supabase, user, response } = await requireRole(['seller'])
+  if (response || !user) return response
   
   try {
     // Get total packages
     const { count: totalPackages } = await supabase
       .from('packages')
       .select('*', { count: 'exact', head: true })
-      .eq('seller_id', session.user.id)
+      .eq('seller_id', user.id)
     
     // Get pending approvals
     const { count: pendingApprovals } = await supabase
       .from('packages')
       .select('*', { count: 'exact', head: true })
-      .eq('seller_id', session.user.id)
+      .eq('seller_id', user.id)
       .eq('is_approved', false)
     
     // Get total bookings
@@ -49,7 +31,7 @@ export async function GET(request: Request) {
           seller_id
         )
       `, { count: 'exact' })
-      .eq('packages.seller_id', session.user.id)
+      .eq('packages.seller_id', user.id)
     
     // Calculate total revenue
     let totalRevenue = 0
@@ -78,7 +60,7 @@ export async function GET(request: Request) {
           email
         )
       `)
-      .eq('packages.seller_id', session.user.id)
+      .eq('packages.seller_id', user.id)
       .order('created_at', { ascending: false })
       .limit(5)
     

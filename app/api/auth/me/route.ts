@@ -1,20 +1,15 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/app/lib/supabase"
+import { jsonError, requireUser } from "@/app/api/_utils/auth"
 
 export async function GET(request: Request) {
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
-    }
+    const { supabase, user, response } = await requireUser()
+    if (response || !user) return response
 
     const { data: profile, error } = await supabase.from("profiles").select("*").eq("id", user.id).single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      return jsonError(error.message, 400)
     }
 
     return NextResponse.json({
@@ -29,4 +24,3 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
-
