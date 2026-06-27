@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/app/lib/supabase"
+import { createSupabaseRouteClient, jsonError } from "@/app/api/_utils/auth"
 
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json()
+    const supabase = await createSupabaseRouteClient()
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
     })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      return jsonError(error.message, 400)
     }
 
     return NextResponse.json({ success: true, user: data.user, session: data.session })
@@ -20,4 +21,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
-

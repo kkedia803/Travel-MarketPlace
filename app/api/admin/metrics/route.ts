@@ -1,29 +1,11 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/app/lib/supabase"
+import { requireRole } from "@/app/api/_utils/auth"
 
 export async function GET(request: Request) {
   try {
-    // Get the authenticated user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { supabase, response } = await requireRole(["admin"])
+    if (response) return response
 
-    if (!user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
-    }
-
-    // Check if user is an admin
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single()
-
-    if (profileError || profile.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
-    }
-
-    // Get total users count
     const { count: usersCount } = await supabase.from("profiles").select("*", { count: "exact", head: true })
 
     // Get total sellers count
@@ -49,4 +31,3 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
-

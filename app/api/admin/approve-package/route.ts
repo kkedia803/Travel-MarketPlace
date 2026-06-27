@@ -1,35 +1,25 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/app/lib/supabase"
+import { jsonError, requireRole } from "@/app/api/_utils/auth"
 
 export async function POST(request: Request) {
   try {
     const { package_id } = await request.json()
 
-    // Get the authenticated user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+    if (!package_id || typeof package_id !== "string") {
+      return jsonError("package_id is required", 400)
     }
 
-    // Check if user is an admin
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single()
+    const { supabase, response } = await requireRole(["admin"])
+    if (response) return response
 
-    if (profileError || profile.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
-    }
-
-    // Approve the package
     const { data, error } = await supabase.from("packages").update({ is_approved: true }).eq("id", package_id).select()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      return jsonError(error.message, 400)
+    }
+
+    if (!data?.length) {
+      return jsonError("Package not found", 404)
     }
 
     return NextResponse.json({ success: true, package: data[0] })
@@ -38,4 +28,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
-

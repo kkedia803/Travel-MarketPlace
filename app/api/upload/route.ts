@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
+import { getUserRole, jsonError, requireUser } from "@/app/api/_utils/auth";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,31 +9,25 @@ cloudinary.config({
 });
 
 export async function POST(request: Request) {
-  console.log("Upload route called");
-
-  // Validate Cloudinary configuration
   if (!process.env.CLOUDINARY_CLOUD_NAME ||
     !process.env.CLOUDINARY_API_KEY ||
     !process.env.CLOUDINARY_API_SECRET) {
-    console.error("Cloudinary credentials are missing");
     return NextResponse.json(
       {
         error: "Server configuration error",
-        details: "Cloudinary credentials are not configured. Please check your environment variables."
       },
       { status: 500 }
     );
   }
 
   try {
-    console.log("About to parse formData");
+    const { supabase, user, response } = await requireUser();
+    if (response || !user) return response;
+
     const formData = await request.formData();
-    console.log("formData parsed");
     const file = formData.get("file");
-    console.log("Received file:", file);
 
     if (!file || typeof file !== "object" || !("arrayBuffer" in file)) {
-      console.error("No valid file provided");
       return NextResponse.json(
         { error: "No valid file provided" },
         { status: 400 }
@@ -49,7 +44,6 @@ export async function POST(request: Request) {
     const allowedTypes = [...allowedImageTypes, ...allowedPdfTypes];
 
     if (!allowedTypes.includes(file.type)) {
-      console.error("Invalid file type:", file.type);
       return NextResponse.json(
         {
           error: `Invalid file type: ${file.type}. Only JPEG, PNG, WebP images and PDF documents are allowed.`,
@@ -59,11 +53,20 @@ export async function POST(request: Request) {
     }
 
     const isPdf = allowedPdfTypes.includes(file.type);
+    const maxSize = isPdf ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
+    if ("size" in file && typeof file.size === "number" && file.size > maxSize) {
+      return jsonError(`File size must be less than ${isPdf ? "10MB" : "5MB"}`, 400);
+    }
+
+    const role = await getUserRole(supabase, user.id);
+    if (isPdf && role !== "seller" && role !== "admin") {
+      return jsonError("Forbidden", 403);
+    }
+
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const base64String = buffer.toString("base64");
     const dataURI = `data:${file.type};base64,${base64String}`;
-    console.log("Uploading to Cloudinary...", isPdf ? "(PDF)" : "(Image)");
 
     try {
       const result = await new Promise((resolve, reject) => {
@@ -75,7 +78,6 @@ export async function POST(request: Request) {
           },
           (error, result) => {
             if (error) {
-              console.error("Cloudinary upload error:", error);
               reject(error);
             } else {
               resolve(result);
@@ -83,7 +85,6 @@ export async function POST(request: Request) {
           }
         );
       });
-      console.log("Cloudinary upload result:", result);
 
       return NextResponse.json({
         url: (result as any).secure_url,
@@ -94,7 +95,6 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: "Failed to upload to Cloudinary",
-          details: (cloudinaryError as Error).message,
         },
         { status: 500 }
       );
@@ -104,7 +104,6 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error: "Failed to process upload request",
-        details: (error as Error).message,
       },
       { status: 500 }
     );

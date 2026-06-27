@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/app/lib/supabase"
+import { createSupabaseRouteClient, jsonError } from "@/app/api/_utils/auth"
 
 export async function GET(request: Request) {
   try {
@@ -9,7 +9,8 @@ export async function GET(request: Request) {
     const minPrice = url.searchParams.get("minPrice")
     const maxPrice = url.searchParams.get("maxPrice")
 
-    let query = supabase.from("packages").select("*").eq("is_approved", true)
+    const supabase = await createSupabaseRouteClient()
+    let query = supabase.from("packages").select("*").eq("is_approved", true).eq("status", "active")
 
     if (category) {
       query = query.eq("category", category)
@@ -20,17 +21,19 @@ export async function GET(request: Request) {
     }
 
     if (minPrice) {
-      query = query.gte("price", Number.parseInt(minPrice))
+      const parsed = Number.parseInt(minPrice)
+      if (!Number.isNaN(parsed)) query = query.gte("price", parsed)
     }
 
     if (maxPrice) {
-      query = query.lte("price", Number.parseInt(maxPrice))
+      const parsed = Number.parseInt(maxPrice)
+      if (!Number.isNaN(parsed)) query = query.lte("price", parsed)
     }
 
     const { data, error } = await query.order("created_at", { ascending: false })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      return jsonError(error.message, 400)
     }
 
     return NextResponse.json(data)
@@ -39,4 +42,3 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
-

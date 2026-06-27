@@ -174,7 +174,6 @@ export default function AdminDashboard() {
           .order("created_at", {ascending:false})
 
         if(travellerError) throw new Error(`Error fetching sellers: ${travellerError.message}`)
-        console.log(travellerData)
         setTravellers(travellerData);
 
         // Count packages for each seller
@@ -443,9 +442,16 @@ export default function AdminDashboard() {
 
   const handleApprovePackage = async (packageId: string) => {
     try {
-      const { error } = await supabase.from("packages").update({ is_approved: true }).eq("id", packageId)
+      const response = await fetch("/api/admin/approve-package", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ package_id: packageId }),
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        const data = await response.json().catch(() => null)
+        throw new Error(data?.error || "Failed to approve package")
+      }
 
       setPendingPackages((prev) => prev.filter((pkg) => pkg.id !== packageId))
 
@@ -474,9 +480,14 @@ export default function AdminDashboard() {
 
   const handleRejectPackage = async (packageId: string) => {
     try {
-      const { error } = await supabase.from("packages").delete().eq("id", packageId)
+      const response = await fetch(`/api/admin/packages/${packageId}`, {
+        method: "DELETE",
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        const data = await response.json().catch(() => null)
+        throw new Error(data?.error || "Failed to reject package")
+      }
 
       setPendingPackages((prev) => prev.filter((pkg) => pkg.id !== packageId))
 

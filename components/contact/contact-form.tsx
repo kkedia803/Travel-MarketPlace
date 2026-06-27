@@ -6,8 +6,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-// import { useToast } from '@/components/ui/use-toast'
-import { supabase } from '@/lib/supabase'
 import { z } from 'zod'
 import { toast } from "@/hooks/use-toast"
 
@@ -98,21 +96,15 @@ export function ContactForm() {
     try {
       setIsSubmitting(true)
       
-      // Insert data into Supabase
-      const { data, error } = await supabase
-        .from('contact_submissions')
-        .insert([
-          { 
-            name: formData.name,
-            email: formData.email,
-            subject: formData.subject,
-            message: formData.message,
-            created_at: new Date().toISOString()
-          }
-        ])
-      
-      if (error) {
-        throw new Error(error.message)
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null)
+        throw new Error(data?.error || 'Failed to send message')
       }
       
       toast({

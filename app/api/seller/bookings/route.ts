@@ -1,29 +1,9 @@
-import { Database } from '@/app/lib/database.types'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-//import type { Database } from '@/app/database.types' // Adjusted path to match project structure
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { requireRole } from '@/app/api/_utils/auth'
 
 export async function GET(request: Request) {
-  const cookieStore = await cookies()
-  const supabase = createRouteHandlerClient<Database>({ cookies: () => cookieStore }) // Use Database type
-  
-  const { data: { session } } = await supabase.auth.getSession()
-  
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  
-  // Check if user is a seller
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', session.user.id)
-    .single() // Ensure profile is a single object
-  
-  if (!profile || profile.role !== 'seller') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const { supabase, user, response } = await requireRole(['seller'])
+  if (response || !user) return response
   
   try {
     // Get all bookings for packages owned by this seller
@@ -34,7 +14,7 @@ export async function GET(request: Request) {
         travelers,
         status,
         created_at,
-        packages (
+        packages!inner (
             id,
             title,
             seller_id
@@ -45,7 +25,7 @@ export async function GET(request: Request) {
           email
         )
       `)
-      .eq('packages.seller_id', session.user.id)
+      .eq('packages.seller_id', user.id)
       .order('created_at', { ascending: false })
       // Removed .single() to ensure bookings is an array
     

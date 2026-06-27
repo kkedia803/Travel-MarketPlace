@@ -7,8 +7,7 @@ import { ProfileForm } from '@/components/profile/profile-form'
 
 export default async function ProfilePage() {
 
-  const cookieStore = await cookies()
-  const supabase = createServerComponentClient({ cookies: () => cookieStore })
+  const supabase = createServerComponentClient({ cookies })
 
 
   const {
